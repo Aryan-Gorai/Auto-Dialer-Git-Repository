@@ -1,0 +1,154 @@
+{
+  "project_info": {
+    "project_number": "1036083075628",
+    "project_id": "mynotes-flutter-aryan",
+    "storage_bucket": "mynotes-flutter-aryan.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1036083075628:android:54e049d18818aa2d57cf89",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1036083075628-ico47s1mjakuc5qoitq3tslf83a68skj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCN9VRhd4N6TeFMgWkPY5PwAz_YMzP5X0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1036083075628-ico47s1mjakuc5qoitq3tslf83a68skj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1036083075628-5k6rn6gq2j86sbm77j6sl7pgu28oiba3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.mynotes"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1036083075628:android:6ea98301a93b360257cf89",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_2_f"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1036083075628-ico47s1mjakuc5qoitq3tslf83a68skj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCN9VRhd4N6TeFMgWkPY5PwAz_YMzP5X0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1036083075628-ico47s1mjakuc5qoitq3tslf83a68skj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1036083075628-5k6rn6gq2j86sbm77j6sl7pgu28oiba3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.mynotes"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1036083075628:android:08d9c85984010fa957cf89",
+        "android_client_info": {
+          "package_name": "com.example.my_notes_aryan_1"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1036083075628-ico47s1mjakuc5qoitq3tslf83a68skj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCN9VRhd4N6TeFMgWkPY5PwAz_YMzP5X0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1036083075628-ico47s1mjakuc5qoitq3tslf83a68skj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1036083075628-5k6rn6gq2j86sbm77j6sl7pgu28oiba3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.mynotes"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1036083075628:android:da9a7a1f9baebf0a57cf89",
+        "android_client_info": {
+          "package_name": "se.pixolity.mynotes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1036083075628-ico47s1mjakuc5qoitq3tslf83a68skj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCN9VRhd4N6TeFMgWkPY5PwAz_YMzP5X0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1036083075628-ico47s1mjakuc5qoitq3tslf83a68skj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1036083075628-5k6rn6gq2j86sbm77j6sl7pgu28oiba3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.mynotes"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

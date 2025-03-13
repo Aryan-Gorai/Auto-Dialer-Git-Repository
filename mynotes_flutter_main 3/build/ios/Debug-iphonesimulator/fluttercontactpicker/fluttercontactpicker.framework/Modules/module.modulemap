@@ -1,0 +1,11 @@
+framework module fluttercontactpicker {
+  umbrella header "fluttercontactpicker-umbrella.h"
+
+  export *
+  module * { export * }
+}
+
+module fluttercontactpicker.Swift {
+  header "fluttercontactpicker-Swift.h"
+  requires objc
+}
