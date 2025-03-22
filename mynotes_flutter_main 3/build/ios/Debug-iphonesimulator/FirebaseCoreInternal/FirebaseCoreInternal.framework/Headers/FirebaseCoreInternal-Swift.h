@@ -347,6 +347,13 @@ SWIFT_CLASS_NAMED("_ObjC_HeartbeatController")
 /// returns:
 /// A heartbeats payload for the flushed heartbeat(s).
 - (FIRHeartbeatsPayload * _Nonnull)flush SWIFT_WARN_UNUSED_RESULT;
+/// Asynchronously flushes heartbeats from storage into a heartbeats payload.
+/// note:
+/// This API is thread-safe.
+///
+/// returns:
+/// A heartbeats payload for the flushed heartbeat(s).
+- (void)flushAsyncWithCompletionHandler:(void (^ _Nonnull)(FIRHeartbeatsPayload * _Nonnull))completionHandler;
 /// Synchronously flushes the heartbeat for today.
 /// If no heartbeat was logged today, the returned payload is empty.
 /// note:
@@ -732,6 +739,13 @@ SWIFT_CLASS_NAMED("_ObjC_HeartbeatController")
 /// returns:
 /// A heartbeats payload for the flushed heartbeat(s).
 - (FIRHeartbeatsPayload * _Nonnull)flush SWIFT_WARN_UNUSED_RESULT;
+/// Asynchronously flushes heartbeats from storage into a heartbeats payload.
+/// note:
+/// This API is thread-safe.
+///
+/// returns:
+/// A heartbeats payload for the flushed heartbeat(s).
+- (void)flushAsyncWithCompletionHandler:(void (^ _Nonnull)(FIRHeartbeatsPayload * _Nonnull))completionHandler;
 /// Synchronously flushes the heartbeat for today.
 /// If no heartbeat was logged today, the returned payload is empty.
 /// note:

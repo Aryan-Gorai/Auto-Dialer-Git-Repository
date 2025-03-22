@@ -6,7 +6,7 @@
 	<dict>
 		<key>Headers/FLTFirebaseAnalyticsPlugin.h</key>
 		<data>
-		z2Jep0BVC5UnC3gFlID0mVl732Q=
+		Oc3e4FRdwjItRHbdZRz3ZxsWlJA=
 		</data>
 		<key>Headers/firebase_analytics-umbrella.h</key>
 		<data>
@@ -14,7 +14,7 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		WoYDK3usp2isvC4J1GIqvMZQ8rY=
+		tyEorl312sscmf3wQnuR7BKBJQM=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -27,11 +27,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			z2Jep0BVC5UnC3gFlID0mVl732Q=
+			Oc3e4FRdwjItRHbdZRz3ZxsWlJA=
 			</data>
 			<key>hash2</key>
 			<data>
-			dvDh4sD8f45JixPvaGt84VchbTsi9PyFv2s7bEalIJc=
+			OvQ/rEsHUiDBlHY71I4869OOh8qKOuz6nus/JTy1MuI=
 			</data>
 		</dict>
 		<key>Headers/firebase_analytics-umbrella.h</key>

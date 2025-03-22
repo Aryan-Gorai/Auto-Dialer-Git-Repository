@@ -6,7 +6,7 @@
 	<dict>
 		<key>Headers/abseil-umbrella.h</key>
 		<data>
-		saopZ6tM869sDl5247D7BmH/maY=
+		bxohngq0t/ZuOtAFGs1wJXLkm38=
 		</data>
 		<key>Headers/algorithm/algorithm.h</key>
 		<data>
@@ -340,6 +340,10 @@
 		<data>
 		5GX/J9TUenhy+mOuSidyWXV+Jv8=
 		</data>
+		<key>Headers/debugging/internal/examine_stack.h</key>
+		<data>
+		/WjRlKLnAmQvn/Dughx43KCkECg=
+		</data>
 		<key>Headers/debugging/internal/stacktrace_aarch64-inl.inc</key>
 		<data>
 		T2dVzLD92r5vVtREVBT794V3fs4=
@@ -511,6 +515,114 @@
 		<key>Headers/hash/internal/low_level_hash.h</key>
 		<data>
 		QHRjH39Vgm0mwQ5ZlRVfa4X2rFA=
+		</data>
+		<key>Headers/log/absl_check.h</key>
+		<data>
+		IljtS6c0492mv1UaVYBq6Xbu+uM=
+		</data>
+		<key>Headers/log/absl_log.h</key>
+		<data>
+		GmdMgGpjZ1C7AAe/+yTKge1lqQY=
+		</data>
+		<key>Headers/log/absl_vlog_is_on.h</key>
+		<data>
+		+vQRvpO9UZ+A6xXkjBrMTnQMJlI=
+		</data>
+		<key>Headers/log/check.h</key>
+		<data>
+		iwYokiBdUgXC5mSSeBPJoX19q3U=
+		</data>
+		<key>Headers/log/globals.h</key>
+		<data>
+		VEHqXj9tJIii5NV9rg3l+sKzjHk=
+		</data>
+		<key>Headers/log/internal/append_truncated.h</key>
+		<data>
+		Gh6m4oud5vp39rpgPVcJKKLaAlU=
+		</data>
+		<key>Headers/log/internal/check_impl.h</key>
+		<data>
+		4ogf3a1v1Uehg2Y/MImlRZ/rmwk=
+		</data>
+		<key>Headers/log/internal/check_op.h</key>
+		<data>
+		y6d09o0E4Q9E6pQaarpy4TJVbhQ=
+		</data>
+		<key>Headers/log/internal/conditions.h</key>
+		<data>
+		bBa8nBTuEykSJBkYTf3Sf+XES2U=
+		</data>
+		<key>Headers/log/internal/config.h</key>
+		<data>
+		KcFYgYezFpIgd14liJvhdS47NOo=
+		</data>
+		<key>Headers/log/internal/fnmatch.h</key>
+		<data>
+		556xY9D1O9dcOcXBnKBNbXfnKTI=
+		</data>
+		<key>Headers/log/internal/globals.h</key>
+		<data>
+		YZWWNUUdpvxShe/KULj32eKhIhU=
+		</data>
+		<key>Headers/log/internal/log_format.h</key>
+		<data>
+		qxd17k3wtyHjG0klq0yyJuy+3lo=
+		</data>
+		<key>Headers/log/internal/log_impl.h</key>
+		<data>
+		MuMcVb3G3uDOleX2fefnwnSnjIw=
+		</data>
+		<key>Headers/log/internal/log_message.h</key>
+		<data>
+		bHtgZ+W5AyzrlSQeYz3yPoqJB1I=
+		</data>
+		<key>Headers/log/internal/log_sink_set.h</key>
+		<data>
+		/pLAzKsBDsMKd6bV8wCN7rTIEYo=
+		</data>
+		<key>Headers/log/internal/nullguard.h</key>
+		<data>
+		esB/MKG0kXL8SxY/TQjXH72BLTM=
+		</data>
+		<key>Headers/log/internal/nullstream.h</key>
+		<data>
+		wbf+gMIleqICD/E3U76vsUtHgSc=
+		</data>
+		<key>Headers/log/internal/proto.h</key>
+		<data>
+		lxBsRAbv9UKAM5Py4KnkH7O9Hwc=
+		</data>
+		<key>Headers/log/internal/strip.h</key>
+		<data>
+		fv4bBCMhUT8NRKy3pW/0nBldPxw=
+		</data>
+		<key>Headers/log/internal/vlog_config.h</key>
+		<data>
+		FHLtTG1mSACfnv1GLRnxXDExRlY=
+		</data>
+		<key>Headers/log/internal/voidify.h</key>
+		<data>
+		GA6RnLBHwXvRYUqGOm8rB4fD/R8=
+		</data>
+		<key>Headers/log/log.h</key>
+		<data>
+		GpGWsPZ3E5wE9pZwDXJqXHZDzLU=
+		</data>
+		<key>Headers/log/log_entry.h</key>
+		<data>
+		srKA64DOvmLgpM17+/JSQWTtXPs=
+		</data>
+		<key>Headers/log/log_sink.h</key>
+		<data>
+		n3L8jvkiWIQHabtSZoPwjhTzRSo=
+		</data>
+		<key>Headers/log/log_sink_registry.h</key>
+		<data>
+		6eZpSinZ/1jOWRKZtXiTXleXQZ0=
+		</data>
+		<key>Headers/log/vlog_is_on.h</key>
+		<data>
+		f+0W+JK4I/bMr+KoYESTJCHK+uE=
 		</data>
 		<key>Headers/memory/memory.h</key>
 		<data>
@@ -1110,7 +1222,7 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		f1+yDzBTmFIiTESU/NwRTMHb//M=
+		kn+kir+w2CH6vhM2Jz1bsH/OquU=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -1118,7 +1230,7 @@
 		</data>
 		<key>xcprivacy.bundle/Info.plist</key>
 		<data>
-		OlAjLfxFTVez+aF7UHb97H5P6pQ=
+		lHh71Lnbws5aqVmw5rEgAjF95Co=
 		</data>
 		<key>xcprivacy.bundle/PrivacyInfo.xcprivacy</key>
 		<data>
@@ -1131,11 +1243,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			saopZ6tM869sDl5247D7BmH/maY=
+			bxohngq0t/ZuOtAFGs1wJXLkm38=
 			</data>
 			<key>hash2</key>
 			<data>
-			dioLQp3TrzhKmRP9yo9NdWSqZKMU7+dA+s6s4N41O/4=
+			4Wxu+Xk37aL9cV2PRoj7HWBFKHmNCetyj0JgG0xsoaY=
 			</data>
 		</dict>
 		<key>Headers/algorithm/algorithm.h</key>
@@ -2051,6 +2163,17 @@
 			TXABSs5BpAPj6e8IBMDrtKNcKw3tgciJsZXb1etrOBw=
 			</data>
 		</dict>
+		<key>Headers/debugging/internal/examine_stack.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			/WjRlKLnAmQvn/Dughx43KCkECg=
+			</data>
+			<key>hash2</key>
+			<data>
+			XJafSs3joqOvSTAL5DAPaYewcEzVwg0CtW/+e8mazZk=
+			</data>
+		</dict>
 		<key>Headers/debugging/internal/stacktrace_aarch64-inl.inc</key>
 		<dict>
 			<key>hash</key>
@@ -2522,6 +2645,303 @@
 			<key>hash2</key>
 			<data>
 			+JwwFFYiG01iTkYUejY1Pq7S+ehmvWQeLLTBnFU3A2Q=
+			</data>
+		</dict>
+		<key>Headers/log/absl_check.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			IljtS6c0492mv1UaVYBq6Xbu+uM=
+			</data>
+			<key>hash2</key>
+			<data>
+			/4/2v5DeB919PSI7P6+oiMiMnvuWmOR14p8a7FzSxwI=
+			</data>
+		</dict>
+		<key>Headers/log/absl_log.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			GmdMgGpjZ1C7AAe/+yTKge1lqQY=
+			</data>
+			<key>hash2</key>
+			<data>
+			eDa5unqeRwvYJez9shs/5+MFKHcQejl2LkONKRzXlmo=
+			</data>
+		</dict>
+		<key>Headers/log/absl_vlog_is_on.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			+vQRvpO9UZ+A6xXkjBrMTnQMJlI=
+			</data>
+			<key>hash2</key>
+			<data>
+			ffCkXfgVNTvRHVCEeNNV48HMjRleQK3TgySe3rxHJgA=
+			</data>
+		</dict>
+		<key>Headers/log/check.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			iwYokiBdUgXC5mSSeBPJoX19q3U=
+			</data>
+			<key>hash2</key>
+			<data>
+			lcLIIqiyuA8+UefgnSHp4XZVDVJDePNTCnREFdB+5cU=
+			</data>
+		</dict>
+		<key>Headers/log/globals.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			VEHqXj9tJIii5NV9rg3l+sKzjHk=
+			</data>
+			<key>hash2</key>
+			<data>
+			mkO1ix4borG7BKKzFh8b908Wb59yvBjzzhNwP0JCEAI=
+			</data>
+		</dict>
+		<key>Headers/log/internal/append_truncated.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			Gh6m4oud5vp39rpgPVcJKKLaAlU=
+			</data>
+			<key>hash2</key>
+			<data>
+			yqU/nCcOesHcrzFAhgxkJI4Xtfr4QqZs+qaR9J/UVas=
+			</data>
+		</dict>
+		<key>Headers/log/internal/check_impl.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			4ogf3a1v1Uehg2Y/MImlRZ/rmwk=
+			</data>
+			<key>hash2</key>
+			<data>
+			KHi+1Nn/wB9W+HgMG7BLLOt3abNMfsRMF4JxbSsbIqY=
+			</data>
+		</dict>
+		<key>Headers/log/internal/check_op.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			y6d09o0E4Q9E6pQaarpy4TJVbhQ=
+			</data>
+			<key>hash2</key>
+			<data>
+			GSqA9EWn+N+R5MDJt2KvPRtk3zP4NrOTIYxjpgdnqVM=
+			</data>
+		</dict>
+		<key>Headers/log/internal/conditions.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			bBa8nBTuEykSJBkYTf3Sf+XES2U=
+			</data>
+			<key>hash2</key>
+			<data>
+			//WR2rcbbBW4H32zJkCmzSAP204PWzXrHF046alJyJs=
+			</data>
+		</dict>
+		<key>Headers/log/internal/config.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			KcFYgYezFpIgd14liJvhdS47NOo=
+			</data>
+			<key>hash2</key>
+			<data>
+			5eBqaBh2x9QtE089PlJTE9MjCbzOH4MaRwVlK0rZilI=
+			</data>
+		</dict>
+		<key>Headers/log/internal/fnmatch.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			556xY9D1O9dcOcXBnKBNbXfnKTI=
+			</data>
+			<key>hash2</key>
+			<data>
+			Y2XFX6QtUSyi7nZ6RQR2Gko2D8O03W3kye8yazp6V0w=
+			</data>
+		</dict>
+		<key>Headers/log/internal/globals.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			YZWWNUUdpvxShe/KULj32eKhIhU=
+			</data>
+			<key>hash2</key>
+			<data>
+			bydiafiIdCEWBfzcxZZxhDGOPdAI9Nfx4SaWmwi/3+c=
+			</data>
+		</dict>
+		<key>Headers/log/internal/log_format.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			qxd17k3wtyHjG0klq0yyJuy+3lo=
+			</data>
+			<key>hash2</key>
+			<data>
+			/ko6bUs1DpWhZ1tGGZ0CF78neBnEAidSFGdvOBV1KsE=
+			</data>
+		</dict>
+		<key>Headers/log/internal/log_impl.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			MuMcVb3G3uDOleX2fefnwnSnjIw=
+			</data>
+			<key>hash2</key>
+			<data>
+			1RIf6L23yRmWS22Xgk3h1uJ1YOMS20xyrZ1ZCVroi+w=
+			</data>
+		</dict>
+		<key>Headers/log/internal/log_message.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			bHtgZ+W5AyzrlSQeYz3yPoqJB1I=
+			</data>
+			<key>hash2</key>
+			<data>
+			Ez2z/DJFkTzPZGow2Ry7MoEJrPtygMjgpWQzYjedFyw=
+			</data>
+		</dict>
+		<key>Headers/log/internal/log_sink_set.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			/pLAzKsBDsMKd6bV8wCN7rTIEYo=
+			</data>
+			<key>hash2</key>
+			<data>
+			jAFtHWGfDiOQEisrOnlsA367ZXkF94mKiViTpI2ITXE=
+			</data>
+		</dict>
+		<key>Headers/log/internal/nullguard.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			esB/MKG0kXL8SxY/TQjXH72BLTM=
+			</data>
+			<key>hash2</key>
+			<data>
+			V3IQlAtwlmbebqlfhtKFzvgMGuk7arlW95ixEXWuEX4=
+			</data>
+		</dict>
+		<key>Headers/log/internal/nullstream.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			wbf+gMIleqICD/E3U76vsUtHgSc=
+			</data>
+			<key>hash2</key>
+			<data>
+			SYUSysDHWFjWta+UECs1J0pjDv1QxdgLsl/q2GAu1C0=
+			</data>
+		</dict>
+		<key>Headers/log/internal/proto.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			lxBsRAbv9UKAM5Py4KnkH7O9Hwc=
+			</data>
+			<key>hash2</key>
+			<data>
+			AYhFwnNoqA+1OIaDZMslwhS3gBrMPDeptRbzCjF0gTo=
+			</data>
+		</dict>
+		<key>Headers/log/internal/strip.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			fv4bBCMhUT8NRKy3pW/0nBldPxw=
+			</data>
+			<key>hash2</key>
+			<data>
+			6u/MUfzcc4bo9CjxPAxwbG+qR0AYOwYe0K0WhOydN3Q=
+			</data>
+		</dict>
+		<key>Headers/log/internal/vlog_config.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			FHLtTG1mSACfnv1GLRnxXDExRlY=
+			</data>
+			<key>hash2</key>
+			<data>
+			PmgsVv6Kx2ZBycJHop4FL014XzizcUM77S6E0ipcw7k=
+			</data>
+		</dict>
+		<key>Headers/log/internal/voidify.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			GA6RnLBHwXvRYUqGOm8rB4fD/R8=
+			</data>
+			<key>hash2</key>
+			<data>
+			iqj6A1EiY4NPBn6SsEV7EPHNSQMPv3nly+bXEYeJ7AY=
+			</data>
+		</dict>
+		<key>Headers/log/log.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			GpGWsPZ3E5wE9pZwDXJqXHZDzLU=
+			</data>
+			<key>hash2</key>
+			<data>
+			HUsTHceBSsae1S8l5XotF0xyDtSiyAwg9PPvNy/gFSM=
+			</data>
+		</dict>
+		<key>Headers/log/log_entry.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			srKA64DOvmLgpM17+/JSQWTtXPs=
+			</data>
+			<key>hash2</key>
+			<data>
+			luVamZIIc0rrrECKexig5e1gyQYbUtdlncZ35tyYO2w=
+			</data>
+		</dict>
+		<key>Headers/log/log_sink.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			n3L8jvkiWIQHabtSZoPwjhTzRSo=
+			</data>
+			<key>hash2</key>
+			<data>
+			BD3lofYCXUN9YyG9WGb+9MvBywZV9yz5kWHPH57Iuuo=
+			</data>
+		</dict>
+		<key>Headers/log/log_sink_registry.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			6eZpSinZ/1jOWRKZtXiTXleXQZ0=
+			</data>
+			<key>hash2</key>
+			<data>
+			6wu/RhG5PInkrJR/RDXepMltpZnYYM/hvXWUM1Z7gog=
+			</data>
+		</dict>
+		<key>Headers/log/vlog_is_on.h</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			f+0W+JK4I/bMr+KoYESTJCHK+uE=
+			</data>
+			<key>hash2</key>
+			<data>
+			/MdDyC6NLgInsVFmQ5+HGj6lG+AkRfdp0Q/nhgu1Y20=
 			</data>
 		</dict>
 		<key>Headers/memory/memory.h</key>
@@ -4178,11 +4598,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			OlAjLfxFTVez+aF7UHb97H5P6pQ=
+			lHh71Lnbws5aqVmw5rEgAjF95Co=
 			</data>
 			<key>hash2</key>
 			<data>
-			4T+F+xrjs3JWIN+uUKnYxq+YFRIHIZSk1FolW4QpvRU=
+			kjOs16M57RSBy/+6+5xPJQHB90dZjeIX0yg4LJm0rjI=
 			</data>
 		</dict>
 		<key>xcprivacy.bundle/PrivacyInfo.xcprivacy</key>

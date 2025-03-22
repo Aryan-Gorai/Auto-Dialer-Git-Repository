@@ -37,7 +37,7 @@ void main() {
         create: (context) => AuthBloc(FirebaseAuthProvider()),
         child:  HomePage(),
 
-        //child: list_view_visible(),
+        // list_view_visible(),
 
         //child: RegisterScreen1(),
         //child: LoginScreen1(),
@@ -53,7 +53,9 @@ void main() {
         '/login/' : (context) => const LoginScreen1(),
         '/register/' : (context) => const RegisterScreen1(),
         sliderScreenRoute: (context) => sliderScreen(),
-
+      
+      //'/list_view/': (context) => ListScreen(),
+      '/list_view/': (context) => sliderScreen(),
 
       },
     ),

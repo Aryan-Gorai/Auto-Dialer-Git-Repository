@@ -47,6 +47,10 @@ class _LoginPageState extends State<LoginScreen1> {
     print("User Credential: $userCredential");
     print("User: ${userCredential.user}");
 
+
+
+
+
     if (FirebaseAuth.instance.currentUser != null) {
       bool isEmailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
       print("Email Verified: $isEmailVerified");
@@ -57,6 +61,8 @@ class _LoginPageState extends State<LoginScreen1> {
         showErrorDialog(context, "Verify Your Email");
       }
     }
+
+
   } on FirebaseAuthException catch (e) {
     print("FirebaseAuthException: ${e.code}");
     

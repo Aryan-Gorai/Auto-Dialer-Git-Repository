@@ -18,7 +18,7 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		fR4g9IhJVuSD5jTftrHX2xR7w1Q=
+		Qbr0lbKayzG8+UT1Jn1wBrUTCTU=
 		</data>
 		<key>Modules/flutter_contacts.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo</key>
 		<data>
@@ -38,7 +38,7 @@
 		</data>
 		<key>Modules/flutter_contacts.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		VvnrsJSJQBwnuVqirEDw/+GdGBo=
+		tWiNbS+Y6yAwPRxSbB2vTAugtzA=
 		</data>
 		<key>Modules/flutter_contacts.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -50,7 +50,7 @@
 		</data>
 		<key>Modules/flutter_contacts.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		b262OZy2cyhCRse1UgAL6gJOuKM=
+		iCDZytRcWK8uFanSRu7+jz9Zt4k=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -112,7 +112,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			TTcYlAOi72BsT4Gyeix0vW9ZB9PgOkzJSYql+ZjFtPI=
+			kap3LsaipAl48JUhUkvfIrKeKtVf8CxxzqV2pHd2fOg=
 			</data>
 		</dict>
 		<key>Modules/flutter_contacts.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
@@ -133,7 +133,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			sW1csjSuJDRFR7yE3U7Ft2Zr40FC3DxFIlAdieJqMB8=
+			emlhUi8thK2aULmBWEGb2yn0ejv+ONgMB2tjy03W2Ys=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>

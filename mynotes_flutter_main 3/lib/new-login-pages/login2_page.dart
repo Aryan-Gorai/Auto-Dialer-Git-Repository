@@ -78,7 +78,7 @@
     
 //                 try {
                   
-//                 final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+//                 final userCredential = await (
 //                 email: email, 
 //                 password: password,
 //                 );

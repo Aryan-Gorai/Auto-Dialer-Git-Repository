@@ -14,11 +14,19 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		I2sqlMzhuy0odiHSd6wiTWqdwHU=
+		E8lc4I+fvYmLn58uJPjVAd7S57I=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
 		Uy4pX3plzTC2T2bCnFdgakT6VyY=
+		</data>
+		<key>share_plus_privacy.bundle/Info.plist</key>
+		<data>
+		oVywiS9jrQOVdGI/QxdILuLTY9I=
+		</data>
+		<key>share_plus_privacy.bundle/PrivacyInfo.xcprivacy</key>
+		<data>
+		/LX0ZlwxwIAIhjZaDB8EiH5KpXA=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -42,6 +50,20 @@
 			<key>hash2</key>
 			<data>
 			39JoytFZnbxsQE3Y7nERznrRSXkw3uvJzC/jUocPB2M=
+			</data>
+		</dict>
+		<key>share_plus_privacy.bundle/Info.plist</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			eae1QCPOGUrrZ4ObHAYiIcTitbfRlHw3vl3oGx9vF+c=
+			</data>
+		</dict>
+		<key>share_plus_privacy.bundle/PrivacyInfo.xcprivacy</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			bS2g2NkwIn1CjB2TY7CtbjoS4sm2jFzilxWKdBL8jDE=
 			</data>
 		</dict>
 	</dict>
