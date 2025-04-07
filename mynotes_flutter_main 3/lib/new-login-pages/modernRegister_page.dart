@@ -87,9 +87,11 @@ class _LoginPageState extends State<RegisterScreen1> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[300],
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
-        child: Center(
-          child: Column(
+        child: SingleChildScrollView(
+          child: Center(
+            child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const SizedBox(height: 50),
@@ -227,11 +229,10 @@ class _LoginPageState extends State<RegisterScreen1> {
                 ],
               )
             ],
+            ),
           ),
         ),
       ),
     );
   }
 }
-
-

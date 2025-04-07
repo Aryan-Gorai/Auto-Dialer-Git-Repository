@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/views/list/firebase_services.dart';
+import 'package:flutter_application_1/views/notes/contact_notes_view.dart';
 
 
 class ImgSample {
@@ -39,6 +40,8 @@ class DialerContactsView extends StatefulWidget {
 class _DialerContactsViewState extends State<DialerContactsView> {
   List<String> myTiles = [];
   bool isLoading = true;
+  int currentCallIndex = -1; // Track the currently called contact
+  List<Map<String, dynamic>> contactsData = []; // Store full contact data
 
   @override
   void initState() {
@@ -49,7 +52,52 @@ class _DialerContactsViewState extends State<DialerContactsView> {
         isLoading = false;
       });
       updateContactIndices();
+      fetchContactsData();
     });
+  }
+  
+  // Fetch full contact data including phone numbers
+  Future<void> fetchContactsData() async {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    QuerySnapshot snapshot = await firestore
+        .collection('lists')
+        .where('list_name', isEqualTo: widget.listName)
+        .where('user_id', isEqualTo: userId)
+        .orderBy("contact_index")
+        .get();
+        
+    List<Map<String, dynamic>> data = snapshot.docs.map((doc) {
+      return doc.data() as Map<String, dynamic>;
+    }).toList();
+    
+    setState(() {
+      contactsData = data;
+    });
+  }
+  
+  // Method to call the current contact
+  void callCurrentContact() {
+    if (currentCallIndex >= 0 && currentCallIndex < contactsData.length) {
+      String phoneNumber = contactsData[currentCallIndex]['contact_phone_number'];
+      String contactName = contactsData[currentCallIndex]['contact_name'];
+      
+      // Record the call timestamp in Firebase
+      recordCallTimestamp(contactName, phoneNumber, widget.listName);
+      
+      // Make the phone call
+      makePhoneCall(phoneNumber);
+    }
+  }
+  
+  // Method to move to the next contact
+  void moveToNextContact() {
+    setState(() {
+      currentCallIndex++;
+      if (currentCallIndex >= contactsData.length) {
+        currentCallIndex = 0; // Loop back to the first contact
+      }
+    });
+    callCurrentContact();
   }
   Future<List<String>> fetchContactsAsArray(String selectedList) async {
     
@@ -114,22 +162,63 @@ Widget build(BuildContext context) {
             : ReorderableListView(
                 padding: const EdgeInsets.all(10),
                 children: [
-                  for (final tile in myTiles)
+                  for (int i = 0; i < myTiles.length; i++)
                     Padding(
-                      key: ValueKey(tile),
+                      key: ValueKey(myTiles[i]),
                       padding: const EdgeInsets.all(8.0),
                       child: Container(
-                        color: Colors.grey[200],
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          border: i == currentCallIndex 
+                              ? Border.all(color: Colors.blue, width: 3.0)
+                              : null,
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
                         child: ListTile(
-                          title: Text(tile),
-                          trailing: IconButton(
-                            icon: Icon(Icons.delete),
-                            onPressed: () {
-                              // Handle delete action
-                              deleteSpecificContact(tile);
-                              
-                            },
+                          title: Text(myTiles[i]),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.note_add),
+                                onPressed: () {
+                                  // Navigate to notes page for this contact
+                                  if (i < contactsData.length) {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => ContactNotesView(
+                                          contactName: contactsData[i]['contact_name'],
+                                          contactPhoneNumber: contactsData[i]['contact_phone_number'],
+                                          listName: widget.listName,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.delete),
+                                onPressed: () {
+                                  // Handle delete action
+                                  deleteSpecificContact(myTiles[i]);
+                                },
+                              ),
+                            ],
                           ),
+                          onTap: () {
+                            // Navigate to notes page for this contact
+                            if (i < contactsData.length) {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => ContactNotesView(
+                                    contactName: contactsData[i]['contact_name'],
+                                    contactPhoneNumber: contactsData[i]['contact_phone_number'],
+                                    listName: widget.listName,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
                         ),
                       ),
                     ),
@@ -144,20 +233,17 @@ Widget build(BuildContext context) {
           right: 30, // Padding from the right
           child: FloatingActionButton(
             onPressed: () async{
+              await upload_button_on_dialer_contacts_view(selectedList);
 
-            await upload_button_on_dialer_contacts_view(selectedList);
-
-
-      fetchContactsAsArray(widget.listName).then((contacts) {
-        setState(() {
-          myTiles = contacts;
-          isLoading = false;
-        });
-        // Update the indices of contacts after refreshing
-        updateContactIndices();
-      });
-            
-
+              fetchContactsAsArray(widget.listName).then((contacts) {
+                setState(() {
+                  myTiles = contacts;
+                  isLoading = false;
+                });
+                // Update the indices of contacts after refreshing
+                updateContactIndices();
+                fetchContactsData();
+              });
             },
             child: Icon(Icons.add),
             tooltip: 'Add Contact',
@@ -168,8 +254,11 @@ Widget build(BuildContext context) {
           right: 30, // Same right padding to align with the first button
           child: FloatingActionButton(
             onPressed: () {
-              // Fetch and show document details
-              fetchDocumentAtIndexAndShowDialog(context, index, widget.listName);
+              // Start calling the first contact
+              setState(() {
+                currentCallIndex = 0;
+              });
+              callCurrentContact();
             },
             child: Icon(Icons.call),
             tooltip: 'Call Contact',
@@ -180,11 +269,11 @@ Widget build(BuildContext context) {
           right: 30, // Same right padding to align with the first button
           child: FloatingActionButton(
             onPressed: () {
-              // Reset or handle action
-              index = 0;
+              // Move to next contact
+              moveToNextContact();
             },
-            child: Icon(Icons.replay_outlined),
-            tooltip: 'Reset',
+            child: Icon(Icons.arrow_forward),
+            tooltip: 'Next Contact',
           ),
         ),
       ],
@@ -228,14 +317,4 @@ void deleteSpecificContact(String contactName) async {
 
 
 
-
-
-
-
-
-
-
-
-
 }
-

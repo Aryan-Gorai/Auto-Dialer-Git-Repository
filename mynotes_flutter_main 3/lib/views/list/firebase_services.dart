@@ -10,7 +10,7 @@ import 'package:flutter_application_1/views/dialer/dialer.dart';
 //import 'package:flutter_application_1/views/dialer/dialer_backup.dart';
 import 'package:flutter_application_1/views/list/list_view.dart';
 import 'package:flutter_application_1/views/list/list_view_visible.dart';
-
+import 'package:flutter_application_1/views/notes/contact_notes_view.dart';
 import 'package:flutter_application_1/views/onBoarding/onBoarding.dart';
 import 'package:flutter_application_1/views/reports/reports_view.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
@@ -700,6 +700,9 @@ Future<void> fetchDocumentAtIndexAndShowDialog(BuildContext context, int index, 
 //int index = 0; // DEFINITION OF CALL CYCLE INDEX
 
 Future<void> showContactDialog(BuildContext context, String contactName, String contactPhoneNumber, String callDuration) async {
+  // Record call timestamp in Firebase
+  await recordCallTimestamp(contactName, contactPhoneNumber, selectedList);
+  
   showDialog<void>(
     context: context,
     builder: (BuildContext context) {
@@ -742,27 +745,6 @@ Future<void> showContactDialog(BuildContext context, String contactName, String 
               print(index);
               print(previousIndex);
               fetchDocumentAtIndexAndShowDialog(context, index, selectedList);
-
-// if (index == totalDocuments) {    FirebaseFirestore firestore = FirebaseFirestore.instance;
-//     CollectionReference listsRef = firestore.collection('lists_collection');
-//     QuerySnapshot querySnapshot = await listsRef
-//         .where('list_name', isEqualTo: selectedList)
-//         .where('user_id', isEqualTo: userId) // Corrected filter syntax
-//         .get();
-
-//     DocumentReference documentRef = querySnapshot.docs.first.reference;
-
-//     int current_Index = index + 1;
-
-//     await documentRef.update({
-//         'current_index': current_Index,
-//         'total_documents': totalDocuments,
-
-//     });
-//     }
-
-
-              
             },
             child: const Text('Next'),
           ),
@@ -772,47 +754,75 @@ Future<void> showContactDialog(BuildContext context, String contactName, String 
               Navigator.of(context).pop();
               // CODE HERE TO UPDATE TO FIREBASE THE TOTAL DOCUMENTS AND CURRENT INDEX NUMBER
 
-            // FirebaseFirestore firestore = FirebaseFirestore.instance;
-            // CollectionReference listsRef = firestore.collection('lists_collection');
-            // QuerySnapshot querySnapshot = await listsRef.where('list_name', isEqualTo: selectedList).get();
-            // DocumentReference documentRef = querySnapshot.docs.first.reference;
-            // int current_Index = index + 1;
-            // await documentRef.update({'current_index': current_Index});
-            // await documentRef.update({'total_documents': totalDocuments});
+              FirebaseFirestore firestore = FirebaseFirestore.instance;
+              CollectionReference listsRef = firestore.collection('lists_collection');
+              QuerySnapshot querySnapshot = await listsRef
+                  .where('list_name', isEqualTo: selectedList)
+                  .where('user_id', isEqualTo: userId) // Corrected filter syntax
+                  .get();
 
+              DocumentReference documentRef = querySnapshot.docs.first.reference;
 
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    CollectionReference listsRef = firestore.collection('lists_collection');
-    QuerySnapshot querySnapshot = await listsRef
-        .where('list_name', isEqualTo: selectedList)
-        .where('user_id', isEqualTo: userId) // Corrected filter syntax
-        .get();
+              int current_Index = index + 1;
 
-    DocumentReference documentRef = querySnapshot.docs.first.reference;
-
-    int current_Index = index + 1;
-
-    await documentRef.update({
-        'current_index': current_Index,
-        'total_documents': totalDocuments,
-
-    });
-     
+              await documentRef.update({
+                  'current_index': current_Index,
+                  'total_documents': totalDocuments,
+              });
             },
             child: const Text('Close'),
+          ),
+          TextButton(
+            onPressed: () {
+              // Navigate to notes page for this contact
+              Navigator.of(context).pop();
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => ContactNotesView(
+                    contactName: contactName,
+                    contactPhoneNumber: contactPhoneNumber,
+                    listName: selectedList,
+                  ),
+                ),
+              );
+            },
+            child: const Text('View Notes'),
           ),
         ],
       );
     },
   );
 
-
-
   await Future.delayed(Duration(seconds: 5));
+  makePhoneCall(contactPhoneNumber);
+}
 
- 
-makePhoneCall(contactPhoneNumber);
-
+// Function to record call timestamp in Firebase
+Future<void> recordCallTimestamp(String contactName, String contactPhoneNumber, String listName) async {
+  try {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    CollectionReference callLogsRef = firestore.collection('contact_notes');
+    
+    // Create a timestamp for the current time
+    Timestamp timestamp = Timestamp.now();
+    
+    // Create a map with the call log data
+    Map<String, dynamic> callLogData = {
+      'user_id': userId,
+      'contact_name': contactName,
+      'contact_phone_number': contactPhoneNumber,
+      'list_name': listName,
+      'timestamp': timestamp,
+      'note_text': 'Call initiated', // Default note text
+    };
+    
+    // Add the new document with an auto-generated ID
+    await callLogsRef.add(callLogData);
+    
+    print('Call timestamp recorded successfully!');
+  } catch (e) {
+    print('Error recording call timestamp: $e');
+  }
 }
 
 // TO READ DATA
