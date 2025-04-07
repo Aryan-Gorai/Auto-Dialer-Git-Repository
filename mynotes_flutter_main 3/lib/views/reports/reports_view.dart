@@ -228,13 +228,8 @@ int _page = 0;
         ],
       ),
       body: Center(
-
-
-
-
-
-        
-        child: Column(
+        child: SingleChildScrollView(
+          child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
 
@@ -392,9 +387,8 @@ Row(
 
 
         ],
+          ),
         ),
-
-        
       ),
     );
   }

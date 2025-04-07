@@ -10,7 +10,7 @@
 		</data>
 		<key>Headers/fast_contacts-Swift.h</key>
 		<data>
-		ubSeuZgHG8NKy+FMpWGK3+dFJ9g=
+		xQbgjapZsaWMLM9lFPSm8m0v6+E=
 		</data>
 		<key>Headers/fast_contacts-umbrella.h</key>
 		<data>
@@ -18,15 +18,15 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		5pg9maWXJJ6GN/XmP+KZ6Ljpdwg=
+		jaUUsrEebXDGUKwvYZVBaRhppIE=
 		</data>
 		<key>Modules/fast_contacts.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo</key>
 		<data>
-		EJEUV+PXSi03dZLgcf9jXfqWCYk=
+		LVeEH5KQIIcwjnuaGauyjCo+e5M=
 		</data>
 		<key>Modules/fast_contacts.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
 		<data>
-		w/DPOI5Nr9btVzHa8ffcAcFH8T4=
+		9hdenP0o2NP0dTDnTB/9ZWrUyw0=
 		</data>
 		<key>Modules/fast_contacts.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -34,11 +34,11 @@
 		</data>
 		<key>Modules/fast_contacts.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		fdZyyBe8qhCYFrk57xwWrIq9cNg=
+		1XekkqXfsbm6sGLvoDpqNCSOrsM=
 		</data>
 		<key>Modules/fast_contacts.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		LLn1uwZdSGr6SQ8PVMrmFjxW6JA=
+		RnQt0iUHd6XuNAdYkJWczgLckj0=
 		</data>
 		<key>Modules/fast_contacts.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -46,11 +46,11 @@
 		</data>
 		<key>Modules/fast_contacts.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		zonukBom7Bh7KkXlfW14B7rAXOw=
+		rcGWYh2o+j1CBgMB3THN+0zig44=
 		</data>
 		<key>Modules/fast_contacts.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		mbU6ERH2ppiMnj/Kgo5zx+pgsBY=
+		aTuU4/kojeb8tDgnAyiZhO3V2QE=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -70,7 +70,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			pg5nb/aG8+Zdt4o49Bg/M16F9goYn6Ft75QAC3X/fog=
+			LlXDoQzwMfVRWCLG/cXc88chMaE4bLcEhFiSZ17K9ZA=
 			</data>
 		</dict>
 		<key>Headers/fast_contacts-umbrella.h</key>
@@ -84,14 +84,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			VIcOYFsnTufPzakDtdcCR9W4ei+iY07V8J2/c+S4jic=
+			hOMmWfQ0iPLl2zW3OJ9fPTycllb6QYBCMpkX8lX4+rQ=
 			</data>
 		</dict>
 		<key>Modules/fast_contacts.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			2nLzW/gaYHwigBmCy8IfXkGH70MA4sFTJX1yh4Jyqms=
+			IaQyPhNZs4Fg8h/0GbiiLp3QVfgZFtZXg0/XGjzFJms=
 			</data>
 		</dict>
 		<key>Modules/fast_contacts.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
@@ -105,14 +105,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			v2B2BFto3F3b+jfNy41f7BrExCEG8Kyc3oEAS6wc8bw=
+			Yuk7aNaJXLQZ/TmvLT8EmY2/1PBKjWljNyjEMzI1onY=
 			</data>
 		</dict>
 		<key>Modules/fast_contacts.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			PLpF5pqea7yBpB9l6aBys4nRAH7r0FsORuPlTKuli2s=
+			Lnh4THUOR/Gg/teTUM252pIS6B74BFbGMOAE6Phm6O8=
 			</data>
 		</dict>
 		<key>Modules/fast_contacts.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
@@ -126,14 +126,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			CkvaD3G0rqaUQjGXQL35vQUxi0BgdG3F8LI0p8qQYAs=
+			bAbXZyZiN9wpN9Itnwy3rMShbBUMUwJsKSPaQ9jQJrk=
 			</data>
 		</dict>
 		<key>Modules/fast_contacts.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			4cjRUf3xAY8O1jxUZBxY+c9d/uHzlvP5m8oZtmoKN70=
+			ZH5gl59J7zT1CFGwUMDoNFjd9uj0Z9SEThCZblt4vOU=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>

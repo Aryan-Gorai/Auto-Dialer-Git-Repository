@@ -6,7 +6,7 @@
 	<dict>
 		<key>Headers/path_provider_foundation-Swift.h</key>
 		<data>
-		gB6WeKcsTBNFkoQ6gj0OHKTcA9Y=
+		nSUpQZozhKEJ7mnz00N8I8jIBGY=
 		</data>
 		<key>Headers/path_provider_foundation-umbrella.h</key>
 		<data>
@@ -14,7 +14,7 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		nPMQ6OWLVvhlvPMsP/XfoMfPTA4=
+		DYsPl6PzLN+Vq6CG2i/E1tM1CUs=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -22,11 +22,11 @@
 		</data>
 		<key>Modules/path_provider_foundation.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo</key>
 		<data>
-		zbBcmGZ79bPiuUm/1fDhg3PCyaA=
+		vmlJeyr1lnGMWBtpH035/KYHXJ0=
 		</data>
 		<key>Modules/path_provider_foundation.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
 		<data>
-		YxeTNh2MMGxvav1ucp3WkbVPVc8=
+		3DUIhR4orjken9y1ee/FaLR3Sqc=
 		</data>
 		<key>Modules/path_provider_foundation.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -34,11 +34,11 @@
 		</data>
 		<key>Modules/path_provider_foundation.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		Ey4m5RScauNcMt/UTjtJKGG5KM4=
+		Yfeq2/CER3vztzXRo5n3gxmTvhY=
 		</data>
 		<key>Modules/path_provider_foundation.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		u8IhJipkel9Y4aGRZjIsJyc5ZsA=
+		6akeg9aQ5FrC9Rbw0JbeXJX+u14=
 		</data>
 		<key>Modules/path_provider_foundation.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -46,15 +46,15 @@
 		</data>
 		<key>Modules/path_provider_foundation.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		B/Yy1HJA01xTFHW0qQ/Rpr2lvjk=
+		irTA9myzFCXibLhAetbvSKJFKXY=
 		</data>
 		<key>Modules/path_provider_foundation.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		K5eXVarbcA3doLrswP1GhQoo+RQ=
+		r6/W3IMDAb7ZqKT8jA6cvyIIgCE=
 		</data>
 		<key>path_provider_foundation_privacy.bundle/Info.plist</key>
 		<data>
-		xzDNAGRPk2owbcSWdR5E9gZEuAA=
+		3o5j9PVM3CZ0Bc7tMq/Tc/1tpT0=
 		</data>
 		<key>path_provider_foundation_privacy.bundle/PrivacyInfo.xcprivacy</key>
 		<data>
@@ -67,7 +67,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			v5SCJ0je/QJVn66/g+Wivnc16oMF7QMuiCsgNdK9N9s=
+			XkPgtEZE6v7/9fjOInHmDMyRYXD7yK2sahXKKYlstHM=
 			</data>
 		</dict>
 		<key>Headers/path_provider_foundation-umbrella.h</key>
@@ -88,14 +88,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			Hd2ZSlu2WAVC+CZSymaNYz9TcsTJ1OzjAYpUKs6+3fQ=
+			XujIbz4pBGNF+VycCRseFFN2Gg/sbem409HZz9eCCWY=
 			</data>
 		</dict>
 		<key>Modules/path_provider_foundation.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			eqRptkFSAv9dtl8cNAzCfm4rTeA1dYNJ9GnzfuUJjq8=
+			r7ZtncIP9puygZLAfGvGWrBp5PYV4uuy1tWG+k3MnzE=
 			</data>
 		</dict>
 		<key>Modules/path_provider_foundation.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
@@ -109,14 +109,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			h92bbm9QV3xpQYq9ZkAbsvZ82aNuR0v2jcfuL/v/JCk=
+			5SQbvKgYKJYI4j2mXqKMxF/BXkxHZ5SCtVEFHL9iPbc=
 			</data>
 		</dict>
 		<key>Modules/path_provider_foundation.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			HjqCBjx7dwZx+c1Zj1j5h0GIbXSJJG2mxpF2YpSRdpQ=
+			iY3rIjPj7CLF0hsTeA7cc0v0BT9TRcQGmF4I3EY0nIM=
 			</data>
 		</dict>
 		<key>Modules/path_provider_foundation.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
@@ -130,21 +130,21 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			VbZ9+urvptfLku4Y28olLJbugCbaxrFjWDjBdA0SyS4=
+			OXqwnWDkBs5ct3ObkGMeyk8vI+aVQQ1rwOSqhvfe6eg=
 			</data>
 		</dict>
 		<key>Modules/path_provider_foundation.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			DhvWE35vyt5pHmZq+C/VTPh+ZI5wEADWFs8GqV8VlHE=
+			SQu2U1nBcEjAxBaSaqTfn1RrM8b/77BiQl0zFdEAY9g=
 			</data>
 		</dict>
 		<key>path_provider_foundation_privacy.bundle/Info.plist</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			JycbrvGZste1xHUtndV1iDwY3GABG576/eGWi4qG4JI=
+			54nhHr95LK7bZhx/tUV3TYy2vbZk8SVUA8aGu33eInE=
 			</data>
 		</dict>
 		<key>path_provider_foundation_privacy.bundle/PrivacyInfo.xcprivacy</key>

@@ -10,7 +10,7 @@
 		</data>
 		<key>Headers/fluttercontactpicker-Swift.h</key>
 		<data>
-		L2hILM0ppkx6DIAJwMUg78bU93c=
+		CmBTI1C9Zbo90EJOxrYDqwsZQfQ=
 		</data>
 		<key>Headers/fluttercontactpicker-umbrella.h</key>
 		<data>
@@ -18,15 +18,15 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		2CpcJRiJPf7nwvONbG0JFBZs0qM=
+		k1wMXsHrXuZy+mLFvH6evhaLyd8=
 		</data>
 		<key>Modules/fluttercontactpicker.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo</key>
 		<data>
-		SQFbfiSvjEEw8liDm/3EtAHm+e4=
+		nU7Gaz2Ovi8Mofqu4t4z3YXJIUc=
 		</data>
 		<key>Modules/fluttercontactpicker.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
 		<data>
-		d/G7n5yNeCnm3f65FXXpqpI5xnI=
+		sXIRTwSbkgjQSXh5RN9nFdUv9jQ=
 		</data>
 		<key>Modules/fluttercontactpicker.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -34,11 +34,11 @@
 		</data>
 		<key>Modules/fluttercontactpicker.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		ptwx3M1oyuOow0+eqw1trIwYC3g=
+		zcjMmrlRQgDMmDu7atspO4u2sFc=
 		</data>
 		<key>Modules/fluttercontactpicker.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		/jR2o8S/8a2I/Yu93dLufI6smxw=
+		xs72DPWVu/cdovHdL3+j480EYLU=
 		</data>
 		<key>Modules/fluttercontactpicker.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -46,11 +46,11 @@
 		</data>
 		<key>Modules/fluttercontactpicker.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		eYWocjG0wN+0rlKgG2/cGEquV+M=
+		IjUcCM02GbpoYpCjsQvVc1VYDgk=
 		</data>
 		<key>Modules/fluttercontactpicker.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		yt6yeSF3UiODfoQUI1KLUFIYYi0=
+		31vIvncOrItgF8u1ldT3iDhAsQs=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -70,7 +70,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			lNZ6thZuvuiRyrDeiIRleyS+ym1S7M5UVe5LYQ9KyVc=
+			UBQD3tYtCoPplauUywK87L5F2OXJ2QCwnATghtjvMvM=
 			</data>
 		</dict>
 		<key>Headers/fluttercontactpicker-umbrella.h</key>
@@ -84,14 +84,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			JkooksGUMXWedOtYBkyxDbQiOaUb6KvVQDUo6Bj7ZhE=
+			14LHAh4Zhp8X6/nLzVq5qPnq6IuD+/jPaqABmGINSw0=
 			</data>
 		</dict>
 		<key>Modules/fluttercontactpicker.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			z5A3a2wZqdtY0zwWJPoTgTOpWa2yuNd4tid4N3Q6WNg=
+			m/bdhb8PvJGa+etbmoaV/AY8SpMRy0flDf3neteFDhY=
 			</data>
 		</dict>
 		<key>Modules/fluttercontactpicker.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
@@ -105,14 +105,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			PA3aWJeD+mYhKUchfEWThB86tsOIrvhiFmnZ8QmR7uc=
+			HYekh8w0sD5rrUkLTXHOwf2xd/J08sZg2q71pvJWFwg=
 			</data>
 		</dict>
 		<key>Modules/fluttercontactpicker.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			4m/Xk/Iqith85MTkbUq/z/9jQYOIsOWa5HA44Qtprsc=
+			/GnfRPHfNSaqwpT+79Rf46V1nAUR00U4svJmqEL8RjU=
 			</data>
 		</dict>
 		<key>Modules/fluttercontactpicker.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
@@ -126,14 +126,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			CCSQYelGtzCI9ZlMeNj9G4oZGWr8xjEn032YRsOj3ps=
+			fylJh9ZZpkUNlVTDuSi98qd6PSEISMan58qz+40qFlo=
 			</data>
 		</dict>
 		<key>Modules/fluttercontactpicker.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			H6ySWmtj4QN5DRTBaHjNs1nM9ntwEIpa/YS3cItlhkI=
+			Q2xwPDa4Y5NgmuKW++RgkmZUVy0X3Du5XKZfbAJGWd0=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
