@@ -6,51 +6,19 @@
 	<dict>
 		<key>FirebaseAuth_Privacy.bundle/Info.plist</key>
 		<data>
-		u3DjjH9i1Hp+/eLUtnkKzgagG60=
+		FM6PSmB3HGe91oTBU2PE5EfcO+o=
 		</data>
 		<key>FirebaseAuth_Privacy.bundle/PrivacyInfo.xcprivacy</key>
 		<data>
 		8cQ/rSS7XR8ohTuSAR27mQb1wiU=
 		</data>
-		<key>Headers/FIRActionCodeSettings.h</key>
-		<data>
-		IaMZxDq94nXZFV42/c7jYRi4AMw=
-		</data>
-		<key>Headers/FIRAdditionalUserInfo.h</key>
-		<data>
-		IzPUxuYUTwwCxfpZ3liefh6jB6k=
-		</data>
 		<key>Headers/FIRAuth.h</key>
 		<data>
 		6sUdiN8C947KPigch/GUTQp2WFM=
 		</data>
-		<key>Headers/FIRAuthAPNSTokenType.h</key>
-		<data>
-		sWEcFBQ5w77vtiiZeQgufbMVvz4=
-		</data>
-		<key>Headers/FIRAuthCredential.h</key>
-		<data>
-		2JETOgL3wqdBUIGnCH8FcBxSDOk=
-		</data>
-		<key>Headers/FIRAuthDataResult.h</key>
-		<data>
-		wf1rYadDbP29ybsnVzJeUzuwZvA=
-		</data>
 		<key>Headers/FIRAuthErrors.h</key>
 		<data>
 		EePYIHGhLy/xmPGtxiKw17pE0uk=
-		</data>
-		<key>Headers/FIRAuthSettings.h</key>
-		<data>
-		2/3LoXIIbgZ+H2F77FuN0HqkxGE=
-		</data>
-		<key>Headers/FIRAuthTokenResult.h</key>
-		<data>
-		i0jSTM4DROSHQaDaCG3PXfAprpg=
-		</data>
-		<key>Headers/FIRAuthUIDelegate.h</key>
-		<data>
-		rlTIY8sycROPm83bW0RPN9ato+w=
 		</data>
 		<key>Headers/FIREmailAuthProvider.h</key>
 		<data>
@@ -80,65 +48,9 @@
 		<data>
 		fGGlQ/th5LDX3/yNwFq4B1sZnCw=
 		</data>
-		<key>Headers/FIRMultiFactorAssertion.h</key>
-		<data>
-		QqrVklMWxdSb6fHEER0UnPHQv8A=
-		</data>
-		<key>Headers/FIRMultiFactorInfo.h</key>
-		<data>
-		2sOynkC7khdquxgOvJSQM5t7DEc=
-		</data>
-		<key>Headers/FIRMultiFactorResolver.h</key>
-		<data>
-		vMCxt2zJ90OM82pBJhrWyuEMe00=
-		</data>
-		<key>Headers/FIRMultiFactorSession.h</key>
-		<data>
-		/4wBB5BIqD6+pbgFrJat91dwlrw=
-		</data>
-		<key>Headers/FIROAuthCredential.h</key>
-		<data>
-		aolt/SlHNIcC3Ifrp0FTBhE46CU=
-		</data>
-		<key>Headers/FIROAuthProvider.h</key>
-		<data>
-		b0chFy3Nojzn006gsgDKakC3geY=
-		</data>
-		<key>Headers/FIRPhoneAuthCredential.h</key>
-		<data>
-		2Cwz5Hk5Mo+ibp/OxU2qdZkmXyI=
-		</data>
 		<key>Headers/FIRPhoneAuthProvider.h</key>
 		<data>
 		WO0sqUgnREw00ABrNTryXfhAuj0=
-		</data>
-		<key>Headers/FIRPhoneMultiFactorAssertion.h</key>
-		<data>
-		/a//auSlPZV0PujsIiYhHnRuApo=
-		</data>
-		<key>Headers/FIRPhoneMultiFactorGenerator.h</key>
-		<data>
-		dA+iVnpu++CWm2Z+3XlfkfIuSOs=
-		</data>
-		<key>Headers/FIRPhoneMultiFactorInfo.h</key>
-		<data>
-		xDM9CBaxieUDjbyes+65ss7wBuI=
-		</data>
-		<key>Headers/FIRRecaptchaBridge.h</key>
-		<data>
-		8v7B6gbjmMDzvdG+EVAl7Y9D0Gw=
-		</data>
-		<key>Headers/FIRTOTPMultiFactorAssertion.h</key>
-		<data>
-		ix5clmH/nmMnYyK1IYGFWMEonOE=
-		</data>
-		<key>Headers/FIRTOTPMultiFactorGenerator.h</key>
-		<data>
-		bCIF5HDsV+PSJ25NwUTnCGlTe9c=
-		</data>
-		<key>Headers/FIRTOTPSecret.h</key>
-		<data>
-		djcu3k2cXYIc8UEVkaNGkE5gI48=
 		</data>
 		<key>Headers/FIRTwitterAuthProvider.h</key>
 		<data>
@@ -148,37 +60,29 @@
 		<data>
 		BpFfuSS3G2foPXYKXGW0mbK7b94=
 		</data>
-		<key>Headers/FIRUserInfo.h</key>
-		<data>
-		LIYVvBX9uvT8TC8d84PintA+tK8=
-		</data>
-		<key>Headers/FIRUserMetadata.h</key>
-		<data>
-		CTSR18LY4Xlr53z46s0TGjg0DqA=
-		</data>
 		<key>Headers/FirebaseAuth-Swift.h</key>
 		<data>
 		piXxSJ71VfL2UobBT4daZaT74mY=
 		</data>
 		<key>Headers/FirebaseAuth-umbrella.h</key>
 		<data>
-		ee6UiHjH0qhpCAtlmdZFs+PQrbo=
+		t0tJXgUFwfcwMxXzHagmtsDUegI=
 		</data>
 		<key>Headers/FirebaseAuth.h</key>
 		<data>
-		kf9oBzYqWDYEv4PwBvaJmP26K18=
+		Pau0qBXGf1T4ztNxq5VmHicF7OI=
 		</data>
 		<key>Info.plist</key>
 		<data>
-		0OlpVE7bfKKyLJJ1kgT1yDJ/iIE=
+		41TynrdiYDmgZKodUU4vqQD360A=
 		</data>
 		<key>Modules/FirebaseAuth.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo</key>
 		<data>
-		CV3/5gUMoifWRiI/JfeesBju3sc=
+		1h8BIQsVl83I32lxB1iPAC1OR/U=
 		</data>
 		<key>Modules/FirebaseAuth.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
 		<data>
-		0ZhXAvyD2VUaA1NrM7AhtHfJ/DM=
+		jxEzyAO5Rmw+Cv2whURM3JckwyU=
 		</data>
 		<key>Modules/FirebaseAuth.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -190,7 +94,7 @@
 		</data>
 		<key>Modules/FirebaseAuth.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		2lRrXLdq9eEp/vHlI9Xlp+b60WE=
+		N0OCvg8TqL/v2IYUajTQ1hlN8gs=
 		</data>
 		<key>Modules/FirebaseAuth.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
@@ -202,7 +106,7 @@
 		</data>
 		<key>Modules/FirebaseAuth.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		Muvm4AEn/g32StRMyv7AN3ouqpk=
+		t36NqVM4OpWk6U0CeRBI1tqQODQ=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -215,7 +119,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			KxvAY6J9LaafdwtFd9LvMnmXEYUVqy3hfFsBgXsin1o=
+			HXOC1+LfOJCeziy+gHkDOq+N4Ocdit3IKWRpnHQFhGw=
 			</data>
 		</dict>
 		<key>FirebaseAuth_Privacy.bundle/PrivacyInfo.xcprivacy</key>
@@ -225,20 +129,6 @@
 			BMFi6vpJss7QZjIxqJzJ9Xk1BsgCtoSGcZtdoGCK79U=
 			</data>
 		</dict>
-		<key>Headers/FIRActionCodeSettings.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			UMKY2ULjHuXNQbwAfDsyrukqC8LjJD35y/rkQFDZ9VU=
-			</data>
-		</dict>
-		<key>Headers/FIRAdditionalUserInfo.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			WECnzkL0WVwJGrxY6M0lbCnPdxFsRm+3UweNrRLngZA=
-			</data>
-		</dict>
 		<key>Headers/FIRAuth.h</key>
 		<dict>
 			<key>hash2</key>
@@ -246,53 +136,11 @@
 			yI4H/1DcFM87kPDou0sQlhD26W3II/Yh1Cj433FtVQc=
 			</data>
 		</dict>
-		<key>Headers/FIRAuthAPNSTokenType.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			03XngkKxRh9zkD013B27vpl/D6GX1MHuGlg7dZpZl60=
-			</data>
-		</dict>
-		<key>Headers/FIRAuthCredential.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			4PhuS4NPtCSlEdXcDpMDm+vpasR3VH1ZVF3fKVeLr/8=
-			</data>
-		</dict>
-		<key>Headers/FIRAuthDataResult.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			GqU4K63x6aCqErN9EyBWxm4JjLAHnuN0ylvH674zCwA=
-			</data>
-		</dict>
 		<key>Headers/FIRAuthErrors.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
 			prss4Xv9JvPCQC2EJm/b2ptyOQyvvOwzqqEmL9jSbDc=
-			</data>
-		</dict>
-		<key>Headers/FIRAuthSettings.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			z/ksRmJV9qpMIsRNgygjpAsa52d8gciJHFWZOIUInc4=
-			</data>
-		</dict>
-		<key>Headers/FIRAuthTokenResult.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			XNx2/A6HdukDiw/CbCQ+nQqHmpXPgE6o27sV71RkxK0=
-			</data>
-		</dict>
-		<key>Headers/FIRAuthUIDelegate.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			ILi1jsLHhai/y5PPxuF4hJnJMIUnx+nARLCB+LFq9/w=
 			</data>
 		</dict>
 		<key>Headers/FIREmailAuthProvider.h</key>
@@ -344,109 +192,11 @@
 			BYItwK6S0CPzbVMXGbH7Maa+vC+4Gaq92a33T+f5Sbc=
 			</data>
 		</dict>
-		<key>Headers/FIRMultiFactorAssertion.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			3IA4BwD9T1J6VoBxtmHacKjq/gURrSLG7OYcAIa7Yx4=
-			</data>
-		</dict>
-		<key>Headers/FIRMultiFactorInfo.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			VcWEonpXUbdTPm8oMt7rKIPo1OKW3C1s9Fl9laxCk9w=
-			</data>
-		</dict>
-		<key>Headers/FIRMultiFactorResolver.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			NlwJYVSIPdcJdUsVJeHeQ9h0OLlxqmdfdNqcFjwKGq0=
-			</data>
-		</dict>
-		<key>Headers/FIRMultiFactorSession.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			M9WWXYGmPwJNSsMdFzUWsbTvkGxaC+frTnKTMzFCy7Q=
-			</data>
-		</dict>
-		<key>Headers/FIROAuthCredential.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			UHr7KJijvLjzdNIIcpwjP1rAbtLTMpKl6Y1aiRhTVgA=
-			</data>
-		</dict>
-		<key>Headers/FIROAuthProvider.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			NkfTdDI7sFbjDyRTMLKNCRnDsLHe6EzB/2Xw1nOER00=
-			</data>
-		</dict>
-		<key>Headers/FIRPhoneAuthCredential.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			BvPLEZYDCeJZza4Skrp4BNwwKUa2dx4WKb9bBLy34I4=
-			</data>
-		</dict>
 		<key>Headers/FIRPhoneAuthProvider.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
 			VH5KlTH6gS5d+kFWouCDzFxX280f1EusGdZqjBD+TtQ=
-			</data>
-		</dict>
-		<key>Headers/FIRPhoneMultiFactorAssertion.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			+ODIWD4ZcwpNNM2gglXVO+kiI3RurR7aV4uGD37OBaE=
-			</data>
-		</dict>
-		<key>Headers/FIRPhoneMultiFactorGenerator.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			Fi2PFeecW6+GUN+25k0Bf9AFCzIpQMHVnddVjZNG8ps=
-			</data>
-		</dict>
-		<key>Headers/FIRPhoneMultiFactorInfo.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			ZQqUyNCWzglouOwIfdDiAvDzRJzvp47TiK8Exlr6MWY=
-			</data>
-		</dict>
-		<key>Headers/FIRRecaptchaBridge.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			7BztiAJI4KquLF1BG4FIq3xDudFvEtXQeLHKf5vvRaY=
-			</data>
-		</dict>
-		<key>Headers/FIRTOTPMultiFactorAssertion.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			SyPdQ+4iyZnsj9z4iKg4mqnHaJdBlh8j+xviF0yXLd8=
-			</data>
-		</dict>
-		<key>Headers/FIRTOTPMultiFactorGenerator.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			TBEVc0Bk5hNM+3Z8nOHKsKAS1bfwAILQnhqtB7+NOYQ=
-			</data>
-		</dict>
-		<key>Headers/FIRTOTPSecret.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			VgDL9HODIZ2qDprKnKi7el/i2cjiglNT2pNFztKaqBY=
 			</data>
 		</dict>
 		<key>Headers/FIRTwitterAuthProvider.h</key>
@@ -463,20 +213,6 @@
 			8HODuG+KMwCV+y+JdvLZT56B3y6CK+Lg0FS5VJIw9LU=
 			</data>
 		</dict>
-		<key>Headers/FIRUserInfo.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			BdAQgAsVOl6THqodGhDYUHxAv/GyFVrgSkKpKf/fbKE=
-			</data>
-		</dict>
-		<key>Headers/FIRUserMetadata.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			IHytxbe5npyOSC2lm9yLRZvP8abTtekshr795lWtLG4=
-			</data>
-		</dict>
 		<key>Headers/FirebaseAuth-Swift.h</key>
 		<dict>
 			<key>hash2</key>
@@ -488,28 +224,28 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			/zpavIxyNmwSLkenO6+kuQZky9g/1W5KCfVeafVf2GM=
+			rBxVhk5GeG8NIoWQ1BvMjKXvarvkveXowo52tzI4Yd0=
 			</data>
 		</dict>
 		<key>Headers/FirebaseAuth.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			l7JUegaehLNdg+cc0thhPAYzzFx/jGWBBXfG0vRSaWA=
+			Ex+Itr4pFKMJ4RxUeQUajTwRY7waKz6+x6Z/7l7nqPc=
 			</data>
 		</dict>
 		<key>Modules/FirebaseAuth.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			5rfcH2T10cgzzo6oauIJEqDVyhDeixCNSg7gg/+zbSk=
+			dHiPMjqTk5T+PeFQ6Db+PLpCiiuB2jRACtOQm52bpHY=
 			</data>
 		</dict>
 		<key>Modules/FirebaseAuth.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			uqOsUjcpVNbcTlj2fGSHQAL1zRFCFZUBl/wumsirAuQ=
+			HB8apiOeifbzXO2HarSO4IfftmH4AcaTUl5OuSM9/70=
 			</data>
 		</dict>
 		<key>Modules/FirebaseAuth.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
@@ -530,7 +266,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			DfIO6wvGzq95XNkSQdHhSMY7ccIMM6kFGRQoYBfQfGs=
+			Utk8yHsnU4MSVnmyvJDZXCOb1YCDmbN+k8aa1rp1hCk=
 			</data>
 		</dict>
 		<key>Modules/FirebaseAuth.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
@@ -551,7 +287,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			RL8Zelxk6WwhEFHsvuPMwy6eLemOrrjY0UKQGSEBxWY=
+			yxXasQj3eQlnLYADVaN3C80Xm34fUCPWQY3Eo+C/uD8=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>

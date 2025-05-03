@@ -4,6 +4,7 @@ import 'package:flutter_application_1/views/dialer/dialer.dart';
 import 'package:flutter_application_1/views/list/firebase_services.dart';
 
 import 'package:flutter_application_1/views/list/list_view.dart';
+import 'package:flutter_application_1/views/profile/user_profile_editor.dart';
 import 'package:flutter_application_1/views/reports/reports_view.dart';
 
 
@@ -62,6 +63,7 @@ int _page = 0;
           ListScreen(),
           DialerContactsView(listName: selectedList),
           ReportsView(),
+          UserProfileEditor()
         ],
       ),
 
@@ -157,9 +159,10 @@ Widget pageNavigator(int index) {
         break;   
 
       case 2:
-      controller.jumpToPage(2);
-
-
+        controller.jumpToPage(2);
+        break;
+      case 3:
+        controller.jumpToPage(3);
         break;
       // Add cases for other pages as needed
     }

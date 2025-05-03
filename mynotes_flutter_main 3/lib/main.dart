@@ -20,6 +20,7 @@ import 'package:flutter_application_1/views/list/list_view_visible.dart';
 
 
 import 'package:flutter_application_1/views/notes/create_update_note_view.dart';
+import 'package:flutter_application_1/views/profile/user_profile_editor.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -27,6 +28,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+
   runApp(
     MaterialApp(
       title: 'Flutter Demo',
@@ -56,6 +59,7 @@ void main() {
       
       //'/list_view/': (context) => ListScreen(),
       '/list_view/': (context) => sliderScreen(),
+      '/UserProfileEditor/': (context) => UserProfileEditor(),
 
       },
     ),

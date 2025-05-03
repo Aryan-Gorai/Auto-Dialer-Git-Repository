@@ -8,14 +8,6 @@
 		<data>
 		i4P3VfiVwHf/7YyJH4jhtJYXxW0=
 		</data>
-		<key>Headers/FIRAppCheckProtocol.h</key>
-		<data>
-		dOd90U4QM7XfWxIo40/g0hrtWIk=
-		</data>
-		<key>Headers/FIRAppCheckTokenProtocol.h</key>
-		<data>
-		bgQ53ecPMP4YpaopvMN4dpI2oco=
-		</data>
 		<key>Headers/FIRAppCheckTokenResultInterop.h</key>
 		<data>
 		xVWF6LnYC4mr+6+X7odpOGjF7w4=
@@ -30,7 +22,7 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		Jh/ss5QGaaIhXLQQRGD+d8lLUbU=
+		DSyU6Lyyl83f5c02MeIB4V+jTqw=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -44,20 +36,6 @@
 			<key>hash2</key>
 			<data>
 			9H3bC5Z5adEjOtzsWPfO71dJraOxxHku8QGGWFYzbB0=
-			</data>
-		</dict>
-		<key>Headers/FIRAppCheckProtocol.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			H7RWionJTPNrFL6gD+Kg1u3/f/kLDY/b5GKKya3jaMo=
-			</data>
-		</dict>
-		<key>Headers/FIRAppCheckTokenProtocol.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			ZNmBtlVFrF6x7kyjbcKyIgw0IQGmoBU0OivXwqTUebw=
 			</data>
 		</dict>
 		<key>Headers/FIRAppCheckTokenResultInterop.h</key>

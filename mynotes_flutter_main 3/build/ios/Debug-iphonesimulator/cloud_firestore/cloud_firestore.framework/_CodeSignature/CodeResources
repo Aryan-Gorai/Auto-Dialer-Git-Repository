@@ -62,51 +62,11 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		OZn7gekh80nlcaw8MKDEVsHFSwc=
+		KEm/ydMqUYfMPq0xSsxeg/Be3lo=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
 		Vl3m0rSDDmJlp+vefpRprN5+wXc=
-		</data>
-		<key>PrivateHeaders/FLTDocumentSnapshotStreamHandler.h</key>
-		<data>
-		B/Ha477VNa4ieCeCuO5gaUz8XA4=
-		</data>
-		<key>PrivateHeaders/FLTFirebaseFirestoreExtension.h</key>
-		<data>
-		d8T8sjAuB6X+HYkiIGUGw8XQb6s=
-		</data>
-		<key>PrivateHeaders/FLTFirebaseFirestoreReader.h</key>
-		<data>
-		DsBZL81QMh58mBeRG/9XjT7Z0YA=
-		</data>
-		<key>PrivateHeaders/FLTFirebaseFirestoreUtils.h</key>
-		<data>
-		iKrkU8du7lxQAxG8rfKVAJ760/c=
-		</data>
-		<key>PrivateHeaders/FLTFirebaseFirestoreWriter.h</key>
-		<data>
-		q/OVzbj9gU69Rbc+x0yeVmypw8M=
-		</data>
-		<key>PrivateHeaders/FLTLoadBundleStreamHandler.h</key>
-		<data>
-		RYhrGklQEBva9kQOB+yU2ReK/oI=
-		</data>
-		<key>PrivateHeaders/FLTQuerySnapshotStreamHandler.h</key>
-		<data>
-		DFHNvq034hRgFQJsm2nHRKn9eIY=
-		</data>
-		<key>PrivateHeaders/FLTSnapshotsInSyncStreamHandler.h</key>
-		<data>
-		QXHtbq1raOiZykgaBGOu4TwZRws=
-		</data>
-		<key>PrivateHeaders/FLTTransactionStreamHandler.h</key>
-		<data>
-		y4U+zDXnMweYZ7/4aapB2sSosDY=
-		</data>
-		<key>PrivateHeaders/FirestorePigeonParser.h</key>
-		<data>
-		maQNGdZcsgxLICjA0KFJcIzMy80=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -274,116 +234,6 @@
 			<key>hash2</key>
 			<data>
 			tuO1dI0xNcHsdP4lplrNeAYDD3spREhgBiMfQ1VnJ/s=
-			</data>
-		</dict>
-		<key>PrivateHeaders/FLTDocumentSnapshotStreamHandler.h</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			B/Ha477VNa4ieCeCuO5gaUz8XA4=
-			</data>
-			<key>hash2</key>
-			<data>
-			8ckMhrJ/8RVof2RvkVLbHyOI4KIBdUn/5sArakdUHLs=
-			</data>
-		</dict>
-		<key>PrivateHeaders/FLTFirebaseFirestoreExtension.h</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			d8T8sjAuB6X+HYkiIGUGw8XQb6s=
-			</data>
-			<key>hash2</key>
-			<data>
-			RAczZqjdBVDOZxaK+WCBs4Uxzcor8FaLCzeOzh3u5Lk=
-			</data>
-		</dict>
-		<key>PrivateHeaders/FLTFirebaseFirestoreReader.h</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			DsBZL81QMh58mBeRG/9XjT7Z0YA=
-			</data>
-			<key>hash2</key>
-			<data>
-			MLtkwTadlEMr6Z632Je6radaJe3Z6dMZH45l0r5RxNU=
-			</data>
-		</dict>
-		<key>PrivateHeaders/FLTFirebaseFirestoreUtils.h</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			iKrkU8du7lxQAxG8rfKVAJ760/c=
-			</data>
-			<key>hash2</key>
-			<data>
-			DsfK2yZMIKvhvbOwlF4A8is2yr9oyWxHZj9HGMMyCBk=
-			</data>
-		</dict>
-		<key>PrivateHeaders/FLTFirebaseFirestoreWriter.h</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			q/OVzbj9gU69Rbc+x0yeVmypw8M=
-			</data>
-			<key>hash2</key>
-			<data>
-			a+liyvmKEvTnTEtrM497X4b4cvKrWS3GTzvqh99Babs=
-			</data>
-		</dict>
-		<key>PrivateHeaders/FLTLoadBundleStreamHandler.h</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			RYhrGklQEBva9kQOB+yU2ReK/oI=
-			</data>
-			<key>hash2</key>
-			<data>
-			E6MCkTDMXSMdgIutMzpNjxSSzmtlsXnmNU6WfX+iGDw=
-			</data>
-		</dict>
-		<key>PrivateHeaders/FLTQuerySnapshotStreamHandler.h</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			DFHNvq034hRgFQJsm2nHRKn9eIY=
-			</data>
-			<key>hash2</key>
-			<data>
-			w7xBhkSq0/yqe+tVnpe0sv46jyJmK+STQuA7vynXAd4=
-			</data>
-		</dict>
-		<key>PrivateHeaders/FLTSnapshotsInSyncStreamHandler.h</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			QXHtbq1raOiZykgaBGOu4TwZRws=
-			</data>
-			<key>hash2</key>
-			<data>
-			IDa4k7qs8jaUungFqMOR0wf6jRHGCyUx+Nu2iNOBv+8=
-			</data>
-		</dict>
-		<key>PrivateHeaders/FLTTransactionStreamHandler.h</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			y4U+zDXnMweYZ7/4aapB2sSosDY=
-			</data>
-			<key>hash2</key>
-			<data>
-			oC16BxCOjHeQUchrsKQZUcJKjFvqxvf2pe0Cni9GR0M=
-			</data>
-		</dict>
-		<key>PrivateHeaders/FirestorePigeonParser.h</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			maQNGdZcsgxLICjA0KFJcIzMy80=
-			</data>
-			<key>hash2</key>
-			<data>
-			3RdLuuaoq8nV62duEOxG9BuGA0wTMsLXubRVrvra0ZA=
 			</data>
 		</dict>
 	</dict>

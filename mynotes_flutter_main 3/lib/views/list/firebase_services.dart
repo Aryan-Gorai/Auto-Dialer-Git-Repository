@@ -12,6 +12,7 @@ import 'package:flutter_application_1/views/list/list_view.dart';
 import 'package:flutter_application_1/views/list/list_view_visible.dart';
 import 'package:flutter_application_1/views/notes/contact_notes_view.dart';
 import 'package:flutter_application_1/views/onBoarding/onBoarding.dart';
+import 'package:flutter_application_1/views/profile/user_profile_editor.dart';
 import 'package:flutter_application_1/views/reports/reports_view.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
@@ -1332,7 +1333,7 @@ class _GbarState extends State<Gbar> {
                     //   );
                       
                     // }
-
+          
                 if (pageindex == 0) {
                       Navigator.of(context).push(
                         MaterialPageRoute(
@@ -1356,6 +1357,14 @@ class _GbarState extends State<Gbar> {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => ReportsView(),
+                        ),
+                      );
+                    }
+
+                    if (pageindex  == 3) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => UserProfileEditor(),
                         ),
                       );
                     }
@@ -1389,10 +1398,10 @@ class _GbarState extends State<Gbar> {
                 icon: Icons.call,
                 text: 'Dialer',
                 ),
-                GButton(
-                icon: Icons.bar_chart,
-                text: 'Reports',
-                ),
+              GButton(
+              icon: Icons.bar_chart,
+              text: 'Reports',
+              ),
               // GButton(
               //   icon: Icons.settings,
               //   text: 'Settigns',

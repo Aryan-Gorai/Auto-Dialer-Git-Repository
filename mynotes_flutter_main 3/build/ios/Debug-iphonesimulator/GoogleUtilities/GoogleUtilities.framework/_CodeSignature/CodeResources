@@ -6,7 +6,7 @@
 	<dict>
 		<key>GoogleUtilities_Privacy.bundle/Info.plist</key>
 		<data>
-		jj3uvVD3Z7SQpaPy1phbBU1/pgw=
+		AIabOnXvfOTLtpmPrFulHXgh/uM=
 		</data>
 		<key>GoogleUtilities_Privacy.bundle/PrivacyInfo.xcprivacy</key>
 		<data>
@@ -18,23 +18,11 @@
 		</data>
 		<key>Headers/GULAppEnvironmentUtil.h</key>
 		<data>
-		xXdtjneyYNasmDpcEIU/p1GTHlk=
+		pXD6RRpqGbIfC4JoYESwkMnQvt4=
 		</data>
 		<key>Headers/GULApplication.h</key>
 		<data>
 		FTHsV4kV8u5IWRCAkT2/l998G18=
-		</data>
-		<key>Headers/GULHeartbeatDateStorable.h</key>
-		<data>
-		4OtriHMHMXlkFjw9E9asMucvYBk=
-		</data>
-		<key>Headers/GULHeartbeatDateStorage.h</key>
-		<data>
-		P/qw3G71G5PCb2AWoGkwoMPbwkg=
-		</data>
-		<key>Headers/GULHeartbeatDateStorageUserDefaults.h</key>
-		<data>
-		yIxvciZTWSq2QppEk0lfLQw8Fno=
 		</data>
 		<key>Headers/GULKeychainStorage.h</key>
 		<data>
@@ -46,7 +34,7 @@
 		</data>
 		<key>Headers/GULLogger.h</key>
 		<data>
-		YiqtpeoBbGUrvPdD+7zepUGAfCA=
+		JRX2UAT3Q2C8Y/gOhC2ve+GcefA=
 		</data>
 		<key>Headers/GULLoggerLevel.h</key>
 		<data>
@@ -86,7 +74,7 @@
 		</data>
 		<key>Headers/GULOriginalIMPConvenienceMacros.h</key>
 		<data>
-		1YT5/0VbR8/41X76CwwJYZUmcYA=
+		wp61DP+6n6xaIuN7Q+MUG//9NTA=
 		</data>
 		<key>Headers/GULReachabilityChecker.h</key>
 		<data>
@@ -96,17 +84,9 @@
 		<data>
 		4X41UFqYbPvmhDB93lYXejW6oSw=
 		</data>
-		<key>Headers/GULSecureCoding.h</key>
-		<data>
-		NqI3HnVooz9+xSkTFaaO0Qu9wPE=
-		</data>
 		<key>Headers/GULSwizzler.h</key>
 		<data>
 		kqRN0S855mcEoeddcbC6llfp/j0=
-		</data>
-		<key>Headers/GULURLSessionDataResponse.h</key>
-		<data>
-		C7k2DFJRl4sOYxgFqiOpnGh1Xho=
 		</data>
 		<key>Headers/GULUserDefaults.h</key>
 		<data>
@@ -116,13 +96,9 @@
 		<data>
 		5hKqPC+TN2bnPxqUZRuXCxhRa8U=
 		</data>
-		<key>Headers/NSURLSession+GULPromises.h</key>
-		<data>
-		2BgzYjJd/EL8eHaeK39hhonnQHk=
-		</data>
 		<key>Info.plist</key>
 		<data>
-		pRFgdwrPcTC+jWGqz87C6P5gGYA=
+		Nf+PoF07B5f1fn3/QptlAlk3/TU=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -135,7 +111,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			BkMWqjXXftO5YA2yBcpjrdRl9ZFj79hRGyoh9vFbKbg=
+			97BZCSnr672k2BvplubMtGT/WH0Bw2KZmY9+E1kfwLw=
 			</data>
 		</dict>
 		<key>GoogleUtilities_Privacy.bundle/PrivacyInfo.xcprivacy</key>
@@ -156,7 +132,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			jNzjLypaoNMJWkbkha1dGaw69ouleyhcnEXh7QEYYAw=
+			fAPmm3I9gMNqCdBZRZnUjtdK57+JKibE/WmSgY5OLj8=
 			</data>
 		</dict>
 		<key>Headers/GULApplication.h</key>
@@ -164,27 +140,6 @@
 			<key>hash2</key>
 			<data>
 			HtFy/aRRkxI7vdDX9QPQdsZZ8OerD7GI+ofK/WbGg1g=
-			</data>
-		</dict>
-		<key>Headers/GULHeartbeatDateStorable.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			ZL4+u/A2OdvbAUp+BaAuMCVi16wtPtXr+2KLKvE4JWg=
-			</data>
-		</dict>
-		<key>Headers/GULHeartbeatDateStorage.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			8K7xliqi/Ra8UCIsxcyw25YHd85HTBjTMXO/Lj4+Ruc=
-			</data>
-		</dict>
-		<key>Headers/GULHeartbeatDateStorageUserDefaults.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			8WE865QHH0tAjEOd/jVjNJ/AF3AbLWDNrWwDchiYNTY=
 			</data>
 		</dict>
 		<key>Headers/GULKeychainStorage.h</key>
@@ -205,7 +160,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			XR4R5yn9bWSZReFRKToQYHOGB8o0YErfIhFqYNUYlb0=
+			LY4u7RfvbFX1rdixgo84YuJ5O17KvmWshjm1kffb1Rw=
 			</data>
 		</dict>
 		<key>Headers/GULLoggerLevel.h</key>
@@ -275,7 +230,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			qvu4mGcbe0yF2adjCRsjtJnQCLKBnwUOPb9jRpeZB58=
+			3RKVFe9VGiJiaLMdtbT57fm9sjp0vxBY2knbefyK3Fw=
 			</data>
 		</dict>
 		<key>Headers/GULReachabilityChecker.h</key>
@@ -292,25 +247,11 @@
 			RXX77bV5gh6q/JqXdNYIGalkk5NAkTeEyA8ikWTsf5o=
 			</data>
 		</dict>
-		<key>Headers/GULSecureCoding.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			3L9JDOv4n3TFP3Gm7AeKtTU8ZIbY0RCDqXIDiY1SBtM=
-			</data>
-		</dict>
 		<key>Headers/GULSwizzler.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
 			nHEVLRZiAlaBzWwIgNfNZ9l61OpmGZSCbpSaKf3yIqs=
-			</data>
-		</dict>
-		<key>Headers/GULURLSessionDataResponse.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			n5k4qaKh2bYI2mwBIAa845pVXUSRxdfJfPyeZ/AIEyA=
 			</data>
 		</dict>
 		<key>Headers/GULUserDefaults.h</key>
@@ -325,13 +266,6 @@
 			<key>hash2</key>
 			<data>
 			VkCk9hfj4ACJaNYNoe9D2Z4Pdyfx5RyY3S5+devhw9A=
-			</data>
-		</dict>
-		<key>Headers/NSURLSession+GULPromises.h</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			biELhEMquN4g3AwZ15AIB3vcGg5AdJI//dTOZc4+/s8=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
