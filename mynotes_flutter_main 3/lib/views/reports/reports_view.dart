@@ -25,6 +25,7 @@ class _ReportsViewState extends State<ReportsView> {
   String _selectedTimeScale = 'month'; // 'month', 'week', 'day'
   int _maxCallThreshold = 10; // Default max threshold
   final TextEditingController _thresholdController = TextEditingController(text: '10');
+  final FocusNode _thresholdFocusNode = FocusNode();
   bool _showHeatmap = true;
   int _timeOffset = 0; // 0 = current period, -1 = previous, 1 = next, etc.
 
@@ -98,6 +99,7 @@ class _ReportsViewState extends State<ReportsView> {
   @override
   void dispose() {
     _thresholdController.dispose();
+    _thresholdFocusNode.dispose();
     super.dispose();
   }
   
@@ -311,8 +313,13 @@ class _ReportsViewState extends State<ReportsView> {
         ],
       ),
       body: Center(
-        child: SingleChildScrollView(
-          child: Column(
+        child: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).unfocus();
+          },
+          behavior: HitTestBehavior.opaque,
+          child: SingleChildScrollView(
+            child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
 
@@ -453,11 +460,15 @@ class _ReportsViewState extends State<ReportsView> {
                               width: 80,
                               child: TextField(
                                 controller: _thresholdController,
+                                focusNode: _thresholdFocusNode,
                                 keyboardType: TextInputType.number,
                                 decoration: const InputDecoration(
                                   border: OutlineInputBorder(),
                                   contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                                 ),
+                                onSubmitted: (value) {
+                                  _thresholdFocusNode.unfocus();
+                                },
                               ),
                             ),
                           ],
@@ -636,7 +647,9 @@ class _ReportsViewState extends State<ReportsView> {
           ),
         ),
       ),
+      ),
     );
+    
   }
 
 

@@ -4,6 +4,7 @@ import 'package:flutter_application_1/views/dialer/dialer.dart';
 import 'package:flutter_application_1/views/list/firebase_services.dart';
 
 import 'package:flutter_application_1/views/list/list_view.dart';
+import 'package:flutter_application_1/views/list/list_view_visible.dart';
 import 'package:flutter_application_1/views/profile/user_profile_editor.dart';
 import 'package:flutter_application_1/views/reports/reports_view.dart';
 
@@ -60,7 +61,8 @@ int _page = 0;
           },
           controller: controller,
         children: [
-          ListScreen(),
+          //ListScreen(),
+          list_view_visible(),
           DialerContactsView(listName: selectedList),
           ReportsView(),
           UserProfileEditor()
