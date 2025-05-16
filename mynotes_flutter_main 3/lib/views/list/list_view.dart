@@ -196,7 +196,7 @@ Future<void> createDemoList() async {
     // Add the new document with an auto-generated ID
     await listsRef.add(newListData);
 
-    // You can perform any additional actions after creating the list here.
+    // I can perform any additional actions after creating the list here.
 
   } catch (error) {
     // Handle errors here
@@ -469,37 +469,6 @@ String get userId => AuthService.firebase().currentUser!.id;
 
 
 
-    
-
-
-//      // Get the Firestore instance
-//      FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-
-//      // Create a reference to the document you want to update (replace 'document_id' with the actual document ID)
-//      DocumentReference contactRef = firestore.collection('lists').doc('7Ks2XyfA9a2IwdPHqHga');
-
-
-//      // Create a map with the updated data (replace 'new_name' and 'new_phone_number' with the actual updated values)
-//      Map<String, dynamic> updatedData = {
-//        //'contact_name': 'Supriya Gorai',
-//        'contact_name': kPickedName,
-//        //'contact_phone_number': '+44 7845967135',
-//        'contact_phone_number': kPickedNumber,
-//        'user_id': userId,
-//      };
-
-
-//      // Update the document in Firestore
-//      await contactRef.update(updatedData);
-    
-
-
-//      print('Data updated successfully!');
-//    } catch (e) {
-//      print('Error updating data in Firestore: $e');
-//    }
-//  }
 
 
 
@@ -1098,62 +1067,6 @@ Future<void> _showCallFinishedDialog(String name) async {
 
 
 
-// Future<void> showContactDialog(String contactName, String contactPhoneNumber, String callDuration) async {
-//   showDialog<void>(
-//     context: context,
-//     builder: (BuildContext context) {
-//       return AlertDialog(
-//         title: Text('Contact Information'),
-//         content: Column(
-//           mainAxisSize: MainAxisSize.min,
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Text('Name: $contactName'),
-//             Text('Phone Number: $contactPhoneNumber'),
-//             Text('Call Duration: $callDuration'),
-//           ],
-//         ),
-//         actions: <Widget>[
-//           TextButton(
-//             onPressed: () {
-//               // Perform any action you want when the user clicks a button
-//               Navigator.of(context).pop();
-//             },
-//             child: const Text('Close'),
-//           ),
-//         ],
-//       );
-//     },
-//   );
-// }
-
-// DIALOG WHEN USER RETURNS TO APP
-
-
-
-
-
-// Dropdown
-
-// Future<void> fetchDataFromFirestore() async {
-//     try {
-//       QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('lists_collection').get();
-//       print("This is function on the lisT_view dart page");
-
-//       setState(() {
-//         list = querySnapshot.docs.map((doc) => doc['list_name'] as String).toList();
-
-//         // If the list is not empty, set the dropdown value to the first item
-//         if (list.isNotEmpty) {
-//           dropdownValue = list.first;
-//         }
-        
-//       });
-//     } catch (error) {
-//       showErrorDialog(context, "Could not load...");
-      
-//     }
-//   }
 
 
 Future<void> fetchDataFromFirestore(String userId) async {
@@ -1256,24 +1169,9 @@ String listContactsJoined = "";
 
    return Scaffold(
 
-  //     floatingActionButton: ElevatedButton(
-  //       style: ElevatedButton.styleFrom(
-  //   primary: Colors.grey[200], // Set to your background color
-  //   onPrimary: Colors.grey[200], // Set to your background color
-  //   shape: RoundedRectangleBorder(
-  //     borderRadius: BorderRadius.circular(8.0),
-  //   ),
-  //   padding: const EdgeInsets.all(12.0),
-  // ),
-  //       child: Icon(Icons.add, size:30, color: textColor(context)),
-  //       onPressed:() {
-  //         _showListDialog(context
-  //         );},
-  //     ),
 
 
-      backgroundColor: const Color.fromRGBO(248, 225, 209, 1),
-
+     backgroundColor: const Color.fromRGBO(248, 225, 209, 1), 
 
 
 
