@@ -145,6 +145,10 @@ class _CallHeatmapState extends State<CallHeatmap> {
 
   // Get color based on call count and threshold
   Color getHeatmapColor(int callCount) {
+    if (callCount == 0) {
+      return Colors.grey[300]!;
+    }
+    
     // Calculate opacity based on call count and threshold
     final double opacity = callCount / widget.maxCallThreshold;
     final double clampedOpacity = opacity.clamp(0.1, 1.0);
@@ -250,7 +254,7 @@ class _CallHeatmapState extends State<CallHeatmap> {
               Container(
                 width: 20,
                 height: 20,
-                color: Color.fromRGBO(0, 128, 0, 0.1),
+                color: Colors.grey[300]!,
               ),
               const SizedBox(width: 4),
               const Text('None'),
