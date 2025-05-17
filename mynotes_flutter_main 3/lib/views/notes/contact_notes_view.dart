@@ -296,21 +296,30 @@ class _ContactNotesViewState extends State<ContactNotesView> {
                                         border: Border.all(color: Colors.grey.shade300),
                                         borderRadius: BorderRadius.circular(4.0),
                                       ),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              note['note_text'],
-                                              style: const TextStyle(fontSize: 16),
+                                  child: note['note_text']?.contains('Call Feedback:') ?? false
+                                      ? Text(
+                                          note['note_text'],
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.blue[800],
+                                            fontWeight: FontWeight.w500
+                                          ),
+                                        )
+                                      : Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                note['note_text'],
+                                                style: const TextStyle(fontSize: 16),
+                                              ),
                                             ),
-                                          ),
-                                          const Icon(
-                                            Icons.edit,
-                                            size: 16,
-                                            color: Colors.grey,
-                                          ),
-                                        ],
-                                      ),
+                                            const Icon(
+                                              Icons.edit,
+                                              size: 16,
+                                              color: Colors.grey,
+                                            ),
+                                          ],
+                                        ),
                                     ),
                                   ),
                                 ],

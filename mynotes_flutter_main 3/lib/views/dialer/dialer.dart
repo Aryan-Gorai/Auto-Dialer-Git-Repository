@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/views/list/firebase_services.dart';
 import 'package:flutter_application_1/views/notes/contact_notes_view.dart';
+import 'package:flutter_application_1/utilities/dialogs/call_feedback_dialog.dart';
 
 
 class ImgSample {
@@ -42,6 +44,9 @@ class _DialerContactsViewState extends State<DialerContactsView> {
   bool isLoading = true;
   int currentCallIndex = -1; // Track the currently called contact
   List<Map<String, dynamic>> contactsData = []; // Store full contact data
+  DateTime? callStartTime;
+  Duration callDuration = Duration.zero;
+  Timer? callTimer;
 
   @override
   void initState() {
@@ -81,16 +86,91 @@ class _DialerContactsViewState extends State<DialerContactsView> {
       String phoneNumber = contactsData[currentCallIndex]['contact_phone_number'];
       String contactName = contactsData[currentCallIndex]['contact_name'];
       
+      // Start timer and record call start time
+      callStartTime = DateTime.now();
+      callDuration = Duration.zero;
+      callTimer?.cancel();
+      callTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+        if (mounted) {
+          setState(() {
+            callDuration = DateTime.now().difference(callStartTime!);
+          });
+        }
+      });
+      
       // Record the call timestamp in Firebase
       recordCallTimestamp(contactName, phoneNumber, widget.listName);
       
       // Make the phone call
       makePhoneCall(phoneNumber);
+
+      // Show feedback dialog immediately for first contact
+      if (currentCallIndex == 0) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showFeedbackDialog(contactName, phoneNumber);
+        });
+      }
     }
+  }
+
+  void showFeedbackDialog(String contactName, String phoneNumber) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => CallFeedbackDialog(
+        contactName: contactName,
+        phoneNumber: phoneNumber,
+        listName: widget.listName,
+        callDuration: callDuration,
+        onFeedbackSubmitted: (answered, voicemail, rating) async {
+          await updateCallFeedback(
+            contactName,
+            phoneNumber,
+            widget.listName,
+            answered,
+            voicemail,
+            rating,
+            callDuration.inSeconds
+          );
+        },
+      ),
+    );
   }
   
   // Method to move to the next contact
   void moveToNextContact() {
+    if (currentCallIndex >= 0 && currentCallIndex < contactsData.length) {
+      String contactName = contactsData[currentCallIndex]['contact_name'];
+      String phoneNumber = contactsData[currentCallIndex]['contact_phone_number'];
+      
+      // Stop timer
+      callTimer?.cancel();
+      
+      // Show feedback dialog
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) => CallFeedbackDialog(
+          contactName: contactName,
+          phoneNumber: phoneNumber,
+          listName: widget.listName,
+          callDuration: callDuration,
+          onFeedbackSubmitted: (answered, voicemail, rating) async {
+            // Update Firebase with call feedback
+            await updateCallFeedback(
+              contactName,
+              phoneNumber,
+              widget.listName,
+              answered,
+              voicemail,
+              rating,
+              callDuration.inSeconds
+            );
+          },
+        ),
+      );
+    }
+    
     setState(() {
       currentCallIndex++;
       if (currentCallIndex >= contactsData.length) {
@@ -284,6 +364,87 @@ Widget build(BuildContext context) {
 
 
 
+
+  Future<void> updateCallFeedback(
+    String contactName,
+    String phoneNumber,
+    String listName,
+    bool answered,
+    bool voicemail,
+    int rating,
+    int durationSeconds
+  ) async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      
+      // Find the most recent call record for this contact
+      QuerySnapshot snapshot = await firestore
+          .collection('call_logs')
+          .where('contact_name', isEqualTo: contactName)
+          .where('list_name', isEqualTo: listName)
+          .orderBy('timestamp', descending: true)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        DocumentReference docRef = snapshot.docs.first.reference;
+        
+        // Update the call record with feedback data
+        await docRef.update({
+          'answered': answered,
+          'voicemail': voicemail,
+          'rating': rating,
+          'duration_seconds': durationSeconds,
+        });
+
+        // Update note text in both collections
+        String noteText = '''
+Call Feedback:
+- Answered: ${answered ? 'Yes' : 'No'}
+${!answered ? '- Voicemail Left: ${voicemail ? 'Yes' : 'No'}\n' : ''}
+- Rating: ${rating}/5 stars
+- Duration: ${durationSeconds} seconds
+''';
+        
+        if (voicemail) {
+          noteText += 'Notes about voicemail...\n';
+        }
+
+        // Update in 'notes' collection
+        QuerySnapshot notesSnapshot = await firestore
+            .collection('notes')
+            .where('contact_name', isEqualTo: contactName)
+            .where('list_name', isEqualTo: listName)
+            .orderBy('timestamp', descending: true)
+            .limit(1)
+            .get();
+
+        if (notesSnapshot.docs.isNotEmpty) {
+          await notesSnapshot.docs.first.reference.update({
+            'text': noteText,
+          });
+        }
+
+        // Update in 'contact_notes' collection
+        QuerySnapshot contactNotesSnapshot = await firestore
+            .collection('contact_notes')
+            .where('contact_name', isEqualTo: contactName)
+            .where('contact_phone_number', isEqualTo: phoneNumber)
+            .where('list_name', isEqualTo: listName)
+            .orderBy('timestamp', descending: true)
+            .limit(1)
+            .get();
+
+        if (contactNotesSnapshot.docs.isNotEmpty) {
+          await contactNotesSnapshot.docs.first.reference.update({
+            'note_text': noteText,
+          });
+        }
+      }
+    } catch (e) {
+      print('Error updating call feedback: $e');
+    }
+  }
 
 void deleteSpecificContact(String contactName) async {
   try {

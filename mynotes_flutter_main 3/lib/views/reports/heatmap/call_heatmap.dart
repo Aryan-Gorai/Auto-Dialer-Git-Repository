@@ -253,7 +253,7 @@ class _CallHeatmapState extends State<CallHeatmap> {
                 color: Color.fromRGBO(0, 128, 0, 0.1),
               ),
               const SizedBox(width: 4),
-              const Text('Few'),
+              const Text('None'),
               const SizedBox(width: 16),
               Container(
                 width: 20,

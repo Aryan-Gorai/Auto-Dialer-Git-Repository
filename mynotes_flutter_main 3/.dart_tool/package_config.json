@@ -290,6 +290,12 @@
       "languageVersion": "3.6"
     },
     {
+      "name": "flutter_rating_bar",
+      "rootUri": "file:///Users/aryangorai/.pub-cache/hosted/pub.dev/flutter_rating_bar-4.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.14"
+    },
+    {
       "name": "flutter_test",
       "rootUri": "file:///Users/aryangorai/Developer/flutter/packages/flutter_test",
       "packageUri": "lib/",
@@ -920,7 +926,7 @@
       "languageVersion": "2.19"
     }
   ],
-  "generated": "2025-05-16T20:08:38.652107Z",
+  "generated": "2025-05-16T23:15:10.958239Z",
   "generator": "pub",
   "generatorVersion": "3.7.0",
   "flutterRoot": "file:///Users/aryangorai/Developer/flutter",
