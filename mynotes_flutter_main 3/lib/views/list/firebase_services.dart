@@ -211,6 +211,7 @@ Future<void> addNewList(String listName) async {
       'user_id': userId,
       'current_index': index,
       'total_documents': totalDocuments,
+      'description': '',
     };
 
     // Add the new document with an auto-generated ID
@@ -473,6 +474,27 @@ Future<void> showListDialog(BuildContext context) async {
 
 
 
+
+  Future<void> updateListDescription(String listName, String description) async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      QuerySnapshot snapshot = await firestore
+          .collection('lists_collection')
+          .where('list_name', isEqualTo: listName)
+          .where('user_id', isEqualTo: userId)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        DocumentReference docRef = snapshot.docs.first.reference;
+        await docRef.update({
+          'description': description,
+        });
+        print('Description updated for $listName');
+      }
+    } catch (e) {
+      print('Error updating description: $e');
+    }
+  }
 
   Future<void> addNewContactDataToList(selectedList) async {
 

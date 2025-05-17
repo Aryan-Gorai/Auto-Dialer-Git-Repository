@@ -60,21 +60,76 @@ void handleTilePress(String listName, context) {
 
 
 
-class _list_view_visibleState extends State<list_view_visible> {
+class _list_view_visibleState extends State<list_view_visible> with SingleTickerProviderStateMixin {
   List<String> myTiles = [];
   bool isLoading = true;
+  late AnimationController _animationController;
+  Map<String, TextEditingController> descriptionControllers = {};
 
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 300),
+    );
     Firebase.initializeApp();
     
-    fetchTilesAsArray(userId).then((contacts) {
+    fetchTilesAsArray(userId).then((contacts) async {
+      // Load descriptions for each list
+      for (String listName in contacts) {
+        String? description = await getListDescription(listName);
+        descriptionControllers[listName] = TextEditingController(text: description ?? '');
+      }
+      
       setState(() {
         myTiles = contacts;
         isLoading = false;
       });
     });
+  }
+
+  Future<String?> getListDescription(String listName) async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      QuerySnapshot snapshot = await firestore
+          .collection('lists_collection')
+          .where('list_name', isEqualTo: listName)
+          .where('user_id', isEqualTo: userId)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        return snapshot.docs.first['description'] as String?;
+      }
+    } catch (e) {
+      print('Error getting description: $e');
+    }
+    return null;
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  Future<void> updateListDescription(String listName, String description) async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      QuerySnapshot snapshot = await firestore
+          .collection('lists_collection')
+          .where('list_name', isEqualTo: listName)
+          .where('user_id', isEqualTo: userId)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        await snapshot.docs.first.reference.update({
+          'description': description,
+        });
+      }
+    } catch (e) {
+      print('Error updating description: $e');
+    }
   }
 
 
@@ -83,8 +138,12 @@ class _list_view_visibleState extends State<list_view_visible> {
 Widget build(BuildContext context) {
   return Scaffold(
     appBar: AppBar(title: Text("Lists ")),
-    body: Stack(
-  children: [
+    body: GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Stack(
+        children: [
     // Your main content goes here
     isLoading  // defined at the bottom of the page
         ? const Center(child: CircularProgressIndicator())
@@ -97,19 +156,61 @@ Widget build(BuildContext context) {
                 padding: const EdgeInsets.all(8.0),
                 child: Container(
                   color: Colors.grey[200],
-                  child: ListTile(
+                  child: ExpansionTile(
                     title: Text(tile),
-                    trailing: IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () {
-                        deleteSpecificContact(tile);
-
-                      },
-
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.people),
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => DialerContactsView(listName: tile),
+                              ),
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.info_outline),
+                          onPressed: null,
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () {
+                            deleteSpecificContact(tile);
+                          },
+                        ),
+                      ],
                     ),
-                    onTap: () {
-                        handleTilePress(tile, context);
-                      },
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                          child: TextField(
+                            controller: descriptionControllers[tile],
+                            decoration: InputDecoration(
+                              hintText: 'Enter list description',
+                              border: OutlineInputBorder(),
+                            ),
+                            maxLines: 3,
+                            onChanged: (value) {
+                              updateListDescription(tile, value);
+                            },
+                          ),
+                      ),
+                    ],
+                    onExpansionChanged: (expanded) {
+                      if (expanded) {
+                        _animationController.forward();
+                        // Dismiss keyboard when expanding
+                        FocusScope.of(context).unfocus();
+                      } else {
+                        _animationController.reverse();
+                      }
+                    },
+                    initiallyExpanded: false,
+                    tilePadding: EdgeInsets.symmetric(horizontal: 16),
+                    childrenPadding: EdgeInsets.only(bottom: 16),
                   ),
                 ),
               );
@@ -140,10 +241,9 @@ Widget build(BuildContext context) {
         tooltip: 'Add Contact',
       ),
     ),
-  ],
-
-),
-
+        ],
+      ),
+    ),
   );
 }
 
@@ -191,4 +291,3 @@ void deleteSpecificContact(String listName) async {
 
 
 }
-
