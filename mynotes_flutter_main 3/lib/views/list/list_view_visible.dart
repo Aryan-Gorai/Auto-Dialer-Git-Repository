@@ -132,6 +132,41 @@ class _list_view_visibleState extends State<list_view_visible> with SingleTicker
     }
   }
 
+  Future<Map<String, dynamic>> _getListStats(String listName) async {
+    try {
+      // Get contact count
+      final contactsSnapshot = await FirebaseFirestore.instance
+          .collection('lists')
+          .where('list_name', isEqualTo: listName)
+          .where('user_id', isEqualTo: userId)
+          .get();
+
+      // Get last dialed time from contact_notes collection
+      final lastDialedQuery = await FirebaseFirestore.instance
+          .collection('contact_notes')
+          .where('list_name', isEqualTo: listName)
+          .where('user_id', isEqualTo: userId)
+          .orderBy('timestamp', descending: true)
+          .limit(1)
+          .get();
+
+      DateTime? lastDialed;
+      if (lastDialedQuery.docs.isNotEmpty) {
+        lastDialed = (lastDialedQuery.docs.first['timestamp'] as Timestamp).toDate();
+      }
+
+      return {
+        'count': contactsSnapshot.size,
+        'lastDialed': lastDialed != null 
+            ? '${lastDialed.day}/${lastDialed.month}/${lastDialed.year} ${lastDialed.hour.toString().padLeft(2, '0')}:${lastDialed.minute.toString().padLeft(2, '0')}'
+            : 'Never',
+      };
+    } catch (e) {
+      print('Error getting list stats: $e');
+      return {'count': 0, 'lastDialed': 'Never'};
+    }
+  }
+
 
 
 @override
@@ -175,28 +210,53 @@ Widget build(BuildContext context) {
                           icon: Icon(Icons.info_outline),
                           onPressed: null,
                         ),
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () {
-                            deleteSpecificContact(tile);
-                          },
-                        ),
                       ],
                     ),
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                          child: TextField(
-                            controller: descriptionControllers[tile],
-                            decoration: InputDecoration(
-                              hintText: 'Enter list description',
-                              border: OutlineInputBorder(),
+                        child: Column(
+                          children: [
+                            TextField(
+                              controller: descriptionControllers[tile],
+                              decoration: InputDecoration(
+                                hintText: 'Enter list description',
+                                border: OutlineInputBorder(),
+                              ),
+                              maxLines: 3,
+                              onChanged: (value) {
+                                updateListDescription(tile, value);
+                              },
                             ),
-                            maxLines: 3,
-                            onChanged: (value) {
-                              updateListDescription(tile, value);
-                            },
-                          ),
+                            SizedBox(height: 16),
+                            FutureBuilder(
+                              future: _getListStats(tile),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  final stats = snapshot.data as Map<String, dynamic>;
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Contacts: ${stats['count']}'),
+                                      Text('Last dialed: ${stats['lastDialed'] ?? 'Never'}'),
+                                    ],
+                                  );
+                                }
+                                return CircularProgressIndicator();
+                              },
+                            ),
+                            SizedBox(height: 16),
+                            TextButton(
+                              onPressed: () {
+                                deleteSpecificContact(tile);
+                              },
+                              child: Text(
+                                'Delete',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                     onExpansionChanged: (expanded) {

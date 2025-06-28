@@ -232,33 +232,47 @@ Future<void> addNewList(String listName) async {
 
 
  PhoneContact? _phoneContact;
-Future<void> upload_button_on_dialer_contacts_view(selectedList ) async{
+Future<void> upload_button_on_dialer_contacts_view(BuildContext context, String selectedList) async {
+  try {
+    bool permission = await FlutterContactPicker.requestPermission();
+    if (!permission) {
+      await showErrorDialog(context, 'Contact permission denied');
+      return;
+    }
 
-                                      bool permission = await FlutterContactPicker.requestPermission();
+    if (!await FlutterContactPicker.hasPermission()) {
+      await showErrorDialog(context, 'No contact access permission');
+      return;
+    }
 
+    _phoneContact = await FlutterContactPicker.pickPhoneContact();
+    if (_phoneContact == null) {
+      return; // User cancelled contact picker
+    }
 
-                                  if (permission) {
-                                    if (await FlutterContactPicker.hasPermission()) {
-                                      _phoneContact = await FlutterContactPicker.pickPhoneContact();
+    if (_phoneContact!.fullName == null || _phoneContact!.fullName!.isEmpty) {
+      await showErrorDialog(context, 'Contact has no name');
+      return;
+    }
 
+    if (_phoneContact!.phoneNumber == null || _phoneContact!.phoneNumber!.number!.isEmpty) {
+      await showErrorDialog(context, 'Contact has no phone number');
+      return;
+    }
 
-                                      if (_phoneContact != null) {
-                                        if (_phoneContact!.fullName != null && _phoneContact!.fullName!.isNotEmpty) {
+    kPickedName = _phoneContact!.fullName.toString();
+    kPickedNumber = _phoneContact!.phoneNumber!.number.toString();
 
-                                            kPickedName = _phoneContact!.fullName.toString();
-                                          
-                                        }
-                                        if (_phoneContact!.phoneNumber != null &&
-                                            _phoneContact!.phoneNumber!.number!.isNotEmpty) {
+    if (selectedList.isEmpty) {
+      await showErrorDialog(context, 'Please select a list first');
+      return;
+    }
 
-                                            kPickedNumber = _phoneContact!.phoneNumber!.number.toString();
-                                        }
-                                      }
-                                    }
-                                  }
-
-
-                                await addNewContactDataToList(selectedList);
+    await addNewContactDataToList(selectedList);
+    // List will automatically refresh via the fetchContactsAsArray call
+  } catch (e) {
+    await showErrorDialog(context, 'Failed to upload contact: ${e.toString()}');
+  }
 }
 
 

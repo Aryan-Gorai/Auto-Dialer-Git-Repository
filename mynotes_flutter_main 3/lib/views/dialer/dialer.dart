@@ -313,7 +313,7 @@ Widget build(BuildContext context) {
           right: 30, // Padding from the right
           child: FloatingActionButton(
             onPressed: () async{
-              await upload_button_on_dialer_contacts_view(selectedList);
+              await upload_button_on_dialer_contacts_view(context, widget.listName);
 
               fetchContactsAsArray(widget.listName).then((contacts) {
                 setState(() {
