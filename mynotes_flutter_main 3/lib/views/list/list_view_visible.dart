@@ -225,7 +225,7 @@ Widget build(BuildContext context) {
                               ),
                               maxLines: 3,
                               onChanged: (value) {
-                                updateListDescription(tile, value);
+                                updateListDescription(tile, value); 
                               },
                             ),
                             SizedBox(height: 16),

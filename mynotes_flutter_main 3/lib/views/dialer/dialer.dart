@@ -47,10 +47,14 @@ class _DialerContactsViewState extends State<DialerContactsView> {
   DateTime? callStartTime;
   Duration callDuration = Duration.zero;
   Timer? callTimer;
+  late TextEditingController _descriptionController;
+  String? _listDescription;
 
   @override
   void initState() {
     super.initState();
+    _descriptionController = TextEditingController();
+    fetchListDescription();
     fetchContactsAsArray(widget.listName).then((contacts) {
       setState(() {
         myTiles = contacts;
@@ -59,6 +63,48 @@ class _DialerContactsViewState extends State<DialerContactsView> {
       updateContactIndices();
       fetchContactsData();
     });
+  }
+
+  Future<void> fetchListDescription() async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      QuerySnapshot snapshot = await firestore
+          .collection('lists_collection')
+          .where('list_name', isEqualTo: widget.listName)
+          .where('user_id', isEqualTo: userId)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          _listDescription = snapshot.docs.first['description'] as String?;
+          _descriptionController.text = _listDescription ?? '';
+        });
+      }
+    } catch (e) {
+      print('Error getting description: $e');
+    }
+  }
+
+  Future<void> updateListDescription(String description) async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      QuerySnapshot snapshot = await firestore
+          .collection('lists_collection')
+          .where('list_name', isEqualTo: widget.listName)
+          .where('user_id', isEqualTo: userId)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        await snapshot.docs.first.reference.update({
+          'description': description,
+        });
+        setState(() {
+          _listDescription = description;
+        });
+      }
+    } catch (e) {
+      print('Error updating description: $e');
+    }
   }
   
   // Fetch full contact data including phone numbers
@@ -234,35 +280,75 @@ class _DialerContactsViewState extends State<DialerContactsView> {
 Widget build(BuildContext context) {
   return Scaffold(
     appBar: AppBar(title: Text("Contacts in ${widget.listName}")),
-    body: Stack(
+    body: Column(
       children: [
-        // Your main content goes here
-        isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : ReorderableListView(
-                padding: const EdgeInsets.all(10),
-                children: [
-                  for (int i = 0; i < myTiles.length; i++)
-                    Padding(
-                      key: ValueKey(myTiles[i]),
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          border: i == currentCallIndex 
-                              ? Border.all(color: Colors.blue, width: 3.0)
-                              : null,
-                          borderRadius: BorderRadius.circular(4.0),
-                        ),
-                        child: ListTile(
-                          title: Text(myTiles[i]),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: Icon(Icons.note_add),
-                                onPressed: () {
-                                  // Navigate to notes page for this contact
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: TextField(
+            controller: _descriptionController,
+            decoration: InputDecoration(
+              hintText: 'Enter list description',
+              border: OutlineInputBorder(),
+              suffixIcon: IconButton(
+                icon: Icon(Icons.save),
+                onPressed: () {
+                  updateListDescription(_descriptionController.text);
+                },
+              ),
+            ),
+            maxLines: 2,
+          ),
+        ),
+        Expanded(
+          child: Stack(
+            children: [
+              isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ReorderableListView(
+                      padding: const EdgeInsets.all(10),
+                      children: [
+                        for (int i = 0; i < myTiles.length; i++)
+                          Padding(
+                            key: ValueKey(myTiles[i]),
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                border: i == currentCallIndex 
+                                    ? Border.all(color: Colors.blue, width: 3.0)
+                                    : null,
+                                borderRadius: BorderRadius.circular(4.0),
+                              ),
+                              child: ListTile(
+                                title: Text(myTiles[i]),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(Icons.note_add),
+                                      onPressed: () {
+                                        if (i < contactsData.length) {
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (context) => ContactNotesView(
+                                                contactName: contactsData[i]['contact_name'],
+                                                contactPhoneNumber: contactsData[i]['contact_phone_number'],
+                                                listName: widget.listName,
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.delete),
+                                      onPressed: () {
+                                        deleteSpecificContact(myTiles[i]);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                onTap: () {
                                   if (i < contactsData.length) {
                                     Navigator.of(context).push(
                                       MaterialPageRoute(
@@ -276,84 +362,58 @@ Widget build(BuildContext context) {
                                   }
                                 },
                               ),
-                              IconButton(
-                                icon: Icon(Icons.delete),
-                                onPressed: () {
-                                  // Handle delete action
-                                  deleteSpecificContact(myTiles[i]);
-                                },
-                              ),
-                            ],
+                            ),
                           ),
-                          onTap: () {
-                            // Navigate to notes page for this contact
-                            if (i < contactsData.length) {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => ContactNotesView(
-                                    contactName: contactsData[i]['contact_name'],
-                                    contactPhoneNumber: contactsData[i]['contact_phone_number'],
-                                    listName: widget.listName,
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      ),
+                      ],
+                      onReorder: (oldIndex, newIndex) {
+                        updateMyTiles(oldIndex, newIndex);
+                      },
                     ),
-                ],
-                onReorder: (oldIndex, newIndex) {
-                  updateMyTiles(oldIndex, newIndex);
-                },
+              Positioned(
+                bottom: 200,
+                right: 30,
+                child: FloatingActionButton(
+                  onPressed: () async {
+                    await upload_button_on_dialer_contacts_view(context, widget.listName);
+                    fetchContactsAsArray(widget.listName).then((contacts) {
+                      setState(() {
+                        myTiles = contacts;
+                        isLoading = false;
+                      });
+                      updateContactIndices();
+                      fetchContactsData();
+                    });
+                  },
+                  child: Icon(Icons.add),
+                  tooltip: 'Add Contact',
+                ),
               ),
-        // FloatingActionButtons
-        Positioned(
-          bottom: 200, // Padding from the bottom
-          right: 30, // Padding from the right
-          child: FloatingActionButton(
-            onPressed: () async{
-              await upload_button_on_dialer_contacts_view(context, widget.listName);
-
-              fetchContactsAsArray(widget.listName).then((contacts) {
-                setState(() {
-                  myTiles = contacts;
-                  isLoading = false;
-                });
-                // Update the indices of contacts after refreshing
-                updateContactIndices();
-                fetchContactsData();
-              });
-            },
-            child: Icon(Icons.add),
-            tooltip: 'Add Contact',
-          ),
-        ),
-        Positioned(
-          bottom: 130, // Padding from the bottom (stacked above the first button)
-          right: 30, // Same right padding to align with the first button
-          child: FloatingActionButton(
-            onPressed: () {
-              // Start calling the first contact
-              setState(() {
-                currentCallIndex = 0;
-              });
-              callCurrentContact();
-            },
-            child: Icon(Icons.call),
-            tooltip: 'Call Contact',
-          ),
-        ),
-        Positioned(
-          bottom: 60, // Padding from the bottom (stacked above the first button)
-          right: 30, // Same right padding to align with the first button
-          child: FloatingActionButton(
-            onPressed: () {
-              // Move to next contact
-              moveToNextContact();
-            },
-            child: Icon(Icons.arrow_forward),
-            tooltip: 'Next Contact',
+              Positioned(
+                bottom: 130,
+                right: 30,
+                child: FloatingActionButton(
+                  onPressed: () {
+                    setState(() {
+                      currentCallIndex = 0;
+                    });
+                    callCurrentContact();
+                  },
+                  child: Icon(Icons.call),
+                  tooltip: 'Call Contact',
+                ),
+              ),
+              Positioned(
+                bottom: 60,
+                right: 30,
+                child: FloatingActionButton(
+                  onPressed: () {
+                    moveToNextContact();
+                  },
+                  child: Icon(Icons.arrow_forward),
+                  tooltip: 'Next Contact',
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -444,6 +504,13 @@ ${!answered ? '- Voicemail Left: ${voicemail ? 'Yes' : 'No'}\n' : ''}
     } catch (e) {
       print('Error updating call feedback: $e');
     }
+  }
+
+  @override
+  void dispose() {
+    _descriptionController.dispose();
+    callTimer?.cancel();
+    super.dispose();
   }
 
 void deleteSpecificContact(String contactName) async {
