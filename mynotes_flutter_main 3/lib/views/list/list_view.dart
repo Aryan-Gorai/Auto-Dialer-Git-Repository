@@ -1783,17 +1783,21 @@ Row(
 
 
 ElevatedButton(
-            onPressed: () {
-              // This code runs when the button is pressed
-                        Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => list_view_visible(),
-            ),
-          );
-                      
-            },
-            child: Text('Press Me'),
-          ),
+  onPressed: () async {
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => list_view_visible(),
+      ),
+    );
+    
+    if (result == true) {
+      // Refresh data when returning from DialerContactsView
+      await fetchDataFromFirestore(userId);
+      await fetchContactsAsArray(selectedList);
+    }
+  },
+  child: Text('View Contacts'),
+),
 
 
 

@@ -1,0 +1,11 @@
+framework module fast_contacts {
+  umbrella header "fast_contacts-umbrella.h"
+
+  export *
+  module * { export * }
+}
+
+module fast_contacts.Swift {
+  header "fast_contacts-Swift.h"
+  requires objc
+}

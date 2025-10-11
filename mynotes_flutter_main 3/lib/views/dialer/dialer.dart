@@ -291,9 +291,9 @@ Widget build(BuildContext context) {
               border: OutlineInputBorder(),
               suffixIcon: IconButton(
                 icon: Icon(Icons.save),
-                onPressed: () {
-                  updateListDescription(_descriptionController.text);
-                },
+          onPressed: () {
+            Navigator.pop(context, true);
+          },
               ),
             ),
             maxLines: 2,
