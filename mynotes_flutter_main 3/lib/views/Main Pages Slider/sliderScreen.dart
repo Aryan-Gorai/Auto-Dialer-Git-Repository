@@ -7,6 +7,7 @@ import 'package:flutter_application_1/views/list/list_view.dart';
 import 'package:flutter_application_1/views/list/list_view_visible.dart';
 import 'package:flutter_application_1/views/profile/user_profile_editor.dart';
 import 'package:flutter_application_1/views/reports/reports_view.dart';
+import 'package:flutter_application_1/views/call/call_history_view.dart';
 
 
 
@@ -65,7 +66,8 @@ int _page = 0;
           list_view_visible(),
           DialerContactsView(listName: selectedList),
           ReportsView(),
-          UserProfileEditor()
+          UserProfileEditor(),
+          CallHistoryView(),
         ],
       ),
 
@@ -108,8 +110,8 @@ int _page = 0;
         Icon(Icons.list, size: 30),
         Icon(Icons.call, size: 30),
         Icon(Icons.bar_chart, size: 30),
-        // Icon(Icons.call_split, size: 30),
         Icon(Icons.perm_identity, size: 30),
+        Icon(Icons.history, size: 30),
       ],
       color: Colors.white,
       buttonBackgroundColor: Colors.white,
@@ -165,6 +167,9 @@ Widget pageNavigator(int index) {
         break;
       case 3:
         controller.jumpToPage(3);
+        break;
+      case 4:
+        controller.jumpToPage(4);
         break;
       // Add cases for other pages as needed
     }
