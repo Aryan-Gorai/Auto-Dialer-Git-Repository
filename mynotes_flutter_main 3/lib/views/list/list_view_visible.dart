@@ -310,28 +310,33 @@ Widget build(BuildContext context) {
 
 
 
-void deleteSpecificContact(String listName) async {
-  try {
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    QuerySnapshot snapshot = await firestore
-        .collection('lists_collection')
-        .where('list_name', isEqualTo: listName)
-        .get();
+  void deleteSpecificContact(String listName) async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      QuerySnapshot snapshot = await firestore
+          .collection('lists_collection')
+          .where('list_name', isEqualTo: listName)
+          .get();
 
-    if (snapshot.docs.isNotEmpty) {
-      DocumentReference docRef = snapshot.docs.first.reference;
-      await docRef.delete();
+      if (snapshot.docs.isNotEmpty) {
+        DocumentReference docRef = snapshot.docs.first.reference;
+        await docRef.delete();
 
-      setState(() {
-        myTiles.remove(listName);
-      });
+        // Update the UI by fetching the updated list
+        fetchTilesAsArray(userId).then((contacts) {
+          if (mounted) {
+            setState(() {
+              myTiles = contacts;
+            });
+          }
+        });
 
-      print('$listName deleted');
+        print('$listName deleted');
+      }
+    } catch (e) {
+      print('Error deleting contact: $e');
     }
-  } catch (e) {
-    print('Error deleting contact: $e');
   }
-}
 
 
 
