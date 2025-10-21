@@ -1,0 +1,19 @@
+dependencies: \
+  /Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main\ 3/macos/Pods/FirebaseFirestoreInternal/Firestore/core/src/local/memory_globals_cache.cc \
+  /Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main\ 3/macos/Pods/FirebaseFirestoreInternal/Firestore/core/src/local/memory_globals_cache.h \
+  /Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main\ 3/macos/Pods/FirebaseFirestoreInternal/Firestore/core/src/local/globals_cache.h \
+  /Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main\ 3/macos/Pods/FirebaseFirestoreInternal/Firestore/core/src/nanopb/byte_string.h \
+  /Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main\ 3/macos/Pods/nanopb/pb.h \
+  /Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main\ 3/macos/Pods/FirebaseFirestoreInternal/Firestore/core/src/util/comparison.h \
+  /Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main\ 3/build/macos/Build/Products/Debug/abseil/absl.framework/Headers/meta/type_traits.h \
+  /Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main\ 3/build/macos/Build/Products/Debug/abseil/absl.framework/Headers/base/attributes.h \
+  /Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main\ 3/build/macos/Build/Products/Debug/abseil/absl.framework/Headers/base/config.h \
+  /Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main\ 3/build/macos/Build/Products/Debug/abseil/absl.framework/Headers/base/options.h \
+  /Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main\ 3/build/macos/Build/Products/Debug/abseil/absl.framework/Headers/base/policy_checks.h \
+  /Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main\ 3/build/macos/Build/Products/Debug/abseil/absl.framework/Headers/strings/string_view.h \
+  /Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main\ 3/build/macos/Build/Products/Debug/abseil/absl.framework/Headers/base/nullability.h \
+  /Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main\ 3/build/macos/Build/Products/Debug/abseil/absl.framework/Headers/base/internal/nullability_impl.h \
+  /Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main\ 3/build/macos/Build/Products/Debug/abseil/absl.framework/Headers/base/internal/throw_delegate.h \
+  /Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main\ 3/build/macos/Build/Products/Debug/abseil/absl.framework/Headers/base/macros.h \
+  /Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main\ 3/build/macos/Build/Products/Debug/abseil/absl.framework/Headers/base/optimization.h \
+  /Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main\ 3/build/macos/Build/Products/Debug/abseil/absl.framework/Headers/base/port.h

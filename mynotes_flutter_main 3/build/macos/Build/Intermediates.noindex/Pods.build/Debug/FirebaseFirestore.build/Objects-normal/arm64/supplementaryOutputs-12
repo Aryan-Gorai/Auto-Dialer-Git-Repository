@@ -1,0 +1,23 @@
+{
+  "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/macos/Pods/FirebaseFirestore/Firestore/Swift/Source/Codable/CollectionReference+WriteEncodable.swift" : {
+    "const-values" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/CollectionReference+WriteEncodable.swiftconstvalues",
+    "dependencies" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/CollectionReference+WriteEncodable.d",
+    "diagnostics" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/CollectionReference+WriteEncodable.dia",
+    "object" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/CollectionReference+WriteEncodable.o",
+    "swift-dependencies" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/CollectionReference+WriteEncodable.swiftdeps"
+  },
+  "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/macos/Pods/FirebaseFirestore/Firestore/Swift/Source/Codable/DocumentID.swift" : {
+    "const-values" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/DocumentID.swiftconstvalues",
+    "dependencies" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/DocumentID.d",
+    "diagnostics" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/DocumentID.dia",
+    "object" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/DocumentID.o",
+    "swift-dependencies" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/DocumentID.swiftdeps"
+  },
+  "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/macos/Pods/FirebaseFirestore/Firestore/Swift/Source/Codable/DocumentReference+Codable.swift" : {
+    "const-values" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/DocumentReference+Codable.swiftconstvalues",
+    "dependencies" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/DocumentReference+Codable.d",
+    "diagnostics" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/DocumentReference+Codable.dia",
+    "object" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/DocumentReference+Codable.o",
+    "swift-dependencies" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/DocumentReference+Codable.swiftdeps"
+  }
+}

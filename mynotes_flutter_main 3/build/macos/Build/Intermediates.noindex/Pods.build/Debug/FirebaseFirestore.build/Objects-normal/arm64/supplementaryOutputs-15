@@ -1,0 +1,23 @@
+{
+  "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/macos/Pods/FirebaseFirestore/Firestore/Swift/Source/AsyncAwait/Firestore+AsyncAwait.swift" : {
+    "const-values" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/Firestore+AsyncAwait.swiftconstvalues",
+    "dependencies" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/Firestore+AsyncAwait.d",
+    "diagnostics" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/Firestore+AsyncAwait.dia",
+    "object" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/Firestore+AsyncAwait.o",
+    "swift-dependencies" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/Firestore+AsyncAwait.swiftdeps"
+  },
+  "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/macos/Pods/FirebaseFirestore/Firestore/Swift/Source/PropertyWrapper/FirestoreQuery.swift" : {
+    "const-values" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/FirestoreQuery.swiftconstvalues",
+    "dependencies" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/FirestoreQuery.d",
+    "diagnostics" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/FirestoreQuery.dia",
+    "object" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/FirestoreQuery.o",
+    "swift-dependencies" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/FirestoreQuery.swiftdeps"
+  },
+  "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/macos/Pods/FirebaseFirestore/Firestore/Swift/Source/SwiftAPI/FieldValue+Swift.swift" : {
+    "const-values" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/FieldValue+Swift.swiftconstvalues",
+    "dependencies" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/FieldValue+Swift.d",
+    "diagnostics" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/FieldValue+Swift.dia",
+    "object" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/FieldValue+Swift.o",
+    "swift-dependencies" : "/Users/aryangorai/Developer/Auto-Dialer-Git-Repository/mynotes_flutter_main 3/build/macos/Build/Intermediates.noindex/Pods.build/Debug/FirebaseFirestore.build/Objects-normal/arm64/FieldValue+Swift.swiftdeps"
+  }
+}
