@@ -23,11 +23,18 @@ import 'package:flutter_application_1/views/notes/create_update_note_view.dart';
 import 'package:flutter_application_1/views/profile/user_profile_editor.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_application_1/firebase_options.dart';
 
 
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase once at app startup
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
 
   runApp(

@@ -73,7 +73,7 @@ class _list_view_visibleState extends State<list_view_visible> with SingleTicker
       vsync: this,
       duration: Duration(milliseconds: 300),
     );
-    Firebase.initializeApp();
+    // Firebase is already initialized in main.dart
     
     fetchTilesAsArray(userId).then((contacts) async {
       // Load descriptions for each list

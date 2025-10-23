@@ -25,15 +25,17 @@ import 'dart:async';
 
 import '../../enums/menu_action.dart';
 
-void main() async {
- WidgetsFlutterBinding.ensureInitialized();
- await Firebase.initializeApp(); // Initialize Firebase
- 
-
- runApp(const MyApp());
-
-
-}
+// This main() function is commented out as Firebase initialization
+// is now centralized in the main lib/main.dart file
+// void main() async {
+//  WidgetsFlutterBinding.ensureInitialized();
+//  await Firebase.initializeApp(); // Initialize Firebase
+//  
+//
+//  runApp(const MyApp());
+//
+//
+// }
 
 
 
