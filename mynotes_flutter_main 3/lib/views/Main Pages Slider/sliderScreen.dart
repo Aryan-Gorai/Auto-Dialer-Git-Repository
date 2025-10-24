@@ -6,7 +6,7 @@ import 'package:flutter_application_1/views/list/firebase_services.dart';
 import 'package:flutter_application_1/views/list/list_view.dart';
 import 'package:flutter_application_1/views/list/list_view_visible.dart';
 import 'package:flutter_application_1/views/profile/user_profile_editor.dart';
-import 'package:flutter_application_1/views/reports/reports_view.dart';
+import 'package:flutter_application_1/views/reports/reports_view_clean.dart';
 import 'package:flutter_application_1/views/call/call_history_view.dart';
 
 

@@ -13,7 +13,7 @@ import 'package:flutter_application_1/views/list/list_view_visible.dart';
 import 'package:flutter_application_1/views/notes/contact_notes_view.dart';
 import 'package:flutter_application_1/views/onBoarding/onBoarding.dart';
 import 'package:flutter_application_1/views/profile/user_profile_editor.dart';
-import 'package:flutter_application_1/views/reports/reports_view.dart';
+import 'package:flutter_application_1/views/reports/reports_view_clean.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 

@@ -1,14 +1,16 @@
 import 'dart:async';
-
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart';
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:string_validator/string_validator.dart';
-import 'package:email_validator/email_validator.dart';
+// import 'package:email_validator/email_validator.dart';
 
 class UserProfileEditor extends StatefulWidget {
   const UserProfileEditor({Key? key}) : super(key: key);
@@ -18,6 +20,72 @@ class UserProfileEditor extends StatefulWidget {
 }
 
 class _UserProfileEditorState extends State<UserProfileEditor> {
+  // Firestore profile doc (id = userId)
+  late final String _userId;
+  DocumentReference<Map<String, dynamic>>? _profileDoc;
+  bool _loading = true;
+
+  // Local state
+  String _imageUrl = "";
+  String _name = '';
+  String _email = '';
+  String _phone = '';
+  String _about = '';
+
+  @override
+  void initState() {
+    super.initState();
+    final user = fb_auth.FirebaseAuth.instance.currentUser;
+    _userId = user?.uid ?? '';
+    _email = user?.email ?? '';
+    if (_userId.isNotEmpty) {
+      _profileDoc = FirebaseFirestore.instance.collection('user_profiles').doc(_userId);
+      _loadOrInitProfile();
+    } else {
+      _loading = false;
+    }
+  }
+
+  Future<void> _loadOrInitProfile() async {
+    try {
+      final snapshot = await _profileDoc!.get();
+      if (!snapshot.exists) {
+        // initialize
+        await _profileDoc!.set({
+          'user_id': _userId,
+          'name': 'Your Name',
+          'email': _email,
+          'phone': '',
+          'about': '',
+          'photoUrl': '',
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+        _name = 'Your Name';
+        _phone = '';
+        _about = '';
+        _imageUrl = '';
+      } else {
+        final data = snapshot.data()!;
+        _name = (data['name'] ?? '').toString();
+        _phone = (data['phone'] ?? '').toString();
+        _about = (data['about'] ?? '').toString();
+        _imageUrl = (data['photoUrl'] ?? '').toString();
+      }
+    } catch (_) {
+      // ignore minimal
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _saveField(String field, dynamic value) async {
+    if (_profileDoc == null) return;
+    await _profileDoc!.set({
+      field: value,
+      'user_id': _userId,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,20 +109,48 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
               ),
             ),
           ),
-          InkWell(
-            onTap: () {
-              navigateSecondPage(_EditImagePage());
-            },
-            child: DisplayImage(
-              imagePath: UserData.myUser.image,
-              onPressed: () {},
+          if (_loading)
+            const Padding(
+              padding: EdgeInsets.all(24.0),
+              child: CircularProgressIndicator(),
+            )
+          else ...[
+            InkWell(
+              onTap: () {
+                navigateSecondPage(context, _EditImagePage(
+                  userId: _userId,
+                  initialUrl: _imageUrl,
+                  onUploaded: (url) {
+                    setState(() => _imageUrl = url);
+                    _saveField('photoUrl', url);
+                  },
+                ));
+              },
+              child: DisplayImage(
+                imagePath: _imageUrl.isEmpty ?
+                  "https://ui-avatars.com/api/?name=${Uri.encodeComponent(_name.isEmpty ? 'User' : _name)}&background=DDD&color=555" :
+                  _imageUrl,
+                onPressed: () {},
+              ),
             ),
-          ),
-          _buildUserInfoDisplay(UserData.myUser.name, 'Name', _EditNameFormPage()),
-          _buildUserInfoDisplay(UserData.myUser.phone, 'Phone', _EditPhoneFormPage()),
-          _buildUserInfoDisplay(UserData.myUser.email, 'Email', _EditEmailFormPage()),
+            _buildEditableInfoDisplay(_name, 'Name', _EditNameFormPage(
+              initial: _name,
+              onSaved: (val) {
+                setState(() => _name = val);
+                _saveField('name', val);
+              },
+            )),
+            _buildEditableInfoDisplay(_phone.isEmpty ? 'Add phone' : _phone, 'Phone', _EditPhoneFormPage(
+              initial: _phone,
+              onSaved: (val) {
+                setState(() => _phone = val);
+                _saveField('phone', val);
+              },
+            )),
+            _buildReadOnlyInfoDisplay(_email.isEmpty ? 'No email' : _email, 'Email'),
+          ],
           Expanded(
-            child: _buildAbout(UserData.myUser),
+            child: _buildAbout(_about),
             flex: 4,
           ),
         ],
@@ -62,7 +158,7 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
     );
   }
 
-  Widget _buildUserInfoDisplay(String getValue, String title, Widget editPage) =>
+  Widget _buildEditableInfoDisplay(String getValue, String title, Widget editPage) =>
       Padding(
         padding: EdgeInsets.only(bottom: 10),
         child: Column(
@@ -91,8 +187,8 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
               child: Row(children: [
                 Expanded(
                   child: TextButton(
-                    onPressed: () {
-                      navigateSecondPage(editPage);
+                     onPressed: () {
+                       navigateSecondPage(context, editPage);
                     },
                     child: Text(
                       getValue,
@@ -111,7 +207,42 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
         ),
       );
 
-  Widget _buildAbout(User user) => Padding(
+  Widget _buildReadOnlyInfoDisplay(String value, String title) => Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey,
+          ),
+        ),
+        const SizedBox(height: 1),
+        Container(
+          width: 350,
+          height: 40,
+          decoration: const BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: Colors.grey,
+                width: 1,
+              ),
+            ),
+          ),
+          alignment: Alignment.centerLeft,
+          child: Text(
+            '  $value',
+            style: const TextStyle(fontSize: 16, height: 1.4, color: Colors.black87),
+          ),
+        )
+      ],
+    ),
+  );
+
+  Widget _buildAbout(String about) => Padding(
     padding: EdgeInsets.only(bottom: 10),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,14 +271,21 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
             Expanded(
               child: TextButton(
                 onPressed: () {
-                  navigateSecondPage(_EditDescriptionFormPage());
+                  navigateSecondPage(context, _EditDescriptionFormPage(
+                    initial: about,
+                    onSaved: (val) {
+                      setState(() => _about = val);
+                      _saveField('about', val);
+                      _saveField('name', _name); // ensure linkage
+                    },
+                  ));
                 },
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(0, 10, 10, 10),
                   child: Align(
                     alignment: Alignment.topLeft,
                     child: Text(
-                      user.aboutMeDescription,
+                      about.isEmpty ? 'Tap to add a short bio' : about,
                       style: TextStyle(
                         fontSize: 16,
                         height: 1.4,
@@ -172,9 +310,9 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
     setState(() {});
   }
 
-  void navigateSecondPage(Widget editForm) {
+  void navigateSecondPage(BuildContext ctx, Widget editForm) {
     Route route = MaterialPageRoute(builder: (context) => editForm);
-    //Navigator.push(context, route).then(onGoBack);
+    Navigator.push(ctx, route).then(onGoBack);
   }
 }
 
@@ -318,7 +456,9 @@ class DisplayImage extends StatelessWidget {
 
 // Edit Pages
 class _EditNameFormPage extends StatefulWidget {
-  const _EditNameFormPage({Key? key}) : super(key: key);
+  final String initial;
+  final void Function(String value) onSaved;
+  const _EditNameFormPage({Key? key, required this.initial, required this.onSaved}) : super(key: key);
 
   @override
   _EditNameFormPageState createState() => _EditNameFormPageState();
@@ -328,7 +468,6 @@ class _EditNameFormPageState extends State<_EditNameFormPage> {
   final _formKey = GlobalKey<FormState>();
   final firstNameController = TextEditingController();
   final secondNameController = TextEditingController();
-  var user = UserData.myUser;
 
   @override
   void dispose() {
@@ -336,9 +475,13 @@ class _EditNameFormPageState extends State<_EditNameFormPage> {
     super.dispose();
   }
 
-  void updateUserValue(String name) {
-    user.name = name;
-    UserData.setUser(user);
+  @override
+  void initState() {
+    super.initState();
+    // try to split into first/last if possible
+    final parts = widget.initial.trim().split(' ');
+    if (parts.isNotEmpty) firstNameController.text = parts.first;
+    if (parts.length > 1) secondNameController.text = parts.sublist(1).join(' ');
   }
 
   @override
@@ -421,7 +564,8 @@ class _EditNameFormPageState extends State<_EditNameFormPage> {
                     onPressed: () {
                       if (_formKey.currentState!.validate() &&
                           isAlpha(firstNameController.text + secondNameController.text)) {
-                        updateUserValue(firstNameController.text + " " + secondNameController.text);
+                        final name = (firstNameController.text + " " + secondNameController.text).trim();
+                        widget.onSaved(name);
                         Navigator.pop(context);
                       }
                     },
@@ -441,7 +585,9 @@ class _EditNameFormPageState extends State<_EditNameFormPage> {
 }
 
 class _EditPhoneFormPage extends StatefulWidget {
-  const _EditPhoneFormPage({Key? key}) : super(key: key);
+  final String initial;
+  final void Function(String value) onSaved;
+  const _EditPhoneFormPage({Key? key, required this.initial, required this.onSaved}) : super(key: key);
 
   @override
   _EditPhoneFormPageState createState() => _EditPhoneFormPageState();
@@ -450,7 +596,6 @@ class _EditPhoneFormPage extends StatefulWidget {
 class _EditPhoneFormPageState extends State<_EditPhoneFormPage> {
   final _formKey = GlobalKey<FormState>();
   final phoneController = TextEditingController();
-  var user = UserData.myUser;
 
   @override
   void dispose() {
@@ -458,15 +603,10 @@ class _EditPhoneFormPageState extends State<_EditPhoneFormPage> {
     super.dispose();
   }
 
-  void updateUserValue(String phone) {
-    String formattedPhoneNumber = "(" +
-        phone.substring(0, 3) +
-        ") " +
-        phone.substring(3, 6) +
-        "-" +
-        phone.substring(6, phone.length);
-    user.phone = formattedPhoneNumber;
-    UserData.setUser(user);
+  @override
+  void initState() {
+    super.initState();
+    phoneController.text = widget.initial;
   }
 
   @override
@@ -524,7 +664,7 @@ class _EditPhoneFormPageState extends State<_EditPhoneFormPage> {
                   child: ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate() && isNumeric(phoneController.text)) {
-                        updateUserValue(phoneController.text);
+                        widget.onSaved(phoneController.text);
                         Navigator.pop(context);
                       }
                     },
@@ -543,108 +683,106 @@ class _EditPhoneFormPageState extends State<_EditPhoneFormPage> {
   }
 }
 
-class _EditEmailFormPage extends StatefulWidget {
-  const _EditEmailFormPage({Key? key}) : super(key: key);
-
-  @override
-  _EditEmailFormPageState createState() => _EditEmailFormPageState();
-}
-
-class _EditEmailFormPageState extends State<_EditEmailFormPage> {
-  final _formKey = GlobalKey<FormState>();
-  final emailController = TextEditingController();
-  var user = UserData.myUser;
-
-  @override
-  void dispose() {
-    emailController.dispose();
-    super.dispose();
-  }
-
-  void updateUserValue(String email) {
-    user.email = email;
-    UserData.setUser(user);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.black),
-        leading: BackButton(),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            SizedBox(
-              width: 320,
-              child: const Text(
-                "What's your email?",
-                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.left,
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 40),
-              child: SizedBox(
-                height: 100,
-                width: 320,
-                child: TextFormField(
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email.';
-                    }
-                    return null;
-                  },
-                  decoration: const InputDecoration(labelText: 'Your email address'),
-                  controller: emailController,
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 150),
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: SizedBox(
-                  width: 320,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate() &&
-                          EmailValidator.validate(emailController.text)) {
-                        updateUserValue(emailController.text);
-                        Navigator.pop(context);
-                      }
-                    },
-                    child: const Text(
-                      'Update',
-                      style: TextStyle(fontSize: 15),
-                    ),
-                  ),
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
+// Email is read-only from FirebaseAuth; edit page removed.
 
 class _EditImagePage extends StatefulWidget {
-  const _EditImagePage({Key? key}) : super(key: key);
+  final String userId;
+  final String initialUrl;
+  final void Function(String url) onUploaded;
+  const _EditImagePage({Key? key, required this.userId, required this.initialUrl, required this.onUploaded}) : super(key: key);
 
   @override
   _EditImagePageState createState() => _EditImagePageState();
 }
 
 class _EditImagePageState extends State<_EditImagePage> {
-  var user = UserData.myUser;
+  String _previewPath = '';
+  bool _uploading = false;
+
+  Future<void> _pickCropUpload() async {
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 90);
+      if (picked == null) return; // user cancelled
+
+      String path = picked.path;
+      // Try crop; if cropper isn't available or user cancels, fall back to picked image.
+      try {
+        final cropped = await ImageCropper().cropImage(
+          sourcePath: picked.path,
+          uiSettings: [
+            IOSUiSettings(title: 'Crop Photo'),
+            AndroidUiSettings(toolbarTitle: 'Crop Photo'),
+          ],
+        );
+        if (cropped != null) {
+          path = cropped.path;
+        }
+      } catch (_) {
+        // ignore crop errors and proceed with original image
+      }
+
+      if (!mounted) return;
+      setState(() => _previewPath = path);
+
+      // Immediately upload and finish for a snappier UX
+      await _uploadAndFinish(path);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to select photo: $e')),
+      );
+    }
+  }
+
+  Future<void> _uploadAndFinish(String path) async {
+    try {
+      if (!mounted) return;
+      setState(() => _uploading = true);
+      // show a simple progress dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(child: CircularProgressIndicator()),
+      );
+
+      final file = File(path);
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('profile_pictures/${widget.userId}.jpg');
+      // Add a timeout to avoid endless spinner if network or permissions hang
+      await storageRef
+          .putFile(file, SettableMetadata(contentType: 'image/jpeg'))
+          .timeout(const Duration(seconds: 60));
+      final url = await storageRef.getDownloadURL();
+
+      if (!mounted) return;
+      Navigator.of(context).pop(); // close progress dialog
+      setState(() => _uploading = false);
+
+      widget.onUploaded(url);
+      if (mounted) Navigator.pop(context); // close editor
+    } on TimeoutException {
+      if (!mounted) return;
+      if (_uploading) {
+        Navigator.of(context).pop();
+      }
+      setState(() => _uploading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Upload timed out. Please check your network and try again.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      // Ensure dialog closed if showing
+      if (_uploading) {
+        Navigator.of(context).pop();
+      }
+      setState(() => _uploading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to upload photo: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -655,69 +793,89 @@ class _EditImagePageState extends State<_EditImagePage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          SizedBox(
-            width: 330,
-            child: const Text(
-              "Upload a photo of yourself:",
-              style: TextStyle(
-                fontSize: 23,
-                fontWeight: FontWeight.bold,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Align(
+                alignment: Alignment.centerLeft,
+                child: SizedBox(
+                  width: 330,
+                  child: const Text(
+                    "Upload a photo of yourself:",
+                    style: TextStyle(
+                      fontSize: 23,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(top: 20),
-            child: SizedBox(
-              width: 330,
-              child: GestureDetector(
-                onTap: () async {
-                  final image = await ImagePicker().pickImage(source: ImageSource.gallery);
-
-                  if (image == null) return;
-
-                  final location = await getApplicationDocumentsDirectory();
-                  final name = basename(image.path);
-                  final imageFile = File('${location.path}/$name');
-                  final newImage = await File(image.path).copy(imageFile.path);
-                  setState(() {
-                    user = user.copy(imagePath: newImage.path);
-                    UserData.setUser(user);
-                  });
-                },
-                child: Image.network(user.image),
+              const SizedBox(height: 16),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 400),
+                child: GestureDetector(
+                  onTap: _pickCropUpload,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: _previewPath.isEmpty
+                        ? (widget.initialUrl.isNotEmpty
+                            ? AspectRatio(
+                                aspectRatio: 1,
+                                child: Image.network(
+                                  widget.initialUrl,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : Container(
+                                height: 200,
+                                color: Colors.grey[200],
+                                alignment: Alignment.center,
+                                child: const Text('Tap to choose a photo'),
+                              ))
+                        : AspectRatio(
+                            aspectRatio: 1,
+                            child: Image.file(
+                              File(_previewPath),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                  ),
+                ),
               ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(top: 40),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: SizedBox(
+              const SizedBox(height: 24),
+              SizedBox(
                 width: 330,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
+                  onPressed: () async {
+                    if (_previewPath.isEmpty) {
+                      await _pickCropUpload();
+                    } else {
+                      await _uploadAndFinish(_previewPath);
+                    }
                   },
                   child: const Text(
-                    'Update',
+                    'Save Photo',
                     style: TextStyle(fontSize: 15),
                   ),
                 ),
               ),
-            ),
-          )
-        ],
+            ],
+          ),
+        ),
       ),
     );
   }
 }
 
 class _EditDescriptionFormPage extends StatefulWidget {
+  final String initial;
+  final void Function(String value) onSaved;
+  const _EditDescriptionFormPage({Key? key, required this.initial, required this.onSaved}) : super(key: key);
+
   @override
   _EditDescriptionFormPageState createState() => _EditDescriptionFormPageState();
 }
@@ -725,7 +883,6 @@ class _EditDescriptionFormPage extends StatefulWidget {
 class _EditDescriptionFormPageState extends State<_EditDescriptionFormPage> {
   final _formKey = GlobalKey<FormState>();
   final descriptionController = TextEditingController();
-  var user = UserData.myUser;
 
   @override
   void dispose() {
@@ -733,9 +890,10 @@ class _EditDescriptionFormPageState extends State<_EditDescriptionFormPage> {
     super.dispose();
   }
 
-  void updateUserValue(String description) {
-    user.aboutMeDescription = description;
-    UserData.setUser(user);
+  @override
+  void initState() {
+    super.initState();
+    descriptionController.text = widget.initial;
   }
 
   @override
@@ -794,7 +952,7 @@ class _EditDescriptionFormPageState extends State<_EditDescriptionFormPage> {
                   child: ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        updateUserValue(descriptionController.text);
+                        widget.onSaved(descriptionController.text);
                         Navigator.pop(context);
                       }
                     },

@@ -248,6 +248,24 @@
       "languageVersion": "3.4"
     },
     {
+      "name": "firebase_storage",
+      "rootUri": "file:///Users/aryangorai/.pub-cache/hosted/pub.dev/firebase_storage-12.4.5",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "firebase_storage_platform_interface",
+      "rootUri": "file:///Users/aryangorai/.pub-cache/hosted/pub.dev/firebase_storage_platform_interface-5.2.5",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "firebase_storage_web",
+      "rootUri": "file:///Users/aryangorai/.pub-cache/hosted/pub.dev/firebase_storage_web-3.10.12",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    },
+    {
       "name": "fixnum",
       "rootUri": "file:///Users/aryangorai/.pub-cache/hosted/pub.dev/fixnum-1.1.1",
       "packageUri": "lib/",
@@ -348,6 +366,24 @@
       "rootUri": "file:///Users/aryangorai/.pub-cache/hosted/pub.dev/http_parser-4.1.2",
       "packageUri": "lib/",
       "languageVersion": "3.4"
+    },
+    {
+      "name": "image_cropper",
+      "rootUri": "file:///Users/aryangorai/.pub-cache/hosted/pub.dev/image_cropper-8.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "image_cropper_for_web",
+      "rootUri": "file:///Users/aryangorai/.pub-cache/hosted/pub.dev/image_cropper_for_web-6.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "image_cropper_platform_interface",
+      "rootUri": "file:///Users/aryangorai/.pub-cache/hosted/pub.dev/image_cropper_platform_interface-7.2.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
     },
     {
       "name": "image_picker",
@@ -926,7 +962,7 @@
       "languageVersion": "2.19"
     }
   ],
-  "generated": "2025-10-24T10:02:31.828034Z",
+  "generated": "2025-10-24T11:25:34.679388Z",
   "generator": "pub",
   "generatorVersion": "3.7.0",
   "flutterRoot": "file:///Users/aryangorai/Developer/flutter",
