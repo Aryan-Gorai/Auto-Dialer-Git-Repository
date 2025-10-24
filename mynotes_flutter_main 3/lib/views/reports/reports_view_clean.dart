@@ -66,6 +66,8 @@ class _ReportsViewState extends State<ReportsView> {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
       await firestore.collection('user_settings').doc(userId).set({
+        // Store the user id explicitly to avoid any cross-user overlap and allow collection-level queries
+        'user_id': userId,
         'heatmap_time_scale': _selectedTimeScale,
         'heatmap_max_threshold': _maxCallThreshold,
         'heatmap_visible': _showHeatmap,
