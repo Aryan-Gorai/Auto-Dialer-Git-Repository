@@ -31,6 +31,9 @@ import 'dart:async';
 
 String get userId => AuthService.firebase().currentUser!.id;
 
+// Firestore collection for contact directory (per user, de-duplicated)
+const String contactDirectoriesCollection = 'Contact Directories';
+
 String kPickedNumber = '';
  String kPickedName = '';
  PhoneContact? phoneContact;
@@ -187,6 +190,13 @@ Future<void> addNewContactData() async {
 
 
    print('New contact data added successfully!');
+
+   // Also upsert into Contact Directories with deduplication
+   await _addOrUpdateContactInDirectory(
+     contactName: kPickedName,
+     contactPhoneNumber: kPickedNumber,
+     listName: listName,
+   );
  } catch (e) {
    print('Error adding new contact data to Firestore: $e');
  }
@@ -565,8 +575,64 @@ Future<void> showListDialog(BuildContext context) async {
 
       await listsRef.add(newContactData);
       print('New contact data added successfully!');
+
+      // Also upsert into Contact Directories with deduplication
+      await _addOrUpdateContactInDirectory(
+        contactName: kPickedName,
+        contactPhoneNumber: kPickedNumber,
+        listName: selectedList,
+      );
     } catch (e) {
       print('Error adding new contact data to Firestore: $e');
+    }
+  }
+
+  // Normalize a phone number for consistent deduping (digits only)
+  String _normalizePhone(String input) {
+    final digitsOnly = input.replaceAll(RegExp(r'[^0-9]'), '');
+    return digitsOnly;
+  }
+
+  // Upsert a contact into the "Contact Directories" collection with deduplication per user + phone
+  Future<void> _addOrUpdateContactInDirectory({
+    required String contactName,
+    required String contactPhoneNumber,
+    required String listName,
+  }) async {
+    try {
+      final firestore = FirebaseFirestore.instance;
+      final normalizedPhone = _normalizePhone(contactPhoneNumber);
+      final docId = '${userId}_$normalizedPhone';
+      final docRef = firestore.collection(contactDirectoriesCollection).doc(docId);
+
+      final existing = await docRef.get();
+      final now = FieldValue.serverTimestamp();
+
+      if (existing.exists) {
+        // Update minimal info and add list membership without duplicating
+        await docRef.set({
+          'contact_name': contactName, // keep name updated with latest
+          'contact_phone_number': contactPhoneNumber,
+          'normalized_phone': normalizedPhone,
+          'user_id': userId,
+          'lists': FieldValue.arrayUnion([listName]),
+          'updated_at': now,
+        }, SetOptions(merge: true));
+      } else {
+        // Create new directory entry
+        await docRef.set({
+          'contact_name': contactName,
+          'contact_phone_number': contactPhoneNumber,
+          'normalized_phone': normalizedPhone,
+          'user_id': userId,
+          'lists': [listName],
+          'created_at': now,
+          'updated_at': now,
+        });
+      }
+    } catch (e) {
+      // Don't block the main list upload flow if directory update fails
+      print('Error upserting into Contact Directories: $e');
     }
   }
 
