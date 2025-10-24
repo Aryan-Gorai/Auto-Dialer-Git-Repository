@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_application_1/services/auth/auth_service.dart';
 
 class CallHistoryView extends StatefulWidget {
   const CallHistoryView({Key? key}) : super(key: key);
@@ -14,6 +15,13 @@ class _CallHistoryViewState extends State<CallHistoryView> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<CallRecord> _callRecords = [];
   bool _isLoading = true;
+  // Map of normalized phone => contact name from Contact Directories
+  Map<String, String> _directoryNameByPhone = {};
+
+  // Collection name for Contact Directories
+  static const String _contactDirectoriesCollection = 'Contact Directories';
+
+  String get _userId => AuthService.firebase().currentUser!.id;
 
   @override
   void initState() {
@@ -29,6 +37,7 @@ class _CallHistoryViewState extends State<CallHistoryView> {
 
       QuerySnapshot querySnapshot = await _firestore
           .collection('call_history')
+          .where('user_id', isEqualTo: _userId)
           .orderBy('timestamp', descending: true)
           .get();
 
@@ -42,6 +51,9 @@ class _CallHistoryViewState extends State<CallHistoryView> {
         }
       }
 
+      // Resolve display names from Contact Directories for the user's numbers
+      await _resolveDirectoryNamesForCalls(records);
+
       setState(() {
         _callRecords = records;
         _isLoading = false;
@@ -51,6 +63,52 @@ class _CallHistoryViewState extends State<CallHistoryView> {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  // Normalize a phone number for consistent lookup (digits only)
+  String _normalizePhone(String input) {
+    return input.replaceAll(RegExp(r'[^0-9]'), '');
+  }
+
+  Future<void> _resolveDirectoryNamesForCalls(List<CallRecord> records) async {
+    try {
+      final Set<String> normalizedPhones = records
+          .map((r) => _normalizePhone(r.address))
+          .where((n) => n.isNotEmpty)
+          .toSet();
+
+      if (normalizedPhones.isEmpty) {
+        setState(() => _directoryNameByPhone = {});
+        return;
+      }
+
+      // Fetch docs by computed IDs in parallel: '<userId>_<normalizedPhone>'
+      final futures = normalizedPhones.map((normalized) async {
+        final docId = '${_userId}_$normalized';
+        final docRef = _firestore.collection(_contactDirectoriesCollection).doc(docId);
+        final snap = await docRef.get();
+        if (snap.exists) {
+          final data = snap.data() as Map<String, dynamic>;
+          final name = (data['contact_name'] as String?)?.trim();
+          if (name != null && name.isNotEmpty) {
+            return MapEntry(normalized, name);
+          }
+        }
+        return null;
+      }).toList();
+
+      final results = await Future.wait(futures);
+      final Map<String, String> nameMap = {};
+      for (final entry in results) {
+        if (entry != null) {
+          nameMap[entry.key] = entry.value;
+        }
+      }
+      setState(() => _directoryNameByPhone = nameMap);
+    } catch (e) {
+      // Non-fatal: keep default display as numbers
+      print('Error resolving directory names: $e');
     }
   }
 
@@ -157,6 +215,8 @@ class _CallHistoryViewState extends State<CallHistoryView> {
   }
 
   Widget _buildCallItem(CallRecord call) {
+    final normalized = _normalizePhone(call.address);
+    final display = _directoryNameByPhone[normalized] ?? call.address;
     return Container(
       decoration: BoxDecoration(
         border: Border(
@@ -181,7 +241,7 @@ class _CallHistoryViewState extends State<CallHistoryView> {
           children: [
             Expanded(
               child: Text(
-                call.address,
+                display,
                 style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 16,
