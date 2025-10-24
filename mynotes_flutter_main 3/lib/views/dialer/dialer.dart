@@ -107,6 +107,29 @@ class _DialerContactsViewState extends State<DialerContactsView> {
     }
   }
 
+  Future<void> toggleFeedbackDialog(bool enabled) async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      QuerySnapshot snapshot = await firestore
+          .collection('lists_collection')
+          .where('list_name', isEqualTo: widget.listName)
+          .where('user_id', isEqualTo: userId)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        await snapshot.docs.first.reference.update({
+          'show_feedback_dialog': enabled,
+        });
+        setState(() {
+          showFeedbackDialogEnabled = enabled;
+        });
+        print('Feedback dialog ${enabled ? 'enabled' : 'disabled'} for list: ${widget.listName}');
+      }
+    } catch (e) {
+      print('Error toggling feedback dialog: $e');
+    }
+  }
+
   Future<void> updateListDescription(String description) async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -171,13 +194,6 @@ class _DialerContactsViewState extends State<DialerContactsView> {
       
       // Make the phone call
       makePhoneCall(phoneNumber);
-
-      // Show feedback dialog immediately for first contact (only if enabled)
-      if (currentCallIndex == 0 && showFeedbackDialogEnabled) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          showFeedbackDialog(contactName, phoneNumber);
-        });
-      }
     }
   }
 
@@ -209,47 +225,58 @@ class _DialerContactsViewState extends State<DialerContactsView> {
   }
   
   // Method to move to the next contact
-  void moveToNextContact() {
-    if (currentCallIndex >= 0 && currentCallIndex < contactsData.length) {
-      String contactName = contactsData[currentCallIndex]['contact_name'];
-      String phoneNumber = contactsData[currentCallIndex]['contact_phone_number'];
-      
-      // Stop timer
-      callTimer?.cancel();
-      
-      // Show feedback dialog only if enabled
-      if (showFeedbackDialogEnabled) {
-        showDialog(
-          context: context,
-          barrierDismissible: true,
-          builder: (context) => CallFeedbackDialog(
-            contactName: contactName,
-            phoneNumber: phoneNumber,
-            listName: widget.listName,
-            callDuration: callDuration,
-            onFeedbackSubmitted: (answered, voicemail, rating) async {
-              // Update Firebase with call feedback
-              await updateCallFeedback(
-                contactName,
-                phoneNumber,
-                widget.listName,
-                answered,
-                voicemail,
-                rating,
-                callDuration.inSeconds
-              );
-            },
-          ),
-        );
-      }
+  Future<void> moveToNextContact() async {
+    // If we haven't started calling yet, start with the first contact
+    if (currentCallIndex < 0 || currentCallIndex >= contactsData.length) {
+      setState(() {
+        currentCallIndex = 0;
+      });
+      callCurrentContact();
+      return;
     }
-    
-    setState(() {
-      currentCallIndex++;
-      if (currentCallIndex >= contactsData.length) {
-        currentCallIndex = 0; // Loop back to the first contact
-      }
-    });
+
+    // Capture the current contact details for feedback
+    final String contactName = contactsData[currentCallIndex]['contact_name'];
+    final String phoneNumber = contactsData[currentCallIndex]['contact_phone_number'];
+
+    // Stop the in-call timer
+    callTimer?.cancel();
+
+    // Show feedback dialog for the CURRENT contact (only once per contact)
+    if (showFeedbackDialogEnabled) {
+      await showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) => CallFeedbackDialog(
+          contactName: contactName,
+          phoneNumber: phoneNumber,
+          listName: widget.listName,
+          callDuration: callDuration,
+          onFeedbackSubmitted: (answered, voicemail, rating) async {
+            await updateCallFeedback(
+              contactName,
+              phoneNumber,
+              widget.listName,
+              answered,
+              voicemail,
+              rating,
+              callDuration.inSeconds,
+            );
+          },
+        ),
+      );
+    }
+
+    // Advance to the next contact and place the next call AFTER the feedback dialog is closed
+    if (mounted) {
+      setState(() {
+        currentCallIndex++;
+        if (currentCallIndex >= contactsData.length) {
+          currentCallIndex = 0; // Loop back to the first contact
+        }
+      });
+    }
+    // Start the next call regardless of whether feedback was submitted or dialog dismissed
     callCurrentContact();
   }
   Future<List<String>> fetchContactsAsArray(String selectedList) async {
@@ -335,6 +362,160 @@ Widget build(BuildContext context) {
               ),
             ),
             maxLines: 2,
+          ),
+        ),
+        // Feedback Dialog Toggle with Liquid Glass Effect
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white.withOpacity(0.7),
+                  Colors.white.withOpacity(0.3),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.5),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Show feedback dialog',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Ask for feedback after each call',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () async {
+                    await toggleFeedbackDialog(!showFeedbackDialogEnabled);
+                  },
+                  child: AnimatedContainer(
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    width: 56,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: showFeedbackDialogEnabled
+                            ? [
+                                Color(0xFF4CAF50).withOpacity(0.8),
+                                Color(0xFF45A049).withOpacity(0.9),
+                              ]
+                            : [
+                                Colors.grey.withOpacity(0.4),
+                                Colors.grey.withOpacity(0.5),
+                              ],
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.4),
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: showFeedbackDialogEnabled
+                              ? Color(0xFF4CAF50).withOpacity(0.3)
+                              : Colors.grey.withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Stack(
+                      children: [
+                        // Glass reflection effect
+                        Positioned(
+                          top: 2,
+                          left: 2,
+                          right: 2,
+                          child: Container(
+                            height: 12,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(18),
+                              ),
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.white.withOpacity(0.4),
+                                  Colors.white.withOpacity(0.0),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        // Toggle knob
+                        AnimatedAlign(
+                          duration: Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          alignment: showFeedbackDialogEnabled
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
+                          child: Container(
+                            margin: EdgeInsets.all(3),
+                            width: 24,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Colors.white,
+                                  Colors.grey.shade100,
+                                ],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 4,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         Expanded(
