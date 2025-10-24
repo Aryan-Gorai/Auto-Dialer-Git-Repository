@@ -6,13 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
 import 'package:flutter_application_1/utilities/dialogs/error_dialog.dart';
 
-import 'package:flutter_application_1/views/dialer/dialer.dart';
-//import 'package:flutter_application_1/views/dialer/dialer_backup.dart';
+//import 'package:flutter_application_1/views/dialer/dialer.dart';
+// import 'package:flutter_application_1/views/dialer/dialer_backup.dart';
 import 'package:flutter_application_1/views/list/list_view.dart';
 import 'package:flutter_application_1/views/list/list_view_visible.dart';
 import 'package:flutter_application_1/views/notes/contact_notes_view.dart';
 import 'package:flutter_application_1/views/onBoarding/onBoarding.dart';
-import 'package:flutter_application_1/views/profile/user_profile_editor.dart';
+// import 'package:flutter_application_1/views/profile/user_profile_editor.dart';
 import 'package:flutter_application_1/views/reports/reports_view_clean.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
@@ -555,8 +555,8 @@ Future<void> showListDialog(BuildContext context) async {
         'contact_index': largestContactIndex + 1,
       };
 
-      // Get the reference to the selected list
-      DocumentReference selectedListRef = listsRef.doc(selectedList);
+  // Get the reference to the selected list (unused with flat collection add)
+  // DocumentReference selectedListRef = listsRef.doc(selectedList);
 
       // Add the new contact data to the selected list
       //await selectedListRef.collection('contacts').add(newContactData); THIS CODE WORKS EXTREMELy wELL BUT TEST IT LATER
@@ -1015,6 +1015,7 @@ void startCallTimer(Function setState) {
 
 
 
+ // ignore: unused_element
  void _stopTimer() {
    callTimer?.cancel();
  }
@@ -1096,7 +1097,7 @@ Future<void> showCallFinishedDialog(BuildContext context , String name, [documen
 
 Future<void> fetchDataFromFirestore() async {
     try {
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('lists_collection').get();
+  await FirebaseFirestore.instance.collection('lists_collection').get();
       
 
       // setState(() {
@@ -1386,17 +1387,7 @@ class _GbarState extends State<Gbar> {
                       
                     }
 
-
-                    if (pageindex  == 1) {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => DialerContactsView(listName: selectedList,),
-                        ),
-                      );
-                      
-                    }
-
-                  if (pageindex  == 2) {
+                  if (pageindex  == 1) {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => ReportsView(),
@@ -1404,13 +1395,6 @@ class _GbarState extends State<Gbar> {
                       );
                     }
 
-                    if (pageindex  == 3) {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => UserProfileEditor(),
-                        ),
-                      );
-                    }
 
 
                     final currentScreen = getCurrentScreen(context);
@@ -1436,10 +1420,6 @@ class _GbarState extends State<Gbar> {
               GButton(
                 icon: Icons.list,
                 text: 'List',
-                ),
-              GButton(
-                icon: Icons.call,
-                text: 'Dialer',
                 ),
               GButton(
               icon: Icons.bar_chart,

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/views/dialer/dialer.dart';
 import 'package:flutter_application_1/views/list/firebase_services.dart';
 
-import 'package:flutter_application_1/views/list/list_view.dart';
+// import 'package:flutter_application_1/views/list/list_view.dart';
 import 'package:flutter_application_1/views/list/list_view_visible.dart';
 import 'package:flutter_application_1/views/profile/user_profile_editor.dart';
 import 'package:flutter_application_1/views/reports/reports_view_clean.dart';
@@ -27,7 +27,7 @@ class _OnBoardingScreenState extends State<sliderScreen> {
 // STUFF FOR BOTTOMNAVIGATIONBAR
 
 
-int _page = 0;
+// int _page = 0; // no longer used
 
 
 
@@ -57,14 +57,14 @@ int _page = 0;
         children: [PageView(
           onPageChanged: (pageindex) {
             setState((){
-              onLastPage = (pageindex == 2);     // SHOW DONE WHEN ON LAST PAGE
+              onLastPage = (pageindex == 3);     // SHOW DONE WHEN ON LAST PAGE (last page index after removal)
             });
           },
           controller: controller,
+          physics: NeverScrollableScrollPhysics(),
         children: [
           //ListScreen(),
           list_view_visible(),
-          DialerContactsView(listName: selectedList),
           ReportsView(),
           UserProfileEditor(),
           CallHistoryView(),
@@ -108,7 +108,6 @@ int _page = 0;
       height: 60.0,
       items: <Widget>[
         Icon(Icons.list, size: 30),
-        Icon(Icons.call, size: 30),
         Icon(Icons.bar_chart, size: 30),
         Icon(Icons.perm_identity, size: 30),
         Icon(Icons.history, size: 30),
@@ -120,7 +119,6 @@ int _page = 0;
       animationDuration: Duration(milliseconds: 600),
       onTap: (index) {
         setState(() {
-          _page = index;
           navigateToPage(index);
           //pageNavigator(index);
         });
@@ -154,20 +152,13 @@ Widget pageNavigator(int index) {
 
         break;
       case 1:
-
-
-        controller.jumpToPage(1);
-
-        break;   
-
+        controller.jumpToPage(1); // Reports
+        break;
       case 2:
-        controller.jumpToPage(2);
+        controller.jumpToPage(2); // Profile
         break;
       case 3:
-        controller.jumpToPage(3);
-        break;
-      case 4:
-        controller.jumpToPage(4);
+        controller.jumpToPage(3); // History
         break;
       // Add cases for other pages as needed
     }
