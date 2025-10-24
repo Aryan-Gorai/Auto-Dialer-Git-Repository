@@ -103,6 +103,8 @@ class MyColorsSample {
                 'user_id': userId,
                 'current_index': index,
                 'total_documents': totalDocuments,
+                'list_order': FieldValue.serverTimestamp(), // Add timestamp for ordering
+                'created_at': FieldValue.serverTimestamp(), // Track creation time
               };
 
               // Add the new document with an auto-generated ID
@@ -191,6 +193,8 @@ Future<void> createDemoList() async {
       'user_id': userId,
       'current_index': index,
       'total_documents': totalDocuments,
+      'list_order': FieldValue.serverTimestamp(), // Add timestamp for ordering
+      'created_at': FieldValue.serverTimestamp(), // Track creation time
     };
 
     // Add the new document with an auto-generated ID
@@ -526,6 +530,8 @@ Future<void> addNewList(String listName) async {
       'user_id': userId,
       'current_index': index,
       'total_documents': totalDocuments,
+      'list_order': FieldValue.serverTimestamp(), // Add timestamp for ordering
+      'created_at': FieldValue.serverTimestamp(), // Track creation time
     };
 
     // Add the new document with an auto-generated ID
@@ -1078,8 +1084,37 @@ Future<void> fetchDataFromFirestore(String userId) async {
 
     print("This is function on the lisT_view dart page");
 
+    // Sort the results
+    List<QueryDocumentSnapshot> docs = querySnapshot.docs.toList();
+    
+    // Check if any document has manual_order field
+    bool hasManualOrder = docs.any((doc) => 
+      (doc.data() as Map<String, dynamic>).containsKey('manual_order')
+    );
+    
+    if (hasManualOrder) {
+      // Sort by manual_order if it exists
+      docs.sort((a, b) {
+        int orderA = (a.data() as Map<String, dynamic>)['manual_order'] ?? 999999;
+        int orderB = (b.data() as Map<String, dynamic>)['manual_order'] ?? 999999;
+        return orderA.compareTo(orderB);
+      });
+    } else {
+      // Otherwise sort by list_order (timestamp), newest first
+      docs.sort((a, b) {
+        Timestamp? timeA = (a.data() as Map<String, dynamic>)['list_order'] as Timestamp?;
+        Timestamp? timeB = (b.data() as Map<String, dynamic>)['list_order'] as Timestamp?;
+        
+        if (timeA == null && timeB == null) return 0;
+        if (timeA == null) return 1;
+        if (timeB == null) return -1;
+        
+        return timeB.compareTo(timeA); // Descending order (newest first)
+      });
+    }
+
     setState(() {
-      list = querySnapshot.docs.map((doc) => doc['list_name'] as String).toList();
+      list = docs.map((doc) => doc['list_name'] as String).toList();
 
       // If the list is not empty, set the dropdown value to the first item
       if (list.isNotEmpty) {

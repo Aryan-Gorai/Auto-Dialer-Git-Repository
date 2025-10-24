@@ -18,18 +18,47 @@ class list_view_visible extends StatefulWidget {
   Future<List<String>> fetchTilesAsArray(userId) async {
     
     FirebaseFirestore firestore = FirebaseFirestore.instance;
+    
+    // First try to fetch with manual ordering
     QuerySnapshot snapshot = await firestore
         .collection('lists_collection')
         .where('user_id', isEqualTo: userId)
         .get();
 
-    List<String> myTiles = snapshot.docs.map((doc) {
+    // Sort the results
+    List<QueryDocumentSnapshot> docs = snapshot.docs.toList();
+    
+    // Check if any document has manual_order field
+    bool hasManualOrder = docs.any((doc) => 
+      (doc.data() as Map<String, dynamic>).containsKey('manual_order')
+    );
+    
+    if (hasManualOrder) {
+      // Sort by manual_order if it exists
+      docs.sort((a, b) {
+        int orderA = (a.data() as Map<String, dynamic>)['manual_order'] ?? 999999;
+        int orderB = (b.data() as Map<String, dynamic>)['manual_order'] ?? 999999;
+        return orderA.compareTo(orderB);
+      });
+    } else {
+      // Otherwise sort by list_order (timestamp), newest first
+      docs.sort((a, b) {
+        Timestamp? timeA = (a.data() as Map<String, dynamic>)['list_order'] as Timestamp?;
+        Timestamp? timeB = (b.data() as Map<String, dynamic>)['list_order'] as Timestamp?;
+        
+        if (timeA == null && timeB == null) return 0;
+        if (timeA == null) return 1;
+        if (timeB == null) return -1;
+        
+        return timeB.compareTo(timeA); // Descending order (newest first)
+      });
+    }
+
+    List<String> myTiles = docs.map((doc) {
       return doc.get('list_name') as String;
     }).toList();
 
-
-
-  print(myTiles);
+    print(myTiles);
     return myTiles;
     
   }
@@ -110,6 +139,10 @@ class _list_view_visibleState extends State<list_view_visible> with SingleTicker
   @override
   void dispose() {
     _animationController.dispose();
+    // Dispose all text controllers
+    for (var controller in descriptionControllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -129,6 +162,43 @@ class _list_view_visibleState extends State<list_view_visible> with SingleTicker
       }
     } catch (e) {
       print('Error updating description: $e');
+    }
+  }
+
+  // Update list order in Firestore
+  Future<void> updateListOrder(String listName, int newOrder) async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      QuerySnapshot snapshot = await firestore
+          .collection('lists_collection')
+          .where('list_name', isEqualTo: listName)
+          .where('user_id', isEqualTo: userId)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        // Use a numeric order field for manual reordering
+        await snapshot.docs.first.reference.update({
+          'manual_order': newOrder,
+        });
+      }
+    } catch (e) {
+      print('Error updating list order: $e');
+    }
+  }
+
+  // Handle reordering of lists
+  void onReorder(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+      final String item = myTiles.removeAt(oldIndex);
+      myTiles.insert(newIndex, item);
+    });
+
+    // Update the order in Firebase for all affected lists
+    for (int i = 0; i < myTiles.length; i++) {
+      updateListOrder(myTiles[i], i);
     }
   }
 
@@ -172,7 +242,18 @@ class _list_view_visibleState extends State<list_view_visible> with SingleTicker
 @override
 Widget build(BuildContext context) {
   return Scaffold(
-    appBar: AppBar(title: Text("Lists")),
+    appBar: AppBar(
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Lists"),
+          Text(
+            "Drag to reorder",
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+          ),
+        ],
+      ),
+    ),
     body: GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -182,16 +263,19 @@ Widget build(BuildContext context) {
     // Your main content goes here
     isLoading  // defined at the bottom of the page
         ? const Center(child: CircularProgressIndicator())
-        : ListView.builder(
+        : ReorderableListView.builder(
             padding: const EdgeInsets.all(10),
             itemCount: myTiles.length,
+            onReorder: onReorder,
             itemBuilder: (context, index) {
               final tile = myTiles[index];
               return Padding(
+                key: ValueKey(tile), // Important: Each item needs a unique key
                 padding: const EdgeInsets.all(8.0),
                 child: Container(
                   color: Colors.grey[200],
                   child: ExpansionTile(
+                    leading: Icon(Icons.drag_handle, color: Colors.grey[600]), // Drag handle icon
                     title: Text(tile),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,

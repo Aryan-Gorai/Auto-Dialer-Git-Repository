@@ -279,7 +279,18 @@ class _DialerContactsViewState extends State<DialerContactsView> {
 @override
 Widget build(BuildContext context) {
   return Scaffold(
-    appBar: AppBar(title: Text("Contacts in ${widget.listName}")),
+    appBar: AppBar(
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Contacts in ${widget.listName}"),
+          Text(
+            "Drag to reorder",
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+          ),
+        ],
+      ),
+    ),
     body: Column(
       children: [
         Padding(
@@ -320,6 +331,7 @@ Widget build(BuildContext context) {
                                 borderRadius: BorderRadius.circular(4.0),
                               ),
                               child: ListTile(
+                                leading: Icon(Icons.drag_handle, color: Colors.grey[600]), // Drag handle icon
                                 title: Text(myTiles[i]),
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,

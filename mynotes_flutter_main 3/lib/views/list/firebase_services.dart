@@ -206,12 +206,15 @@ Future<void> addNewList(String listName) async {
     fetchDataFromFirestore();
 
     // Create a map with the new list data
+    // Use timestamp to track creation order - newer lists will have higher values
     Map<String, dynamic> newListData = {
       'list_name': listName,
       'user_id': userId,
       'current_index': index,
       'total_documents': totalDocuments,
       'description': '',
+      'list_order': FieldValue.serverTimestamp(), // Add timestamp for ordering
+      'created_at': FieldValue.serverTimestamp(), // Track creation time
     };
 
     // Add the new document with an auto-generated ID
