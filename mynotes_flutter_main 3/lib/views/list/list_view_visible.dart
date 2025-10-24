@@ -172,7 +172,7 @@ class _list_view_visibleState extends State<list_view_visible> with SingleTicker
 @override
 Widget build(BuildContext context) {
   return Scaffold(
-    appBar: AppBar(title: Text("Lists ")),
+    appBar: AppBar(title: Text("Lists")),
     body: GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();

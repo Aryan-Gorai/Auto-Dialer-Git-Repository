@@ -154,10 +154,8 @@ Widget pageNavigator(int index) {
 
         break;
       case 1:
-        // Navigate to the second page
-        // Navigator.pushReplacementNamed(context, '/second_page');
-        //Navigator.of(context).push(MaterialPageRoute(builder: (context) => const DialerViewCopy()));
-        //return DialerViewCopy();
+
+
         controller.jumpToPage(1);
 
         break;   

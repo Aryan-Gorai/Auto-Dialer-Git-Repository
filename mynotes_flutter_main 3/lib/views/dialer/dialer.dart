@@ -436,70 +436,64 @@ Widget build(BuildContext context) {
   ) async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
+      CollectionReference notesRef = firestore.collection('contact_notes');
       
       // Find the most recent call record for this contact
-      QuerySnapshot snapshot = await firestore
-          .collection('call_logs')
+      QuerySnapshot snapshot = await notesRef
           .where('contact_name', isEqualTo: contactName)
+          .where('contact_phone_number', isEqualTo: phoneNumber)
           .where('list_name', isEqualTo: listName)
           .orderBy('timestamp', descending: true)
           .limit(1)
           .get();
 
+      // Create comprehensive note text with star rating
+      String noteText = '''
+Call Feedback:
+- Answered: ${answered ? 'Yes' : 'No'}
+${!answered ? '- Voicemail Left: ${voicemail ? 'Yes' : 'No'}\n' : ''}
+- Rating: ${rating > 0 ? '$rating/5 stars' : 'Not rated'}
+- Duration: ${durationSeconds} seconds
+''';
+      
+      if (voicemail) {
+        noteText += 'Notes about voicemail...\n';
+      }
+
       if (snapshot.docs.isNotEmpty) {
+        // Update existing call record
         DocumentReference docRef = snapshot.docs.first.reference;
         
-        // Update the call record with feedback data
         await docRef.update({
           'answered': answered,
           'voicemail': voicemail,
           'rating': rating,
           'duration_seconds': durationSeconds,
+          'has_feedback': true,
+          'note_text': noteText,
         });
 
-        // Update note text in both collections
-        String noteText = '''
-Call Feedback:
-- Answered: ${answered ? 'Yes' : 'No'}
-${!answered ? '- Voicemail Left: ${voicemail ? 'Yes' : 'No'}\n' : ''}
-- Rating: ${rating}/5 stars
-- Duration: ${durationSeconds} seconds
-''';
+        print('Call feedback updated successfully with rating: $rating/5');
+      } else {
+        // Create new call record with all feedback data
+        Timestamp timestamp = Timestamp.now();
         
-        if (voicemail) {
-          noteText += 'Notes about voicemail...\n';
-        }
+        Map<String, dynamic> callFeedbackData = {
+          'user_id': userId,
+          'contact_name': contactName,
+          'contact_phone_number': phoneNumber,
+          'list_name': listName,
+          'timestamp': timestamp,
+          'answered': answered,
+          'voicemail': voicemail,
+          'rating': rating,
+          'duration_seconds': durationSeconds,
+          'has_feedback': true,
+          'note_text': noteText,
+        };
 
-        // Update in 'notes' collection
-        QuerySnapshot notesSnapshot = await firestore
-            .collection('notes')
-            .where('contact_name', isEqualTo: contactName)
-            .where('list_name', isEqualTo: listName)
-            .orderBy('timestamp', descending: true)
-            .limit(1)
-            .get();
-
-        if (notesSnapshot.docs.isNotEmpty) {
-          await notesSnapshot.docs.first.reference.update({
-            'text': noteText,
-          });
-        }
-
-        // Update in 'contact_notes' collection
-        QuerySnapshot contactNotesSnapshot = await firestore
-            .collection('contact_notes')
-            .where('contact_name', isEqualTo: contactName)
-            .where('contact_phone_number', isEqualTo: phoneNumber)
-            .where('list_name', isEqualTo: listName)
-            .orderBy('timestamp', descending: true)
-            .limit(1)
-            .get();
-
-        if (contactNotesSnapshot.docs.isNotEmpty) {
-          await contactNotesSnapshot.docs.first.reference.update({
-            'note_text': noteText,
-          });
-        }
+        await notesRef.add(callFeedbackData);
+        print('New call feedback record created with rating: $rating/5');
       }
     } catch (e) {
       print('Error updating call feedback: $e');

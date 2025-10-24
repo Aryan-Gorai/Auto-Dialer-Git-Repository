@@ -296,30 +296,7 @@ class _ContactNotesViewState extends State<ContactNotesView> {
                                         border: Border.all(color: Colors.grey.shade300),
                                         borderRadius: BorderRadius.circular(4.0),
                                       ),
-                                  child: note['note_text']?.contains('Call Feedback:') ?? false
-                                      ? Text(
-                                          note['note_text'],
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.blue[800],
-                                            fontWeight: FontWeight.w500
-                                          ),
-                                        )
-                                      : Row(
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                note['note_text'],
-                                                style: const TextStyle(fontSize: 16),
-                                              ),
-                                            ),
-                                            const Icon(
-                                              Icons.edit,
-                                              size: 16,
-                                              color: Colors.grey,
-                                            ),
-                                          ],
-                                        ),
+                                  child: _buildNoteContent(note),
                                     ),
                                   ),
                                 ],
@@ -344,5 +321,94 @@ class _ContactNotesViewState extends State<ContactNotesView> {
         tooltip: 'Call Contact',
       ),
     );
+  }
+
+  Widget _buildNoteContent(Map<String, dynamic> note) {
+    // Debug: Print note data to see what fields are available
+    print('Note data: ${note.keys.toList()}');
+    if (note['rating'] != null) {
+      print('Rating value: ${note['rating']}, type: ${note['rating'].runtimeType}');
+    }
+
+    // Check if this is a call feedback note
+    bool isCallFeedback = note['note_text']?.contains('Call Feedback:') ?? false;
+    
+    // Get rating value - handle different data types
+    dynamic ratingValue = note['rating'];
+    int? rating;
+    
+    if (ratingValue != null) {
+      if (ratingValue is int) {
+        rating = ratingValue;
+      } else if (ratingValue is String) {
+        rating = int.tryParse(ratingValue);
+      } else if (ratingValue is double) {
+        rating = ratingValue.toInt();
+      }
+    }
+
+    bool hasRating = rating != null && rating > 0;
+
+    // Build the rating widget
+    Widget ratingWidget = hasRating
+        ? Row(
+            children: [
+              Icon(
+                Icons.star,
+                color: Colors.amber,
+                size: 16,
+              ),
+              SizedBox(width: 4),
+              Text(
+                '$rating/5',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.amber[700],
+                ),
+              ),
+            ],
+          )
+        : SizedBox.shrink();
+
+    if (isCallFeedback) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  note['note_text'],
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.blue[800],
+                    fontWeight: FontWeight.w500
+                  ),
+                ),
+              ),
+              ratingWidget,
+            ],
+          ),
+        ],
+      );
+    } else {
+      return Row(
+        children: [
+          Expanded(
+            child: Text(
+              note['note_text'],
+              style: const TextStyle(fontSize: 16),
+            ),
+          ),
+          ratingWidget,
+          const Icon(
+            Icons.edit,
+            size: 16,
+            color: Colors.grey,
+          ),
+        ],
+      );
+    }
   }
 }
