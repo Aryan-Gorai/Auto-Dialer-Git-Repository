@@ -53,6 +53,13 @@ class _ContactNotesViewState extends State<ContactNotesView> {
       List<Map<String, dynamic>> notes = snapshot.docs.map((doc) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
         data['id'] = doc.id; // Add document ID for reference
+        
+        // Debug: Print each note's data
+        print('Note fetched - ID: ${doc.id}');
+        print('  - rating: ${data['rating']}');
+        print('  - note_text: ${data['note_text']}');
+        print('  - has_feedback: ${data['has_feedback']}');
+        
         return data;
       }).toList();
 
@@ -60,6 +67,8 @@ class _ContactNotesViewState extends State<ContactNotesView> {
         callNotes = notes;
         isLoading = false;
       });
+      
+      print('Total notes fetched: ${notes.length}');
     } catch (e) {
       print('Error fetching call notes: $e');
       setState(() {
@@ -254,11 +263,18 @@ class _ContactNotesViewState extends State<ContactNotesView> {
                         itemCount: callNotes.length,
                         itemBuilder: (context, index) {
                           final note = callNotes[index];
+                          bool isCallFeedback = note['note_text']?.contains('Call Feedback:') ?? false;
+                          bool hasFeedback = note['has_feedback'] == true;
+                          bool hasRating = note['rating'] != null && (note['rating'] is int ? note['rating'] : int.tryParse(note['rating'].toString()) ?? 0) > 0;
+                          
                           return Card(
                             margin: const EdgeInsets.symmetric(
                               horizontal: 8.0,
                               vertical: 4.0,
                             ),
+                            // Add color highlight for call feedback notes
+                            color: (isCallFeedback || hasFeedback) ? Colors.blue[50] : Colors.white,
+                            elevation: (isCallFeedback || hasFeedback) ? 3 : 1,
                             child: Padding(
                               padding: const EdgeInsets.all(12.0),
                               child: Column(
@@ -266,13 +282,47 @@ class _ContactNotesViewState extends State<ContactNotesView> {
                                 children: [
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        formatTimestamp(note['timestamp']),
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey[600],
-                                          fontWeight: FontWeight.bold,
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              formatTimestamp(note['timestamp']),
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey[600],
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            // Display rating in the header if available
+                                            if (note['rating'] != null && (note['rating'] is int ? note['rating'] : int.tryParse(note['rating'].toString())) != null && (note['rating'] is int ? note['rating'] : int.tryParse(note['rating'].toString()))! > 0) ...[
+                                              SizedBox(height: 4),
+                                              Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  ...List.generate(5, (index) {
+                                                    int rating = note['rating'] is int ? note['rating'] : int.tryParse(note['rating'].toString()) ?? 0;
+                                                    return Icon(
+                                                      index < rating ? Icons.star : Icons.star_border,
+                                                      color: Colors.amber,
+                                                      size: 16,
+                                                    );
+                                                  }),
+                                                  SizedBox(width: 4),
+                                                  Text(
+                                                    '${note['rating'] is int ? note['rating'] : int.tryParse(note['rating'].toString()) ?? 0}/5',
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: Colors.amber[700],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ],
                                         ),
                                       ),
                                       IconButton(
@@ -324,14 +374,9 @@ class _ContactNotesViewState extends State<ContactNotesView> {
   }
 
   Widget _buildNoteContent(Map<String, dynamic> note) {
-    // Debug: Print note data to see what fields are available
-    print('Note data: ${note.keys.toList()}');
-    if (note['rating'] != null) {
-      print('Rating value: ${note['rating']}, type: ${note['rating'].runtimeType}');
-    }
-
-    // Check if this is a call feedback note
+    // Check if this is a call feedback note or if it has feedback
     bool isCallFeedback = note['note_text']?.contains('Call Feedback:') ?? false;
+    bool hasFeedback = note['has_feedback'] == true;
     
     // Get rating value - handle different data types
     dynamic ratingValue = note['rating'];
@@ -348,17 +393,23 @@ class _ContactNotesViewState extends State<ContactNotesView> {
     }
 
     bool hasRating = rating != null && rating > 0;
+    
+    // Debug output
+    print('Building note content - has_feedback: $hasFeedback, rating: $rating, hasRating: $hasRating');
 
-    // Build the rating widget
+    // Build the star rating widget with individual stars
     Widget ratingWidget = hasRating
         ? Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.star,
-                color: Colors.amber,
-                size: 16,
-              ),
-              SizedBox(width: 4),
+              ...List.generate(5, (index) {
+                return Icon(
+                  index < rating! ? Icons.star : Icons.star_border,
+                  color: Colors.amber,
+                  size: 18,
+                );
+              }),
+              SizedBox(width: 6),
               Text(
                 '$rating/5',
                 style: TextStyle(
@@ -371,37 +422,39 @@ class _ContactNotesViewState extends State<ContactNotesView> {
           )
         : SizedBox.shrink();
 
-    if (isCallFeedback) {
+    // If it's a call feedback note or has feedback, show it differently
+    if (isCallFeedback || hasFeedback) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  note['note_text'],
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.blue[800],
-                    fontWeight: FontWeight.w500
-                  ),
-                ),
-              ),
-              ratingWidget,
-            ],
+          Text(
+            note['note_text'] ?? 'Call initiated',
+            style: TextStyle(
+              fontSize: 16,
+              color: isCallFeedback ? Colors.blue[800] : Colors.black87,
+              fontWeight: isCallFeedback ? FontWeight.w500 : FontWeight.normal,
+            ),
           ),
+          if (hasRating) ...[
+            SizedBox(height: 8),
+            ratingWidget,
+          ],
         ],
       );
     } else {
+      // Regular note (not call feedback)
       return Row(
         children: [
           Expanded(
             child: Text(
-              note['note_text'],
+              note['note_text'] ?? 'No content',
               style: const TextStyle(fontSize: 16),
             ),
           ),
-          ratingWidget,
+          if (hasRating) ...[
+            ratingWidget,
+            SizedBox(width: 8),
+          ],
           const Icon(
             Icons.edit,
             size: 16,

@@ -438,14 +438,19 @@ Widget build(BuildContext context) {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
       CollectionReference notesRef = firestore.collection('contact_notes');
       
-      // Find the most recent call record for this contact
+      print('Updating call feedback for: $contactName, $phoneNumber, Rating: $rating');
+      
+      // Find the most recent call record for this contact (must include user_id)
       QuerySnapshot snapshot = await notesRef
+          .where('user_id', isEqualTo: userId)
           .where('contact_name', isEqualTo: contactName)
           .where('contact_phone_number', isEqualTo: phoneNumber)
           .where('list_name', isEqualTo: listName)
           .orderBy('timestamp', descending: true)
           .limit(1)
           .get();
+
+      print('Found ${snapshot.docs.length} matching call records');
 
       // Create comprehensive note text with star rating
       String noteText = '''
@@ -463,6 +468,9 @@ ${!answered ? '- Voicemail Left: ${voicemail ? 'Yes' : 'No'}\n' : ''}
       if (snapshot.docs.isNotEmpty) {
         // Update existing call record
         DocumentReference docRef = snapshot.docs.first.reference;
+        String docId = snapshot.docs.first.id;
+        
+        print('Updating document ID: $docId with rating: $rating');
         
         await docRef.update({
           'answered': answered,
@@ -473,10 +481,12 @@ ${!answered ? '- Voicemail Left: ${voicemail ? 'Yes' : 'No'}\n' : ''}
           'note_text': noteText,
         });
 
-        print('Call feedback updated successfully with rating: $rating/5');
+        print('✅ Call feedback updated successfully! Doc ID: $docId, Rating: $rating/5');
       } else {
         // Create new call record with all feedback data
         Timestamp timestamp = Timestamp.now();
+        
+        print('No existing call record found, creating new one with rating: $rating');
         
         Map<String, dynamic> callFeedbackData = {
           'user_id': userId,
@@ -492,11 +502,12 @@ ${!answered ? '- Voicemail Left: ${voicemail ? 'Yes' : 'No'}\n' : ''}
           'note_text': noteText,
         };
 
-        await notesRef.add(callFeedbackData);
-        print('New call feedback record created with rating: $rating/5');
+        DocumentReference newDoc = await notesRef.add(callFeedbackData);
+        print('✅ New call feedback record created! Doc ID: ${newDoc.id}, Rating: $rating/5');
       }
     } catch (e) {
-      print('Error updating call feedback: $e');
+      print('❌ Error updating call feedback: $e');
+      print('Error details: ${e.toString()}');
     }
   }
 

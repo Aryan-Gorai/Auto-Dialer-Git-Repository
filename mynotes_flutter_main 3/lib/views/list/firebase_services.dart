@@ -843,6 +843,8 @@ Future<void> recordCallTimestamp(String contactName, String contactPhoneNumber, 
     // Create a timestamp for the current time
     Timestamp timestamp = Timestamp.now();
     
+    print('Recording call timestamp for: $contactName, Phone: $contactPhoneNumber, List: $listName, UserID: $userId');
+    
     // Create a map with the call log data
     Map<String, dynamic> callLogData = {
       'user_id': userId,
@@ -851,14 +853,16 @@ Future<void> recordCallTimestamp(String contactName, String contactPhoneNumber, 
       'list_name': listName,
       'timestamp': timestamp,
       'note_text': 'Call initiated', // Default note text
+      'rating': 0, // Initialize rating to 0
+      'has_feedback': false, // Mark as not having feedback yet
     };
     
     // Add the new document with an auto-generated ID
-    await callLogsRef.add(callLogData);
+    DocumentReference newDoc = await callLogsRef.add(callLogData);
     
-    print('Call timestamp recorded successfully!');
+    print('✅ Call timestamp recorded successfully! Doc ID: ${newDoc.id}');
   } catch (e) {
-    print('Error recording call timestamp: $e');
+    print('❌ Error recording call timestamp: $e');
   }
 }
 
