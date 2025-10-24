@@ -237,6 +237,47 @@ class _list_view_visibleState extends State<list_view_visible> with SingleTicker
     }
   }
 
+  // Get the feedback dialog enabled state for a list
+  Future<bool> _getFeedbackDialogEnabled(String listName) async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      QuerySnapshot snapshot = await firestore
+          .collection('lists_collection')
+          .where('list_name', isEqualTo: listName)
+          .where('user_id', isEqualTo: userId)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        // Default to true if the field doesn't exist
+        return snapshot.docs.first['show_feedback_dialog'] as bool? ?? true;
+      }
+    } catch (e) {
+      print('Error getting feedback dialog setting: $e');
+    }
+    return true; // Default to enabled
+  }
+
+  // Toggle the feedback dialog setting for a list
+  Future<void> _toggleFeedbackDialog(String listName, bool enabled) async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      QuerySnapshot snapshot = await firestore
+          .collection('lists_collection')
+          .where('list_name', isEqualTo: listName)
+          .where('user_id', isEqualTo: userId)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        await snapshot.docs.first.reference.update({
+          'show_feedback_dialog': enabled,
+        });
+        print('Feedback dialog ${enabled ? 'enabled' : 'disabled'} for list: $listName');
+      }
+    } catch (e) {
+      print('Error toggling feedback dialog: $e');
+    }
+  }
+
 
 
 @override
@@ -327,6 +368,152 @@ Widget build(BuildContext context) {
                                   );
                                 }
                                 return CircularProgressIndicator();
+                              },
+                            ),
+                            SizedBox(height: 16),
+                            // Feedback Dialog Toggle with Liquid Glass Effect
+                            FutureBuilder<bool>(
+                              future: _getFeedbackDialogEnabled(tile),
+                              builder: (context, snapshot) {
+                                bool isEnabled = snapshot.data ?? true;
+                                return Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        Colors.white.withOpacity(0.7),
+                                        Colors.white.withOpacity(0.3),
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.5),
+                                      width: 1.5,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 10,
+                                        offset: Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          'Show feedback dialog',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () async {
+                                          await _toggleFeedbackDialog(tile, !isEnabled);
+                                          setState(() {});
+                                        },
+                                        child: AnimatedContainer(
+                                          duration: Duration(milliseconds: 300),
+                                          curve: Curves.easeInOut,
+                                          width: 56,
+                                          height: 32,
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                              colors: isEnabled
+                                                  ? [
+                                                      Color(0xFF4CAF50).withOpacity(0.8),
+                                                      Color(0xFF45A049).withOpacity(0.9),
+                                                    ]
+                                                  : [
+                                                      Colors.grey.withOpacity(0.4),
+                                                      Colors.grey.withOpacity(0.5),
+                                                    ],
+                                            ),
+                                            borderRadius: BorderRadius.circular(20),
+                                            border: Border.all(
+                                              color: Colors.white.withOpacity(0.4),
+                                              width: 2,
+                                            ),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: isEnabled
+                                                    ? Color(0xFF4CAF50).withOpacity(0.3)
+                                                    : Colors.grey.withOpacity(0.2),
+                                                blurRadius: 8,
+                                                offset: Offset(0, 2),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Stack(
+                                            children: [
+                                              // Glass reflection effect
+                                              Positioned(
+                                                top: 2,
+                                                left: 2,
+                                                right: 2,
+                                                child: Container(
+                                                  height: 12,
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.vertical(
+                                                      top: Radius.circular(18),
+                                                    ),
+                                                    gradient: LinearGradient(
+                                                      begin: Alignment.topCenter,
+                                                      end: Alignment.bottomCenter,
+                                                      colors: [
+                                                        Colors.white.withOpacity(0.4),
+                                                        Colors.white.withOpacity(0.0),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              // Toggle knob
+                                              AnimatedAlign(
+                                                duration: Duration(milliseconds: 300),
+                                                curve: Curves.easeInOut,
+                                                alignment: isEnabled
+                                                    ? Alignment.centerRight
+                                                    : Alignment.centerLeft,
+                                                child: Container(
+                                                  margin: EdgeInsets.all(3),
+                                                  width: 24,
+                                                  height: 24,
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    gradient: LinearGradient(
+                                                      begin: Alignment.topLeft,
+                                                      end: Alignment.bottomRight,
+                                                      colors: [
+                                                        Colors.white,
+                                                        Colors.grey.shade100,
+                                                      ],
+                                                    ),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.black.withOpacity(0.2),
+                                                        blurRadius: 4,
+                                                        offset: Offset(0, 2),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
                               },
                             ),
                             SizedBox(height: 16),

@@ -49,12 +49,14 @@ class _DialerContactsViewState extends State<DialerContactsView> {
   Timer? callTimer;
   late TextEditingController _descriptionController;
   String? _listDescription;
+  bool showFeedbackDialogEnabled = true; // Track if feedback dialogs should be shown
 
   @override
   void initState() {
     super.initState();
     _descriptionController = TextEditingController();
     fetchListDescription();
+    loadFeedbackDialogSetting();
     fetchContactsAsArray(widget.listName).then((contacts) {
       setState(() {
         myTiles = contacts;
@@ -82,6 +84,26 @@ class _DialerContactsViewState extends State<DialerContactsView> {
       }
     } catch (e) {
       print('Error getting description: $e');
+    }
+  }
+
+  Future<void> loadFeedbackDialogSetting() async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      QuerySnapshot snapshot = await firestore
+          .collection('lists_collection')
+          .where('list_name', isEqualTo: widget.listName)
+          .where('user_id', isEqualTo: userId)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          // Default to true if the field doesn't exist
+          showFeedbackDialogEnabled = snapshot.docs.first['show_feedback_dialog'] as bool? ?? true;
+        });
+      }
+    } catch (e) {
+      print('Error loading feedback dialog setting: $e');
     }
   }
 
@@ -150,8 +172,8 @@ class _DialerContactsViewState extends State<DialerContactsView> {
       // Make the phone call
       makePhoneCall(phoneNumber);
 
-      // Show feedback dialog immediately for first contact
-      if (currentCallIndex == 0) {
+      // Show feedback dialog immediately for first contact (only if enabled)
+      if (currentCallIndex == 0 && showFeedbackDialogEnabled) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           showFeedbackDialog(contactName, phoneNumber);
         });
@@ -160,6 +182,9 @@ class _DialerContactsViewState extends State<DialerContactsView> {
   }
 
   void showFeedbackDialog(String contactName, String phoneNumber) {
+    // Only show if enabled
+    if (!showFeedbackDialogEnabled) return;
+    
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -192,29 +217,31 @@ class _DialerContactsViewState extends State<DialerContactsView> {
       // Stop timer
       callTimer?.cancel();
       
-      // Show feedback dialog
-      showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (context) => CallFeedbackDialog(
-          contactName: contactName,
-          phoneNumber: phoneNumber,
-          listName: widget.listName,
-          callDuration: callDuration,
-          onFeedbackSubmitted: (answered, voicemail, rating) async {
-            // Update Firebase with call feedback
-            await updateCallFeedback(
-              contactName,
-              phoneNumber,
-              widget.listName,
-              answered,
-              voicemail,
-              rating,
-              callDuration.inSeconds
-            );
-          },
-        ),
-      );
+      // Show feedback dialog only if enabled
+      if (showFeedbackDialogEnabled) {
+        showDialog(
+          context: context,
+          barrierDismissible: true,
+          builder: (context) => CallFeedbackDialog(
+            contactName: contactName,
+            phoneNumber: phoneNumber,
+            listName: widget.listName,
+            callDuration: callDuration,
+            onFeedbackSubmitted: (answered, voicemail, rating) async {
+              // Update Firebase with call feedback
+              await updateCallFeedback(
+                contactName,
+                phoneNumber,
+                widget.listName,
+                answered,
+                voicemail,
+                rating,
+                callDuration.inSeconds
+              );
+            },
+          ),
+        );
+      }
     }
     
     setState(() {
