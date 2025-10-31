@@ -587,10 +587,14 @@ Future<void> showListDialog(BuildContext context) async {
     }
   }
 
-  // Normalize a phone number for consistent deduping (digits only)
+  // Normalize a phone number for consistent deduping (last 9 digits only)
+  // This handles cases like +44 7845967135 vs 07845967135
   String _normalizePhone(String input) {
     final digitsOnly = input.replaceAll(RegExp(r'[^0-9]'), '');
-    return digitsOnly;
+    if (digitsOnly.length >= 9) {
+      return digitsOnly.substring(digitsOnly.length - 9);
+    }
+    return digitsOnly; // Return as-is if less than 9 digits
   }
 
   // Upsert a contact into the "Contact Directories" collection with deduplication per user + phone

@@ -66,9 +66,14 @@ class _CallHistoryViewState extends State<CallHistoryView> {
     }
   }
 
-  // Normalize a phone number for consistent lookup (digits only)
+  // Normalize a phone number for consistent lookup (last 9 digits only)
+  // This handles cases like +44 7845967135 vs 07845967135
   String _normalizePhone(String input) {
-    return input.replaceAll(RegExp(r'[^0-9]'), '');
+    final digitsOnly = input.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digitsOnly.length >= 9) {
+      return digitsOnly.substring(digitsOnly.length - 9);
+    }
+    return digitsOnly; // Return as-is if less than 9 digits
   }
 
   Future<void> _resolveDirectoryNamesForCalls(List<CallRecord> records) async {
