@@ -9,6 +9,9 @@ import '../dialer/dialer.dart';
 import '../list/firebase_services.dart';
 import 'heatmap/call_heatmap.dart';
 import 'weekly_calls_chart.dart';
+import 'call_duration_chart.dart';
+import 'list_performance_chart.dart';
+import 'call_outcome_donut_chart.dart';
 
 class ReportsView extends StatefulWidget {
   const ReportsView({Key? key}) : super(key: key);
@@ -32,7 +35,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     _loadHeatmapSettings();
     _thresholdController.addListener(_updateThresholdAndSave);
   }
@@ -113,6 +116,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
         title: const Text('Reports View (% Completion)'),
         bottom: TabBar(
           controller: _tabController,
+          isScrollable: true,
           tabs: const [
             Tab(
               icon: Icon(Icons.grid_on),
@@ -121,6 +125,18 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
             Tab(
               icon: Icon(Icons.show_chart),
               text: 'Weekly Trends',
+            ),
+            Tab(
+              icon: Icon(Icons.bar_chart),
+              text: 'Call Duration',
+            ),
+            Tab(
+              icon: Icon(Icons.bar_chart_outlined),
+              text: 'List Performance',
+            ),
+            Tab(
+              icon: Icon(Icons.pie_chart),
+              text: 'Outcomes',
             ),
           ],
         ),
@@ -155,6 +171,12 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
           _buildHeatmapTab(),
           // Tab 2: Weekly Trends
           _buildWeeklyTrendsTab(),
+          // Tab 3: Call Duration
+          _buildCallDurationTab(),
+          // Tab 4: List Performance
+          _buildListPerformanceTab(),
+          // Tab 5: Call Outcomes
+          _buildCallOutcomesTab(),
         ],
       ),
     );
@@ -354,6 +376,54 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
           ),
           margin: const EdgeInsets.all(8.0),
           child: const WeeklyCallsChart(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCallDurationTab() {
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      behavior: HitTestBehavior.opaque,
+      child: SingleChildScrollView(
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          margin: const EdgeInsets.all(8.0),
+          child: const CallDurationChart(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildListPerformanceTab() {
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      behavior: HitTestBehavior.opaque,
+      child: SingleChildScrollView(
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          margin: const EdgeInsets.all(8.0),
+          child: const ListPerformanceChart(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCallOutcomesTab() {
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      behavior: HitTestBehavior.opaque,
+      child: SingleChildScrollView(
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          margin: const EdgeInsets.all(8.0),
+          child: const CallOutcomeDonutChart(),
         ),
       ),
     );
