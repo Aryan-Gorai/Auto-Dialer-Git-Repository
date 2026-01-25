@@ -1354,12 +1354,7 @@ Widget build(BuildContext context) {
                                             }
                                           },
                                         ),
-                                        IconButton(
-                                          icon: Icon(Icons.delete),
-                                          onPressed: () {
-                                            deleteSpecificContact(myTiles[i]);
-                                          },
-                                        ),
+                                        // Hide delete button during call cycle
                                       ],
                                     ),
                                     onTap: () {
