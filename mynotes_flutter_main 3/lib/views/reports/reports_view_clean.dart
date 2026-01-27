@@ -4,6 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/enums/menu_action.dart';
 import 'package:flutter_application_1/utilities/dialogs/logout_dialog.dart';
+import 'package:flutter_application_1/services/auth/auth_service.dart';
+import 'package:intl/intl.dart';
 
 import '../dialer/dialer.dart';
 import '../list/firebase_services.dart';
@@ -25,12 +27,25 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
   late TabController _tabController;
 
   // Heatmap settings
-  String _selectedTimeScale = 'month'; // 'month', 'week', 'day'
+  String _selectedTimeScale = 'last7days'; // 'last7days', 'currentWeek', 'last30days', 'custom'
   int _maxCallThreshold = 10; // Default max threshold
   final TextEditingController _thresholdController = TextEditingController(text: '10');
   final FocusNode _thresholdFocusNode = FocusNode();
   bool _showHeatmap = true;
   int _timeOffset = 0; // 0 = current period, -1 = previous, 1 = next, etc.
+  DateTime? _customStartDate;
+  DateTime? _customEndDate;
+
+  // Common time range settings for all tabs
+  String _weeklyTrendsTimeRange = 'last7days';
+  String _callDurationTimeRange = 'last7days'; 
+  String _outcomesTimeRange = 'last7days';
+  DateTime? _weeklyTrendsStartDate;
+  DateTime? _weeklyTrendsEndDate;
+  DateTime? _callDurationStartDate;
+  DateTime? _callDurationEndDate;
+  DateTime? _outcomesStartDate;
+  DateTime? _outcomesEndDate;
 
   @override
   void initState() {
@@ -50,7 +65,27 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
         final data = snapshot.data() as Map<String, dynamic>;
         setState(() {
           if (data.containsKey('heatmap_time_scale')) {
-            _selectedTimeScale = data['heatmap_time_scale'];
+            String savedTimeScale = data['heatmap_time_scale'];
+            // Handle migration from old values to new values
+            switch (savedTimeScale) {
+              case 'day':
+                _selectedTimeScale = 'last7days';
+                break;
+              case 'week':
+                _selectedTimeScale = 'currentWeek';
+                break;
+              case 'month':
+                _selectedTimeScale = 'last30days';
+                break;
+              case 'last7days':
+              case 'currentWeek':
+              case 'last30days':
+              case 'custom':
+                _selectedTimeScale = savedTimeScale;
+                break;
+              default:
+                _selectedTimeScale = 'last7days'; // fallback default
+            }
           }
           if (data.containsKey('heatmap_max_threshold')) {
             _maxCallThreshold = data['heatmap_max_threshold'];
@@ -58,6 +93,12 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
           }
           if (data.containsKey('heatmap_visible')) {
             _showHeatmap = data['heatmap_visible'];
+          }
+          if (data.containsKey('custom_start_date')) {
+            _customStartDate = (data['custom_start_date'] as Timestamp).toDate();
+          }
+          if (data.containsKey('custom_end_date')) {
+            _customEndDate = (data['custom_end_date'] as Timestamp).toDate();
           }
         });
       }
@@ -70,14 +111,23 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
   Future<void> _saveHeatmapSettings() async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
-      await firestore.collection('user_settings').doc(userId).set({
+      Map<String, dynamic> dataToSave = {
         // Store the user id explicitly to avoid any cross-user overlap and allow collection-level queries
         'user_id': userId,
         'heatmap_time_scale': _selectedTimeScale,
         'heatmap_max_threshold': _maxCallThreshold,
         'heatmap_visible': _showHeatmap,
         'last_updated': Timestamp.now(),
-      }, SetOptions(merge: true));
+      };
+
+      if (_customStartDate != null) {
+        dataToSave['custom_start_date'] = Timestamp.fromDate(_customStartDate!);
+      }
+      if (_customEndDate != null) {
+        dataToSave['custom_end_date'] = Timestamp.fromDate(_customEndDate!);
+      }
+
+      await firestore.collection('user_settings').doc(userId).set(dataToSave, SetOptions(merge: true));
     } catch (e) {
       // noop
     }
@@ -89,6 +139,85 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
     _thresholdController.dispose();
     _thresholdFocusNode.dispose();
     super.dispose();
+  }
+
+  String get userId => AuthService.firebase().currentUser!.id;
+
+  Future<void> _selectDateRange() async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      initialDateRange: _customStartDate != null && _customEndDate != null
+          ? DateTimeRange(start: _customStartDate!, end: _customEndDate!)
+          : null,
+    );
+
+    if (picked != null) {
+      setState(() {
+        _customStartDate = picked.start;
+        _customEndDate = picked.end;
+        _selectedTimeScale = 'custom';
+      });
+      _saveHeatmapSettings();
+    }
+  }
+
+  Future<void> _selectWeeklyTrendsDateRange() async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      initialDateRange: _weeklyTrendsStartDate != null && _weeklyTrendsEndDate != null
+          ? DateTimeRange(start: _weeklyTrendsStartDate!, end: _weeklyTrendsEndDate!)
+          : null,
+    );
+
+    if (picked != null) {
+      setState(() {
+        _weeklyTrendsStartDate = picked.start;
+        _weeklyTrendsEndDate = picked.end;
+        _weeklyTrendsTimeRange = 'custom';
+      });
+    }
+  }
+
+  Future<void> _selectCallDurationDateRange() async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      initialDateRange: _callDurationStartDate != null && _callDurationEndDate != null
+          ? DateTimeRange(start: _callDurationStartDate!, end: _callDurationEndDate!)
+          : null,
+    );
+
+    if (picked != null) {
+      setState(() {
+        _callDurationStartDate = picked.start;
+        _callDurationEndDate = picked.end;
+        _callDurationTimeRange = 'custom';
+      });
+    }
+  }
+
+  Future<void> _selectOutcomesDateRange() async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      initialDateRange: _outcomesStartDate != null && _outcomesEndDate != null
+          ? DateTimeRange(start: _outcomesStartDate!, end: _outcomesEndDate!)
+          : null,
+    );
+
+    if (picked != null) {
+      setState(() {
+        _outcomesStartDate = picked.start;
+        _outcomesEndDate = picked.end;
+        _outcomesTimeRange = 'custom';
+      });
+    }
   }
 
   void _updateThresholdAndSave() {
@@ -229,22 +358,49 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                                 value: _selectedTimeScale,
                                 onChanged: (String? newValue) {
                                   if (newValue != null) {
-                                    setState(() {
-                                      _selectedTimeScale = newValue;
-                                    });
-                                    _saveHeatmapSettings();
+                                    if (newValue == 'custom') {
+                                      _selectDateRange();
+                                    } else {
+                                      setState(() {
+                                        _selectedTimeScale = newValue;
+                                      });
+                                      _saveHeatmapSettings();
+                                    }
                                   }
                                 },
-                                items: <String>['month', 'week', 'day']
-                                    .map<DropdownMenuItem<String>>((String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(value[0].toUpperCase() + value.substring(1)),
-                                  );
-                                }).toList(),
+                                items: [
+                                  const DropdownMenuItem<String>(
+                                    value: 'last7days',
+                                    child: Text('Last 7 Days'),
+                                  ),
+                                  const DropdownMenuItem<String>(
+                                    value: 'currentWeek',
+                                    child: Text('Current Week'),
+                                  ),
+                                  const DropdownMenuItem<String>(
+                                    value: 'last30days',
+                                    child: Text('Last 30 Days'),
+                                  ),
+                                  const DropdownMenuItem<String>(
+                                    value: 'custom',
+                                    child: Text('Select Custom'),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
+                          if (_selectedTimeScale == 'custom' && _customStartDate != null && _customEndDate != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(
+                                'Selected: ${DateFormat('MMM d').format(_customStartDate!)} - ${DateFormat('MMM d, yyyy').format(_customEndDate!)}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ),
                           const SizedBox(height: 16),
                           // Max threshold input
                           Row(
@@ -370,12 +526,40 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
       onTap: () => FocusScope.of(context).unfocus(),
       behavior: HitTestBehavior.opaque,
       child: SingleChildScrollView(
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          margin: const EdgeInsets.all(8.0),
-          child: const WeeklyCallsChart(),
+        child: Column(
+          children: [
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              margin: const EdgeInsets.all(8.0),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: _buildTimeRangeDropdown(
+                  _weeklyTrendsTimeRange,
+                  (String newValue) {
+                    setState(() {
+                      _weeklyTrendsTimeRange = newValue;
+                    });
+                  },
+                  _selectWeeklyTrendsDateRange,
+                  _weeklyTrendsStartDate,
+                  _weeklyTrendsEndDate,
+                ),
+              ),
+            ),
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              margin: const EdgeInsets.all(8.0),
+              child: WeeklyCallsChart(
+                selectedTimeRange: _weeklyTrendsTimeRange,
+                customStartDate: _weeklyTrendsStartDate,
+                customEndDate: _weeklyTrendsEndDate,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -386,12 +570,40 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
       onTap: () => FocusScope.of(context).unfocus(),
       behavior: HitTestBehavior.opaque,
       child: SingleChildScrollView(
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          margin: const EdgeInsets.all(8.0),
-          child: const CallDurationChart(),
+        child: Column(
+          children: [
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              margin: const EdgeInsets.all(8.0),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: _buildTimeRangeDropdown(
+                  _callDurationTimeRange,
+                  (String newValue) {
+                    setState(() {
+                      _callDurationTimeRange = newValue;
+                    });
+                  },
+                  _selectCallDurationDateRange,
+                  _callDurationStartDate,
+                  _callDurationEndDate,
+                ),
+              ),
+            ),
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              margin: const EdgeInsets.all(8.0),
+              child: CallDurationChart(
+                selectedTimeRange: _callDurationTimeRange,
+                customStartDate: _callDurationStartDate,
+                customEndDate: _callDurationEndDate,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -418,12 +630,40 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
       onTap: () => FocusScope.of(context).unfocus(),
       behavior: HitTestBehavior.opaque,
       child: SingleChildScrollView(
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          margin: const EdgeInsets.all(8.0),
-          child: const CallOutcomeDonutChart(),
+        child: Column(
+          children: [
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              margin: const EdgeInsets.all(8.0),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: _buildTimeRangeDropdown(
+                  _outcomesTimeRange,
+                  (String newValue) {
+                    setState(() {
+                      _outcomesTimeRange = newValue;
+                    });
+                  },
+                  _selectOutcomesDateRange,
+                  _outcomesStartDate,
+                  _outcomesEndDate,
+                ),
+              ),
+            ),
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              margin: const EdgeInsets.all(8.0),
+              child: CallOutcomeDonutChart(
+                selectedTimeRange: _outcomesTimeRange,
+                customStartDate: _outcomesStartDate,
+                customEndDate: _outcomesEndDate,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -468,5 +708,73 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
       case 1:
         break;
     }
+  }
+
+  Widget _buildTimeRangeDropdown(
+    String currentValue,
+    Function(String) onChanged,
+    VoidCallback onCustomSelected,
+    DateTime? customStartDate,
+    DateTime? customEndDate,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Time Range:',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[700],
+              ),
+            ),
+            const SizedBox(width: 16),
+            DropdownButton<String>(
+              value: currentValue,
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  if (newValue == 'custom') {
+                    onCustomSelected();
+                  } else {
+                    onChanged(newValue);
+                  }
+                }
+              },
+              items: const [
+                DropdownMenuItem<String>(
+                  value: 'last7days',
+                  child: Text('Last 7 Days'),
+                ),
+                DropdownMenuItem<String>(
+                  value: 'currentWeek',
+                  child: Text('Current Week'),
+                ),
+                DropdownMenuItem<String>(
+                  value: 'last30days',
+                  child: Text('Last 30 Days'),
+                ),
+                DropdownMenuItem<String>(
+                  value: 'custom',
+                  child: Text('Select Custom'),
+                ),
+              ],
+            ),
+          ],
+        ),
+        if (currentValue == 'custom' && customStartDate != null && customEndDate != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Text(
+              'Selected: ${DateFormat('MMM d').format(customStartDate)} - ${DateFormat('MMM d, yyyy').format(customEndDate)}',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+      ],
+    );
   }
 }

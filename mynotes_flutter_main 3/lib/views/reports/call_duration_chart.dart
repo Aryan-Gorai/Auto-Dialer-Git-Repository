@@ -5,7 +5,20 @@ import 'package:flutter_application_1/services/auth/auth_service.dart';
 import 'package:intl/intl.dart';
 
 class CallDurationChart extends StatefulWidget {
-  const CallDurationChart({Key? key}) : super(key: key);
+  final String? selectedTimeRange;
+  final DateTime? customStartDate;
+  final DateTime? customEndDate;
+  final Function(String)? onTimeRangeChanged;
+  final VoidCallback? onCustomRangeSelected;
+
+  const CallDurationChart({
+    Key? key,
+    this.selectedTimeRange,
+    this.customStartDate,
+    this.customEndDate,
+    this.onTimeRangeChanged,
+    this.onCustomRangeSelected,
+  }) : super(key: key);
 
   @override
   State<CallDurationChart> createState() => _CallDurationChartState();
@@ -36,10 +49,26 @@ class _CallDurationChartState extends State<CallDurationChart> {
 
   String get _userId => AuthService.firebase().currentUser!.id;
 
+  String get currentTimeRange => widget.selectedTimeRange ?? _selectedTimeRange;
+  DateTime? get currentStartDate => widget.customStartDate ?? _customStartDate;
+  DateTime? get currentEndDate => widget.customEndDate ?? _customEndDate;
+  bool get isExternallyControlled => widget.selectedTimeRange != null;
+
   @override
   void initState() {
     super.initState();
     _fetchCallData();
+  }
+
+  @override
+  void didUpdateWidget(CallDurationChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Refresh data when external parameters change
+    if (oldWidget.selectedTimeRange != widget.selectedTimeRange ||
+        oldWidget.customStartDate != widget.customStartDate ||
+        oldWidget.customEndDate != widget.customEndDate) {
+      _fetchCallData();
+    }
   }
 
   Future<void> _fetchCallData() async {
@@ -52,29 +81,29 @@ class _CallDurationChartState extends State<CallDurationChart> {
       DateTime startDate;
       DateTime endDate = DateTime.now();
 
-      if (_selectedTimeRange == 'last7days') {
+      if (currentTimeRange == 'last7days') {
         startDate = DateTime.now().subtract(const Duration(days: 6));
         startDate = DateTime(startDate.year, startDate.month, startDate.day);
         endDate = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
-      } else if (_selectedTimeRange == 'currentWeek') {
+      } else if (currentTimeRange == 'currentWeek') {
         final now = DateTime.now();
         final currentWeekday = now.weekday;
         startDate = now.subtract(Duration(days: currentWeekday - 1));
         startDate = DateTime(startDate.year, startDate.month, startDate.day);
         endDate = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
-      } else if (_selectedTimeRange == 'last30days') {
+      } else if (currentTimeRange == 'last30days') {
         startDate = DateTime.now().subtract(const Duration(days: 29));
         startDate = DateTime(startDate.year, startDate.month, startDate.day);
         endDate = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
       } else {
-        if (_customStartDate == null || _customEndDate == null) {
+        if (currentStartDate == null || currentEndDate == null) {
           setState(() {
             _isLoading = false;
           });
           return;
         }
-        startDate = DateTime(_customStartDate!.year, _customStartDate!.month, _customStartDate!.day);
-        endDate = DateTime(_customEndDate!.year, _customEndDate!.month, _customEndDate!.day, 23, 59, 59);
+        startDate = DateTime(currentStartDate!.year, currentStartDate!.month, currentStartDate!.day);
+        endDate = DateTime(currentEndDate!.year, currentEndDate!.month, currentEndDate!.day, 23, 59, 59);
       }
 
       print('Fetching call durations for user: $_userId');
@@ -262,87 +291,92 @@ class _CallDurationChartState extends State<CallDurationChart> {
           ),
           const SizedBox(height: 16),
 
-          // Time range selector
-          Row(
-            children: [
-              Text(
-                'Time Range:',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[700],
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+          // Time range selector (only show if not externally controlled)
+          if (!isExternallyControlled)
+            Column(
+              children: [
+                Row(
                   children: [
-                    ChoiceChip(
-                      label: const Text('Last 7 Days'),
-                      selected: _selectedTimeRange == 'last7days',
-                      onSelected: (selected) {
-                        if (selected) {
-                          setState(() {
-                            _selectedTimeRange = 'last7days';
-                          });
-                          _fetchCallData();
-                        }
-                      },
+                    Text(
+                      'Time Range:',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[700],
+                      ),
                     ),
-                    ChoiceChip(
-                      label: const Text('Current Week'),
-                      selected: _selectedTimeRange == 'currentWeek',
-                      onSelected: (selected) {
-                        if (selected) {
-                          setState(() {
-                            _selectedTimeRange = 'currentWeek';
-                          });
-                          _fetchCallData();
-                        }
-                      },
-                    ),
-                    ChoiceChip(
-                      label: const Text('Last 30 Days'),
-                      selected: _selectedTimeRange == 'last30days',
-                      onSelected: (selected) {
-                        if (selected) {
-                          setState(() {
-                            _selectedTimeRange = 'last30days';
-                          });
-                          _fetchCallData();
-                        }
-                      },
-                    ),
-                    ChoiceChip(
-                      label: Text(_selectedTimeRange == 'custom' && _customStartDate != null
-                          ? 'Custom Range'
-                          : 'Select Custom'),
-                      selected: _selectedTimeRange == 'custom',
-                      onSelected: (selected) {
-                        _selectDateRange();
-                      },
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          ChoiceChip(
+                            label: const Text('Last 7 Days'),
+                            selected: _selectedTimeRange == 'last7days',
+                            onSelected: (selected) {
+                              if (selected) {
+                                setState(() {
+                                  _selectedTimeRange = 'last7days';
+                                });
+                                _fetchCallData();
+                              }
+                            },
+                          ),
+                          ChoiceChip(
+                            label: const Text('Current Week'),
+                            selected: _selectedTimeRange == 'currentWeek',
+                            onSelected: (selected) {
+                              if (selected) {
+                                setState(() {
+                                  _selectedTimeRange = 'currentWeek';
+                                });
+                                _fetchCallData();
+                              }
+                            },
+                          ),
+                          ChoiceChip(
+                            label: const Text('Last 30 Days'),
+                            selected: _selectedTimeRange == 'last30days',
+                            onSelected: (selected) {
+                              if (selected) {
+                                setState(() {
+                                  _selectedTimeRange = 'last30days';
+                                });
+                                _fetchCallData();
+                              }
+                            },
+                          ),
+                          ChoiceChip(
+                            label: Text(_selectedTimeRange == 'custom' && _customStartDate != null
+                                ? 'Custom Range'
+                                : 'Select Custom'),
+                            selected: _selectedTimeRange == 'custom',
+                            onSelected: (selected) {
+                              _selectDateRange();
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
 
-          if (_selectedTimeRange == 'custom' && _customStartDate != null && _customEndDate != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Text(
-                'Selected: ${DateFormat('MMM d').format(_customStartDate!)} - ${DateFormat('MMM d, yyyy').format(_customEndDate!)}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
+                if (_selectedTimeRange == 'custom' && _customStartDate != null && _customEndDate != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      'Selected: ${DateFormat('MMM d').format(_customStartDate!)} - ${DateFormat('MMM d, yyyy').format(_customEndDate!)}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+
+                const SizedBox(height: 24),
+              ],
             ),
-
-          const SizedBox(height: 24),
 
           // Legend
           Wrap(

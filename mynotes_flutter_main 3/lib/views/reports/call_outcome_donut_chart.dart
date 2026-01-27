@@ -2,9 +2,23 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
+import 'package:intl/intl.dart';
 
 class CallOutcomeDonutChart extends StatefulWidget {
-  const CallOutcomeDonutChart({Key? key}) : super(key: key);
+  final String? selectedTimeRange;
+  final DateTime? customStartDate;
+  final DateTime? customEndDate;
+  final Function(String)? onTimeRangeChanged;
+  final VoidCallback? onCustomRangeSelected;
+
+  const CallOutcomeDonutChart({
+    Key? key,
+    this.selectedTimeRange,
+    this.customStartDate,
+    this.customEndDate,
+    this.onTimeRangeChanged,
+    this.onCustomRangeSelected,
+  }) : super(key: key);
 
   @override
   State<CallOutcomeDonutChart> createState() => _CallOutcomeDonutChartState();
@@ -14,7 +28,9 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isLoading = true;
   int _touchedIndex = -1;
-  String _selectedTimeRange = 'thisWeek'; // 'thisWeek', 'last7days', 'last30days'
+  String _selectedTimeRange = 'last7days'; // 'last7days', 'currentWeek', 'last30days', 'custom'
+  DateTime? _customStartDate;
+  DateTime? _customEndDate;
 
   // Outcome categories
   int _connectedCalls = 0;
@@ -25,10 +41,26 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
 
   String get _userId => AuthService.firebase().currentUser!.id;
 
+  String get currentTimeRange => widget.selectedTimeRange ?? _selectedTimeRange;
+  DateTime? get currentStartDate => widget.customStartDate ?? _customStartDate;
+  DateTime? get currentEndDate => widget.customEndDate ?? _customEndDate;
+  bool get isExternallyControlled => widget.selectedTimeRange != null;
+
   @override
   void initState() {
     super.initState();
     _fetchCallOutcomes();
+  }
+
+  @override
+  void didUpdateWidget(CallOutcomeDonutChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Refresh data when external parameters change
+    if (oldWidget.selectedTimeRange != widget.selectedTimeRange ||
+        oldWidget.customStartDate != widget.customStartDate ||
+        oldWidget.customEndDate != widget.customEndDate) {
+      _fetchCallOutcomes();
+    }
   }
 
   Future<void> _fetchCallOutcomes() async {
@@ -41,20 +73,30 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
       DateTime startDate;
       DateTime endDate = DateTime.now();
 
-      if (_selectedTimeRange == 'thisWeek') {
+      if (currentTimeRange == 'currentWeek') {
         final now = DateTime.now();
         final currentWeekday = now.weekday;
         startDate = now.subtract(Duration(days: currentWeekday - 1));
         startDate = DateTime(startDate.year, startDate.month, startDate.day);
         endDate = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
-      } else if (_selectedTimeRange == 'last7days') {
+      } else if (currentTimeRange == 'last7days') {
         startDate = DateTime.now().subtract(const Duration(days: 6));
         startDate = DateTime(startDate.year, startDate.month, startDate.day);
         endDate = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
-      } else {
+      } else if (currentTimeRange == 'last30days') {
         startDate = DateTime.now().subtract(const Duration(days: 29));
         startDate = DateTime(startDate.year, startDate.month, startDate.day);
         endDate = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
+      } else {
+        // Custom range
+        if (currentStartDate == null || currentEndDate == null) {
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+        startDate = DateTime(currentStartDate!.year, currentStartDate!.month, currentStartDate!.day);
+        endDate = DateTime(currentEndDate!.year, currentEndDate!.month, currentEndDate!.day, 23, 59, 59);
       }
 
       print('Fetching call outcomes for user: $_userId');
@@ -154,12 +196,16 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
   }
 
   String _getTimeRangeLabel() {
-    if (_selectedTimeRange == 'thisWeek') {
-      return 'This Week';
-    } else if (_selectedTimeRange == 'last7days') {
+    if (currentTimeRange == 'currentWeek') {
+      return 'Current Week';
+    } else if (currentTimeRange == 'last7days') {
       return 'Last 7 Days';
-    } else {
+    } else if (currentTimeRange == 'last30days') {
       return 'Last 30 Days';
+    } else if (currentTimeRange == 'custom' && currentStartDate != null && currentEndDate != null) {
+      return '${DateFormat('MMM d').format(currentStartDate!)} - ${DateFormat('MMM d, yyyy').format(currentEndDate!)}';
+    } else {
+      return 'Custom Range';
     }
   }
 
@@ -188,66 +234,79 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
           ),
           const SizedBox(height: 16),
 
-          // Time range selector
-          Row(
-            children: [
-              Text(
-                'Period:',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[700],
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+          // Time range selector (only show if not externally controlled)
+          if (!isExternallyControlled)
+            Column(
+              children: [
+                Row(
                   children: [
-                    ChoiceChip(
-                      label: const Text('This Week'),
-                      selected: _selectedTimeRange == 'thisWeek',
-                      onSelected: (selected) {
-                        if (selected) {
-                          setState(() {
-                            _selectedTimeRange = 'thisWeek';
-                          });
-                          _fetchCallOutcomes();
-                        }
-                      },
+                    Text(
+                      'Period:',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    ChoiceChip(
-                      label: const Text('Last 7 Days'),
-                      selected: _selectedTimeRange == 'last7days',
-                      onSelected: (selected) {
-                        if (selected) {
-                          setState(() {
-                            _selectedTimeRange = 'last7days';
-                          });
-                          _fetchCallOutcomes();
-                        }
-                      },
-                    ),
-                    ChoiceChip(
-                      label: const Text('Last 30 Days'),
-                      selected: _selectedTimeRange == 'last30days',
-                      onSelected: (selected) {
-                        if (selected) {
-                          setState(() {
-                            _selectedTimeRange = 'last30days';
-                          });
-                          _fetchCallOutcomes();
-                        }
-                      },
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          ChoiceChip(
+                            label: const Text('Current Week'),
+                            selected: _selectedTimeRange == 'currentWeek',
+                            onSelected: (selected) {
+                              if (selected) {
+                                setState(() {
+                                  _selectedTimeRange = 'currentWeek';
+                                });
+                                _fetchCallOutcomes();
+                              }
+                            },
+                          ),
+                          ChoiceChip(
+                            label: const Text('Last 7 Days'),
+                            selected: _selectedTimeRange == 'last7days',
+                            onSelected: (selected) {
+                              if (selected) {
+                                setState(() {
+                                  _selectedTimeRange = 'last7days';
+                                });
+                                _fetchCallOutcomes();
+                              }
+                            },
+                          ),
+                          ChoiceChip(
+                            label: const Text('Last 30 Days'),
+                            selected: _selectedTimeRange == 'last30days',
+                            onSelected: (selected) {
+                              if (selected) {
+                                setState(() {
+                                  _selectedTimeRange = 'last30days';
+                                });
+                                _fetchCallOutcomes();
+                              }
+                            },
+                          ),
+                          ChoiceChip(
+                            label: Text(_selectedTimeRange == 'custom' && _customStartDate != null
+                                ? 'Custom Range'
+                                : 'Select Custom'),
+                            selected: _selectedTimeRange == 'custom',
+                            onSelected: (selected) {
+                              // Add custom date picker functionality if needed
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 32),
+                const SizedBox(height: 32),
+              ],
+            ),
 
           // Donut Chart
           if (_isLoading)
