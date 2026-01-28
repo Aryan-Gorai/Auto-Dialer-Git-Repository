@@ -31,12 +31,14 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
   DateTime? _customStartDate;
   DateTime? _customEndDate;
   
-  // Data for the chart
-  Map<int, CallDayData> _callDataByWeekday = {}; // 1=Mon, 7=Sun
+  // Data for the chart - now supports both daily and weekly aggregation
+  Map<int, CallDayData> _callDataByWeekday = {}; // For weekly view: 1=Mon, 7=Sun
+  Map<String, DailyCallData> _callDataByDate = {}; // For custom ranges: date string -> data
   List<FlSpot> _successfulSpots = [];
   List<FlSpot> _failedSpots = [];
   List<FlSpot> _missedSpots = [];
   List<FlSpot> _rollingAverageSpots = [];
+  bool _useWeeklyView = true; // true = weekday aggregation, false = daily view
 
   String get _userId => AuthService.firebase().currentUser!.id;
 
@@ -76,6 +78,7 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
         startDate = DateTime.now().subtract(const Duration(days: 6));
         startDate = DateTime(startDate.year, startDate.month, startDate.day);
         endDate = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
+        _useWeeklyView = true;
       } else if (currentTimeRange == 'currentWeek') {
         // Get current week (Monday to Sunday)
         final now = DateTime.now();
@@ -83,10 +86,12 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
         startDate = now.subtract(Duration(days: currentWeekday - 1));
         startDate = DateTime(startDate.year, startDate.month, startDate.day);
         endDate = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
+        _useWeeklyView = true;
       } else if (currentTimeRange == 'last30days') {
         startDate = DateTime.now().subtract(const Duration(days: 29));
         startDate = DateTime(startDate.year, startDate.month, startDate.day);
         endDate = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
+        _useWeeklyView = false; // Use daily view for 30 days
       } else {
         // Custom range
         if (currentStartDate == null || currentEndDate == null) {
@@ -97,131 +102,212 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
         }
         startDate = DateTime(currentStartDate!.year, currentStartDate!.month, currentStartDate!.day);
         endDate = DateTime(currentEndDate!.year, currentEndDate!.month, currentEndDate!.day, 23, 59, 59);
+        // Use daily view for custom ranges longer than 7 days
+        int daysDiff = endDate.difference(startDate).inDays + 1;
+        _useWeeklyView = daysDiff <= 7;
       }
 
       // Fetch call history from Firebase
-      // Note: Firestore doesn't support multiple range queries without a composite index
-      // So we fetch all user's call history and filter in memory
-      print('Fetching call history for user: $_userId');
+      print('📞 Fetching call history from call_history collection');
       print('Date range: $startDate to $endDate');
       
       final QuerySnapshot querySnapshot = await _firestore
           .collection('call_history')
-          .where('user_id', isEqualTo: _userId)
-          .orderBy('timestamp', descending: true)
+          .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
           .get();
 
       print('Total call records fetched: ${querySnapshot.docs.length}');
 
-      // Aggregate data by day of week
-      final Map<int, CallDayData> dataByWeekday = {
-        1: CallDayData(weekday: 1, dayName: 'Mon'),
-        2: CallDayData(weekday: 2, dayName: 'Tue'),
-        3: CallDayData(weekday: 3, dayName: 'Wed'),
-        4: CallDayData(weekday: 4, dayName: 'Thu'),
-        5: CallDayData(weekday: 5, dayName: 'Fri'),
-        6: CallDayData(weekday: 6, dayName: 'Sat'),
-        7: CallDayData(weekday: 7, dayName: 'Sun'),
-      };
-
-      int recordsInRange = 0;
-      for (var doc in querySnapshot.docs) {
-        try {
-          final data = doc.data() as Map<String, dynamic>;
-          final timestamp = (data['timestamp'] as Timestamp).toDate();
-          
-          // Filter by date range in memory
-          if (timestamp.isBefore(startDate) || timestamp.isAfter(endDate)) {
-            continue;
-          }
-          
-          recordsInRange++;
-          final weekday = timestamp.weekday; // 1=Mon, 7=Sun
-          
-          final duration = (data['duration'] as num?)?.toDouble() ?? 0.0;
-          final callType = data['call_type'] as String? ?? '';
-          
-          bool answered;
-          if (data['answered'] is bool) {
-            answered = data['answered'] as bool;
-          } else if (data['answered'] is int) {
-            answered = (data['answered'] as int) == 1;
-          } else {
-            answered = false;
-          }
-
-          // Categorize calls - made more inclusive
-          // Successful: Outgoing calls that were answered OR have duration > 0
-          // Failed: Calls that weren't answered and have 0 duration (excluding Missed type)
-          // Missed: Explicitly marked as Missed OR incoming calls not answered
-          
-          if (callType.toLowerCase() == 'missed') {
-            dataByWeekday[weekday]!.missedCallbacks++;
-            print('Missed call on ${dataByWeekday[weekday]!.dayName}');
-          } else if (callType.toLowerCase() == 'incoming' && !answered) {
-            dataByWeekday[weekday]!.missedCallbacks++;
-            print('Missed incoming call on ${dataByWeekday[weekday]!.dayName}');
-          } else if (answered || duration > 0) {
-            // Successful if answered OR has duration (covers most outgoing calls)
-            dataByWeekday[weekday]!.successfulCalls++;
-            print('Successful call on ${dataByWeekday[weekday]!.dayName}, duration: $duration, answered: $answered');
-          } else {
-            dataByWeekday[weekday]!.failedCalls++;
-            print('Failed call on ${dataByWeekday[weekday]!.dayName}');
-          }
-        } catch (e) {
-          print('Error parsing call record: $e');
-        }
-      }
-
-      print('Records in date range: $recordsInRange');
-      for (var day in dataByWeekday.values) {
-        print('${day.dayName}: S=${day.successfulCalls}, F=${day.failedCalls}, M=${day.missedCallbacks}');
-      }
-
-      // Calculate rolling average (7-day window)
-      final List<double> totalCallsPerDay = [];
-      for (int i = 1; i <= 7; i++) {
-        final dayData = dataByWeekday[i]!;
-        totalCallsPerDay.add((dayData.successfulCalls + dayData.failedCalls + dayData.missedCallbacks).toDouble());
-      }
-
-      // Create chart data spots
-      final List<FlSpot> successfulSpots = [];
-      final List<FlSpot> failedSpots = [];
-      final List<FlSpot> missedSpots = [];
-      final List<FlSpot> rollingAverageSpots = [];
-
-      for (int i = 1; i <= 7; i++) {
-        final dayData = dataByWeekday[i]!;
-        final xValue = (i - 1).toDouble();
-        
-        successfulSpots.add(FlSpot(xValue, dayData.successfulCalls.toDouble()));
-        failedSpots.add(FlSpot(xValue, dayData.failedCalls.toDouble()));
-        missedSpots.add(FlSpot(xValue, dayData.missedCallbacks.toDouble()));
-        
-        // Calculate rolling average (simple moving average across all days)
-        double rollingAvg = totalCallsPerDay.reduce((a, b) => a + b) / 7;
-        rollingAverageSpots.add(FlSpot(xValue, rollingAvg));
-      }
-
-      if (mounted) {
-        setState(() {
-          _callDataByWeekday = dataByWeekday;
-          _successfulSpots = successfulSpots;
-          _failedSpots = failedSpots;
-          _missedSpots = missedSpots;
-          _rollingAverageSpots = rollingAverageSpots;
-          _isLoading = false;
-        });
+      if (_useWeeklyView) {
+        // Aggregate by weekday
+        _processWeeklyData(querySnapshot, startDate, endDate);
+      } else {
+        // Aggregate by specific dates
+        _processDailyData(querySnapshot, startDate, endDate);
       }
     } catch (e) {
-      print('Error fetching call data: $e');
+      print('❌ Error fetching call data: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  void _processWeeklyData(QuerySnapshot querySnapshot, DateTime startDate, DateTime endDate) {
+    // Aggregate data by day of week
+    final Map<int, CallDayData> dataByWeekday = {
+      1: CallDayData(weekday: 1, dayName: 'Mon'),
+      2: CallDayData(weekday: 2, dayName: 'Tue'),
+      3: CallDayData(weekday: 3, dayName: 'Wed'),
+      4: CallDayData(weekday: 4, dayName: 'Thu'),
+      5: CallDayData(weekday: 5, dayName: 'Fri'),
+      6: CallDayData(weekday: 6, dayName: 'Sat'),
+      7: CallDayData(weekday: 7, dayName: 'Sun'),
+    };
+
+    int recordsInRange = 0;
+    for (var doc in querySnapshot.docs) {
+      try {
+        final data = doc.data() as Map<String, dynamic>;
+        final timestamp = (data['timestamp'] as Timestamp).toDate();
+        
+        recordsInRange++;
+        final weekday = timestamp.weekday; // 1=Mon, 7=Sun
+        
+        final duration = (data['duration'] as num?)?.toDouble() ?? 0.0;
+        final callType = data['call_type'] as String? ?? '';
+        
+        bool answered;
+        if (data['answered'] is bool) {
+          answered = data['answered'] as bool;
+        } else if (data['answered'] is int) {
+          answered = (data['answered'] as int) == 1;
+        } else {
+          answered = false;
+        }
+
+        // Categorize calls
+        if (callType.toLowerCase() == 'missed') {
+          dataByWeekday[weekday]!.missedCallbacks++;
+        } else if (callType.toLowerCase() == 'incoming' && !answered) {
+          dataByWeekday[weekday]!.missedCallbacks++;
+        } else if (answered || duration > 0) {
+          dataByWeekday[weekday]!.successfulCalls++;
+        } else {
+          dataByWeekday[weekday]!.failedCalls++;
+        }
+      } catch (e) {
+        print('Error parsing call record: $e');
+      }
+    }
+
+    print('Records processed: $recordsInRange');
+
+    // Create chart data spots
+    final List<FlSpot> successfulSpots = [];
+    final List<FlSpot> failedSpots = [];
+    final List<FlSpot> missedSpots = [];
+    final List<FlSpot> rollingAverageSpots = [];
+
+    final List<double> totalCallsPerDay = [];
+    for (int i = 1; i <= 7; i++) {
+      final dayData = dataByWeekday[i]!;
+      totalCallsPerDay.add((dayData.successfulCalls + dayData.failedCalls + dayData.missedCallbacks).toDouble());
+    }
+
+    for (int i = 1; i <= 7; i++) {
+      final dayData = dataByWeekday[i]!;
+      final xValue = (i - 1).toDouble();
+      
+      successfulSpots.add(FlSpot(xValue, dayData.successfulCalls.toDouble()));
+      failedSpots.add(FlSpot(xValue, dayData.failedCalls.toDouble()));
+      missedSpots.add(FlSpot(xValue, dayData.missedCallbacks.toDouble()));
+      
+      double rollingAvg = totalCallsPerDay.reduce((a, b) => a + b) / 7;
+      rollingAverageSpots.add(FlSpot(xValue, rollingAvg));
+    }
+
+    if (mounted) {
+      setState(() {
+        _callDataByWeekday = dataByWeekday;
+        _successfulSpots = successfulSpots;
+        _failedSpots = failedSpots;
+        _missedSpots = missedSpots;
+        _rollingAverageSpots = rollingAverageSpots;
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _processDailyData(QuerySnapshot querySnapshot, DateTime startDate, DateTime endDate) {
+    // Create map of dates with zero counts
+    final Map<String, DailyCallData> dataByDate = {};
+    DateTime currentDate = startDate;
+    while (currentDate.isBefore(endDate) || currentDate.isAtSameMomentAs(endDate)) {
+      final dateKey = DateFormat('yyyy-MM-dd').format(currentDate);
+      dataByDate[dateKey] = DailyCallData(
+        date: currentDate,
+        dateKey: dateKey,
+      );
+      currentDate = currentDate.add(const Duration(days: 1));
+    }
+
+    // Aggregate call data by date
+    for (var doc in querySnapshot.docs) {
+      try {
+        final data = doc.data() as Map<String, dynamic>;
+        final timestamp = (data['timestamp'] as Timestamp).toDate();
+        final dateKey = DateFormat('yyyy-MM-dd').format(timestamp);
+        
+        if (!dataByDate.containsKey(dateKey)) continue;
+        
+        final duration = (data['duration'] as num?)?.toDouble() ?? 0.0;
+        final callType = data['call_type'] as String? ?? '';
+        
+        bool answered;
+        if (data['answered'] is bool) {
+          answered = data['answered'] as bool;
+        } else if (data['answered'] is int) {
+          answered = (data['answered'] as int) == 1;
+        } else {
+          answered = false;
+        }
+
+        // Categorize calls
+        if (callType.toLowerCase() == 'missed') {
+          dataByDate[dateKey]!.missedCallbacks++;
+        } else if (callType.toLowerCase() == 'incoming' && !answered) {
+          dataByDate[dateKey]!.missedCallbacks++;
+        } else if (answered || duration > 0) {
+          dataByDate[dateKey]!.successfulCalls++;
+        } else {
+          dataByDate[dateKey]!.failedCalls++;
+        }
+      } catch (e) {
+        print('Error parsing call record: $e');
+      }
+    }
+
+    // Create chart data spots
+    final List<FlSpot> successfulSpots = [];
+    final List<FlSpot> failedSpots = [];
+    final List<FlSpot> missedSpots = [];
+    final List<FlSpot> rollingAverageSpots = [];
+
+    final sortedDates = dataByDate.keys.toList()..sort();
+    final List<double> totalCallsPerDay = [];
+
+    for (int i = 0; i < sortedDates.length; i++) {
+      final dateKey = sortedDates[i];
+      final dayData = dataByDate[dateKey]!;
+      final xValue = i.toDouble();
+      
+      successfulSpots.add(FlSpot(xValue, dayData.successfulCalls.toDouble()));
+      failedSpots.add(FlSpot(xValue, dayData.failedCalls.toDouble()));
+      missedSpots.add(FlSpot(xValue, dayData.missedCallbacks.toDouble()));
+      totalCallsPerDay.add((dayData.successfulCalls + dayData.failedCalls + dayData.missedCallbacks).toDouble());
+    }
+
+    // Calculate rolling average
+    if (totalCallsPerDay.isNotEmpty) {
+      double avg = totalCallsPerDay.reduce((a, b) => a + b) / totalCallsPerDay.length;
+      for (int i = 0; i < sortedDates.length; i++) {
+        rollingAverageSpots.add(FlSpot(i.toDouble(), avg));
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _callDataByDate = dataByDate;
+        _successfulSpots = successfulSpots;
+        _failedSpots = failedSpots;
+        _missedSpots = missedSpots;
+        _rollingAverageSpots = rollingAverageSpots;
+        _isLoading = false;
+      });
     }
   }
 
@@ -375,7 +461,7 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
               height: 300,
               child: Center(child: CircularProgressIndicator()),
             )
-          else if (_callDataByWeekday.isEmpty || _getMaxY() == 0)
+          else if ((_useWeeklyView && _callDataByWeekday.isEmpty) || (!_useWeeklyView && _callDataByDate.isEmpty) || _getMaxY() == 0)
             SizedBox(
               height: 300,
               child: Center(
@@ -438,18 +524,40 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 30,
-                        interval: 1,
+                        interval: _useWeeklyView ? 1 : (_callDataByDate.length > 14 ? 3 : 1),
                         getTitlesWidget: (double value, TitleMeta meta) {
-                          final weekday = value.toInt() + 1;
-                          final dayData = _callDataByWeekday[weekday];
-                          if (dayData != null) {
-                            return Text(
-                              dayData.dayName,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            );
+                          if (_useWeeklyView) {
+                            final weekday = value.toInt() + 1;
+                            final dayData = _callDataByWeekday[weekday];
+                            if (dayData != null) {
+                              return Text(
+                                dayData.dayName,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              );
+                            }
+                          } else {
+                            // Daily view - show dates
+                            final sortedDates = _callDataByDate.keys.toList()..sort();
+                            final index = value.toInt();
+                            if (index >= 0 && index < sortedDates.length) {
+                              final dateKey = sortedDates[index];
+                              final dayData = _callDataByDate[dateKey];
+                              if (dayData != null) {
+                                return RotatedBox(
+                                  quarterTurns: -1,
+                                  child: Text(
+                                    DateFormat('M/d').format(dayData.date),
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                );
+                              }
+                            }
                           }
                           return const Text('');
                         },
@@ -477,50 +585,118 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
                     border: Border.all(color: Colors.grey.shade400),
                   ),
                   minX: 0,
-                  maxX: 6,
+                  maxX: _useWeeklyView ? 6 : (_callDataByDate.length - 1).toDouble(),
                   minY: 0,
                   maxY: _getMaxY() + 5,
                   lineTouchData: LineTouchData(
                     enabled: true,
                     touchTooltipData: LineTouchTooltipData(
-                      getTooltipColor: (touchedSpot) => Colors.blueGrey,
+                      getTooltipColor: (touchedSpot) => Colors.blueGrey.shade800,
                       tooltipRoundedRadius: 8,
+                      tooltipPadding: const EdgeInsets.all(12),
+                      fitInsideHorizontally: true,
+                      fitInsideVertically: true,
                       getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
-                        return touchedBarSpots.map((barSpot) {
-                          final weekday = barSpot.x.toInt() + 1;
+                        if (touchedBarSpots.isEmpty) return [];
+                        
+                        // Get the x value from the first touched spot
+                        final xValue = touchedBarSpots.first.x.toInt();
+                        
+                        // Get data based on view mode
+                        String dateLabel;
+                        int successful = 0;
+                        int failed = 0;
+                        int missed = 0;
+                        
+                        if (_useWeeklyView) {
+                          final weekday = xValue + 1;
                           final dayData = _callDataByWeekday[weekday];
+                          if (dayData == null) return [];
                           
-                          if (dayData == null) return null;
-                          
-                          String label = '';
-                          Color color = Colors.white;
-                          
-                          if (barSpot.barIndex == 0) {
-                            label = 'Successful: ${dayData.successfulCalls}';
-                            color = Colors.green;
-                          } else if (barSpot.barIndex == 1) {
-                            label = 'Failed: ${dayData.failedCalls}';
-                            color = Colors.red;
-                          } else if (barSpot.barIndex == 2) {
-                            label = 'Missed: ${dayData.missedCallbacks}';
-                            color = Colors.orange;
-                          } else if (barSpot.barIndex == 3) {
-                            label = 'Avg: ${barSpot.y.toStringAsFixed(1)}';
-                            color = Colors.blue.shade300;
+                          dateLabel = dayData.dayName;
+                          successful = dayData.successfulCalls;
+                          failed = dayData.failedCalls;
+                          missed = dayData.missedCallbacks;
+                        } else {
+                          final sortedDates = _callDataByDate.keys.toList()..sort();
+                          if (xValue >= 0 && xValue < sortedDates.length) {
+                            final dateKey = sortedDates[xValue];
+                            final dayData = _callDataByDate[dateKey];
+                            if (dayData == null) return [];
+                            
+                            dateLabel = DateFormat('MMM d').format(dayData.date);
+                            successful = dayData.successfulCalls;
+                            failed = dayData.failedCalls;
+                            missed = dayData.missedCallbacks;
+                          } else {
+                            return [];
                           }
-                          
-                          return LineTooltipItem(
-                            label,
-                            TextStyle(
-                              color: color,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          );
+                        }
+                        
+                        final total = successful + failed + missed;
+                        
+                        // Return tooltip items for each line that was touched
+                        return touchedBarSpots.map((LineBarSpot touchedSpot) {
+                          // Only show the comprehensive tooltip once (for the first line)
+                          if (touchedSpot.barIndex == 0) {
+                            return LineTooltipItem(
+                              '$dateLabel\n',
+                              const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: '✓ Successful: $successful\n',
+                                  style: const TextStyle(
+                                    color: Colors.greenAccent,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: '✗ Failed: $failed\n',
+                                  style: const TextStyle(
+                                    color: Colors.redAccent,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: '◉ Missed: $missed\n',
+                                  style: const TextStyle(
+                                    color: Colors.orangeAccent,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: '━━━━━━━━━\n',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade400,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: 'Total: $total',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            );
+                          } else {
+                            // For other lines, return null so they don't show separate tooltips
+                            return const LineTooltipItem('', TextStyle());
+                          }
                         }).toList();
                       },
                     ),
                     handleBuiltInTouches: true,
+                    touchSpotThreshold: 20,
                     getTouchedSpotIndicator: (LineChartBarData barData, List<int> spotIndexes) {
                       return spotIndexes.map((spotIndex) {
                         return TouchedSpotIndicatorData(
@@ -600,7 +776,7 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
           const SizedBox(height: 24),
           
           // Daily breakdown summary
-          if (!_isLoading && _callDataByWeekday.isNotEmpty && _getMaxY() > 0)
+          if (!_isLoading && ((_useWeeklyView && _callDataByWeekday.isNotEmpty) || (!_useWeeklyView && _callDataByDate.isNotEmpty)) && _getMaxY() > 0)
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -619,47 +795,94 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  ..._callDataByWeekday.values.map((dayData) {
-                    final total = dayData.successfulCalls + dayData.failedCalls + dayData.missedCallbacks;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 50,
-                            child: Text(
-                              dayData.dayName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
+                  if (_useWeeklyView)
+                    ..._callDataByWeekday.values.map((dayData) {
+                      final total = dayData.successfulCalls + dayData.failedCalls + dayData.missedCallbacks;
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 50,
+                              child: Text(
+                                dayData.dayName,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Row(
-                              children: [
-                                _buildStatBadge('S: ${dayData.successfulCalls}', Colors.green),
-                                const SizedBox(width: 8),
-                                _buildStatBadge('F: ${dayData.failedCalls}', Colors.red),
-                                const SizedBox(width: 8),
-                                _buildStatBadge('M: ${dayData.missedCallbacks}', Colors.orange),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Total: $total',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[700],
-                                    fontWeight: FontWeight.w600,
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  _buildStatBadge('S: ${dayData.successfulCalls}', Colors.green),
+                                  const SizedBox(width: 8),
+                                  _buildStatBadge('F: ${dayData.failedCalls}', Colors.red),
+                                  const SizedBox(width: 8),
+                                  _buildStatBadge('M: ${dayData.missedCallbacks}', Colors.orange),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Total: $total',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[700],
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList()
+                  else
+                    // Daily view - show all dates
+                    ...(() {
+                      final sortedDates = _callDataByDate.keys.toList()..sort();
+                      return sortedDates.map((dateKey) {
+                        final dayData = _callDataByDate[dateKey]!;
+                        final total = dayData.successfulCalls + dayData.failedCalls + dayData.missedCallbacks;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 70,
+                                child: Text(
+                                  DateFormat('MMM d').format(dayData.date),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Wrap(
+                                  spacing: 6,
+                                  runSpacing: 4,
+                                  children: [
+                                    _buildStatBadge('S: ${dayData.successfulCalls}', Colors.green),
+                                    _buildStatBadge('F: ${dayData.failedCalls}', Colors.red),
+                                    _buildStatBadge('M: ${dayData.missedCallbacks}', Colors.orange),
+                                    Text(
+                                      'Total: $total',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.grey[700],
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
+                        );
+                      }).toList();
+                    })(),
                 ],
               ),
             ),
@@ -709,9 +932,16 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
 
   double _getMaxY() {
     double max = 0;
-    for (var data in _callDataByWeekday.values) {
-      final dayMax = (data.successfulCalls + data.failedCalls + data.missedCallbacks).toDouble();
-      if (dayMax > max) max = dayMax;
+    if (_useWeeklyView) {
+      for (var data in _callDataByWeekday.values) {
+        final dayMax = (data.successfulCalls + data.failedCalls + data.missedCallbacks).toDouble();
+        if (dayMax > max) max = dayMax;
+      }
+    } else {
+      for (var data in _callDataByDate.values) {
+        final dayMax = (data.successfulCalls + data.failedCalls + data.missedCallbacks).toDouble();
+        if (dayMax > max) max = dayMax;
+      }
     }
     for (var spot in _rollingAverageSpots) {
       if (spot.y > max) max = spot.y;
@@ -730,5 +960,18 @@ class CallDayData {
   CallDayData({
     required this.weekday,
     required this.dayName,
+  });
+}
+
+class DailyCallData {
+  final DateTime date;
+  final String dateKey;
+  int successfulCalls = 0;
+  int failedCalls = 0;
+  int missedCallbacks = 0;
+
+  DailyCallData({
+    required this.date,
+    required this.dateKey,
   });
 }

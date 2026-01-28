@@ -656,6 +656,8 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                               maxCallThreshold: _maxCallThreshold,
                               timeOffset: _timeOffset,
                               contactFilter: _selectedContactFilter,
+                              customStartDate: _customStartDate,
+                              customEndDate: _customEndDate,
                             ),
                           ),
                         ],
