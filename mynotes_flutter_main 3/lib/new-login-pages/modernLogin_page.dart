@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/constants/routes.dart';
 import 'package:flutter_application_1/new-login-pages/my_button_login.dart';
 import 'package:flutter_application_1/new-login-pages/my_textfield.dart';
+import 'package:flutter_application_1/utilities/apple_typography.dart';
 
 import 'package:flutter_application_1/utilities/dialogs/error_dialog.dart';
 
@@ -98,9 +99,10 @@ class _LoginPageState extends State<LoginScreen1> {
               // welcome back, you've been missed!
               Text(
                 'Welcome back you\'ve been missed!',
-                style: TextStyle(
-                  color: Colors.grey[700],
-                  fontSize: 16,
+                style: AppleTypography.withAppleFont(
+                  AppleTypography.body1.copyWith(
+                    color: Colors.grey[700],
+                  )
                 ),
               ),
 

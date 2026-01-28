@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/views/list/firebase_services.dart';
 import 'package:flutter_application_1/views/notes/contact_notes_view.dart';
 import 'package:flutter_application_1/utilities/dialogs/call_feedback_dialog.dart';
+import 'package:flutter_application_1/utilities/apple_typography.dart';
 
 
 class ImgSample {
@@ -1227,9 +1228,10 @@ Widget build(BuildContext context) {
                         ),
                         label: Text(
                           'End Loop',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                          style: AppleTypography.withAppleFont(
+                            AppleTypography.body1.copyWith(
+                              fontWeight: FontWeight.w600,
+                            )
                           ),
                         ),
                         style: ElevatedButton.styleFrom(

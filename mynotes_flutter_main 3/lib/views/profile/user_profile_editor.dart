@@ -10,6 +10,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:string_validator/string_validator.dart';
+import 'package:flutter_application_1/utilities/apple_typography.dart';
 // import 'package:email_validator/email_validator.dart';
 
 class UserProfileEditor extends StatefulWidget {
@@ -101,10 +102,11 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
               padding: EdgeInsets.only(bottom: 20),
               child: Text(
                 'Edit Profile',
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w700,
-                  color: Color.fromRGBO(64, 105, 225, 1),
+                style: AppleTypography.withAppleFont(
+                  AppleTypography.headline3.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromRGBO(64, 105, 225, 1),
+                  )
                 ),
               ),
             ),
@@ -166,10 +168,11 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
           children: [
             Text(
               title,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey,
+              style: AppleTypography.withAppleFont(
+                AppleTypography.caption.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey,
+                )
               ),
             ),
             SizedBox(height: 1),
@@ -192,7 +195,11 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
                     },
                     child: Text(
                       getValue,
-                      style: TextStyle(fontSize: 16, height: 1.4),
+                      style: AppleTypography.withAppleFont(
+                        AppleTypography.body1.copyWith(
+                          height: 1.4,
+                        )
+                      ),
                     ),
                   ),
                 ),
@@ -235,7 +242,12 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
           alignment: Alignment.centerLeft,
           child: Text(
             '  $value',
-            style: const TextStyle(fontSize: 16, height: 1.4, color: Colors.black87),
+            style: AppleTypography.withAppleFont(
+              AppleTypography.body1.copyWith(
+                height: 1.4, 
+                color: Colors.black87
+              )
+            ),
           ),
         )
       ],
@@ -286,9 +298,10 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
                     alignment: Alignment.topLeft,
                     child: Text(
                       about.isEmpty ? 'Tap to add a short bio' : about,
-                      style: TextStyle(
-                        fontSize: 16,
-                        height: 1.4,
+                      style: AppleTypography.withAppleFont(
+                        AppleTypography.body1.copyWith(
+                          height: 1.4,
+                        )
                       ),
                     ),
                   ),
@@ -626,9 +639,13 @@ class _EditPhoneFormPageState extends State<_EditPhoneFormPage> {
           children: <Widget>[
             SizedBox(
               width: 320,
-              child: const Text(
+              child: Text(
                 "What's Your Phone Number?",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: AppleTypography.withAppleFont(
+                  AppleTypography.headline6.copyWith(
+                    fontWeight: FontWeight.bold,
+                  )
+                ),
               ),
             ),
             Padding(
@@ -913,9 +930,13 @@ class _EditDescriptionFormPageState extends State<_EditDescriptionFormPage> {
           children: <Widget>[
             SizedBox(
               width: 350,
-              child: const Text(
+              child: Text(
                 "What type of passenger\nare you?",
-                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                style: AppleTypography.withAppleFont(
+                  AppleTypography.headline4.copyWith(
+                    fontWeight: FontWeight.bold,
+                  )
+                ),
               ),
             ),
             Padding(

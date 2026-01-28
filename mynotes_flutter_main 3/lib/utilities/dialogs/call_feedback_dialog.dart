@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:flutter_application_1/utilities/apple_typography.dart';
 
 class CallFeedbackDialog extends StatefulWidget {
   final String contactName;
@@ -29,7 +30,7 @@ class _CallFeedbackDialogState extends State<CallFeedbackDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Call Feedback'),
+      title: Text('Call Feedback', style: AppleTypography.withAppleFont(AppleTypography.headline6)),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

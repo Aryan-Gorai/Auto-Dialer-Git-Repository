@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
+import 'package:flutter_application_1/utilities/apple_typography.dart';
 
 class ListPerformanceChart extends StatefulWidget {
   const ListPerformanceChart({Key? key}) : super(key: key);

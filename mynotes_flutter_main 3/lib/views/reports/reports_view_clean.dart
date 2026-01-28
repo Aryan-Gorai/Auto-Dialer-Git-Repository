@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/enums/menu_action.dart';
 import 'package:flutter_application_1/utilities/dialogs/logout_dialog.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
+import 'package:flutter_application_1/utilities/apple_typography.dart';
 import 'package:intl/intl.dart';
 
 import '../dialer/dialer.dart';
@@ -242,7 +243,14 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
     return Scaffold(
       backgroundColor: const Color.fromRGBO(248, 225, 209, 1),
       appBar: AppBar(
-        title: const Text('Reports View (% Completion)'),
+        title: Text(
+          'Reports View (% Completion)',
+          style: AppleTypography.withAppleFont(
+            AppleTypography.headline5.copyWith(
+              fontWeight: FontWeight.normal,
+            )
+          ),
+        ),
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
@@ -336,10 +344,11 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                         children: <Widget>[
                           Text(
                             'Call Frequency Heatmap',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey[800],
+                            style: AppleTypography.withAppleFont(
+                              AppleTypography.headline5.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey[800],
+                              )
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -348,9 +357,10 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                             children: [
                               Text(
                                 'Time Scale:',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey[700],
+                                style: AppleTypography.withAppleFont(
+                                  AppleTypography.body1.copyWith(
+                                    color: Colors.grey[700],
+                                  )
                                 ),
                               ),
                               const SizedBox(width: 16),

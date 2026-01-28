@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
+import 'package:flutter_application_1/utilities/apple_typography.dart';
 import 'package:intl/intl.dart';
 
 class CallDurationChart extends StatefulWidget {
@@ -618,10 +619,11 @@ class _CallDurationChartState extends State<CallDurationChart> {
                   const SizedBox(height: 16),
                   Text(
                     'Duration Distribution',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
+                    style: AppleTypography.withAppleFont(
+                      AppleTypography.body1.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[800],
+                      )
                     ),
                   ),
                   const SizedBox(height: 8),

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
+import 'package:flutter_application_1/utilities/apple_typography.dart';
 
 class CallHistoryView extends StatefulWidget {
   const CallHistoryView({Key? key}) : super(key: key);
@@ -184,11 +185,12 @@ class _CallHistoryViewState extends State<CallHistoryView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Call History',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 34,
+          style: AppleTypography.withAppleFont(
+            AppleTypography.headline5.copyWith(
+              fontWeight: FontWeight.normal,
+            )
           ),
         ),
         backgroundColor: Colors.white,
@@ -203,10 +205,14 @@ class _CallHistoryViewState extends State<CallHistoryView> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _callRecords.isEmpty
-              ? const Center(
+              ? Center(
                   child: Text(
                     'No call history found',
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                    style: AppleTypography.withAppleFont(
+                      AppleTypography.body1.copyWith(
+                        color: Colors.grey,
+                      )
+                    ),
                   ),
                 )
               : ListView.builder(
@@ -247,9 +253,10 @@ class _CallHistoryViewState extends State<CallHistoryView> {
             Expanded(
               child: Text(
                 display,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
+                style: AppleTypography.withAppleFont(
+                  AppleTypography.body1.copyWith(
+                    fontWeight: FontWeight.w600,
+                  )
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

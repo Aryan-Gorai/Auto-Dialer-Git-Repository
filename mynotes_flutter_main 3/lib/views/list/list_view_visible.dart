@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/views/dialer/dialer.dart';
 import 'package:flutter_application_1/views/list/firebase_services.dart';
+import 'package:flutter_application_1/utilities/apple_typography.dart';
 
 
 class list_view_visible extends StatefulWidget {
@@ -248,10 +249,17 @@ Widget build(BuildContext context) {
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Lists"),
+          Text(
+            "Lists",
+            style: AppleTypography.withAppleFont(
+              AppleTypography.headline5.copyWith(
+                fontWeight: FontWeight.normal,
+              )
+            ),
+          ),
           Text(
             "Drag to reorder",
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+            style: AppleTypography.withAppleFont(AppleTypography.caption),
           ),
         ],
       ),
@@ -338,7 +346,9 @@ Widget build(BuildContext context) {
                               },
                               child: Text(
                                 'Delete',
-                                style: TextStyle(color: Colors.red),
+                                style: AppleTypography.withAppleFont(
+                                  AppleTypography.body2.copyWith(color: Colors.red)
+                                ),
                               ),
                             ),
                           ],

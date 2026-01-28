@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
+import 'package:flutter_application_1/utilities/apple_typography.dart';
 import 'package:intl/intl.dart';
 
 class CallOutcomeDonutChart extends StatefulWidget {
@@ -377,17 +378,20 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
                         children: [
                           Text(
                             '$_totalCalls',
-                            style: TextStyle(
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey[800],
+                            style: AppleTypography.withAppleFont(
+                              TextStyle(
+                                fontSize: 40,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey[800],
+                              )
                             ),
                           ),
                           Text(
                             'Total Calls',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
+                            style: AppleTypography.withAppleFont(
+                              AppleTypography.body2.copyWith(
+                                color: Colors.grey[600],
+                              )
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -467,10 +471,11 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
                     children: [
                       Text(
                         'Success Rate',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[800],
+                        style: AppleTypography.withAppleFont(
+                          AppleTypography.body1.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[800],
+                          )
                         ),
                       ),
                       Text(
