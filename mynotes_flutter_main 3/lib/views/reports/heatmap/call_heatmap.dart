@@ -7,12 +7,14 @@ class CallHeatmap extends StatefulWidget {
   final String timeScale; // 'month', 'week', 'day'
   final int maxCallThreshold; // Value that represents the darkest green
   final int timeOffset; // Offset for navigation (0 = current, -1 = previous, 1 = next, etc.)
+  final String? contactFilter; // Optional: normalized_phone to filter by specific contact
 
   const CallHeatmap({
     Key? key,
     required this.timeScale,
     required this.maxCallThreshold,
     required this.timeOffset,
+    this.contactFilter,
   }) : super(key: key);
 
   @override
@@ -102,13 +104,31 @@ class _CallHeatmapState extends State<CallHeatmap> {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
       
-      // Query the contact_notes collection for call records
-      QuerySnapshot snapshot = await firestore
+      // Build base query for contact_notes collection
+      Query query = firestore
           .collection('contact_notes')
           .where('user_id', isEqualTo: userId)
           .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
-          .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
-          .get();
+          .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endDate));
+
+      // If contact filter is set, we need to get the phone number from Contact Directories first
+      String? phoneNumberToFilter;
+      if (widget.contactFilter != null) {
+        // Fetch the contact from Contact Directories to get the phone number
+        final contactDoc = await firestore
+            .collection('Contact Directories')
+            .where('user_id', isEqualTo: userId)
+            .where('normalized_phone', isEqualTo: widget.contactFilter)
+            .limit(1)
+            .get();
+        
+        if (contactDoc.docs.isNotEmpty) {
+          phoneNumberToFilter = contactDoc.docs.first['contact_phone_number'] as String?;
+        }
+      }
+
+      // Execute the query
+      QuerySnapshot snapshot = await query.get();
 
       // Initialize the call data map
       Map<String, int> newCallData = {};
@@ -116,6 +136,15 @@ class _CallHeatmapState extends State<CallHeatmap> {
       // Process the query results
       for (var doc in snapshot.docs) {
         final data = doc.data() as Map<String, dynamic>;
+        
+        // Apply contact filter if specified
+        if (phoneNumberToFilter != null) {
+          final docPhone = data['contact_phone_number'] as String?;
+          if (docPhone != phoneNumberToFilter) {
+            continue; // Skip this record if it doesn't match the filtered contact
+          }
+        }
+        
         final timestamp = (data['timestamp'] as Timestamp).toDate();
         
         String key;

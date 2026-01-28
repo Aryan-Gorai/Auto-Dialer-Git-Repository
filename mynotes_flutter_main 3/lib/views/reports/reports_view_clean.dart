@@ -36,6 +36,11 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
   int _timeOffset = 0; // 0 = current period, -1 = previous, 1 = next, etc.
   DateTime? _customStartDate;
   DateTime? _customEndDate;
+  
+  // Contact filter for heatmap
+  String? _selectedContactFilter; // normalized_phone of selected contact, null = All Contacts
+  List<Map<String, dynamic>> _availableContacts = [];
+  bool _isLoadingContacts = false;
 
   // Common time range settings for all tabs
   String _weeklyTrendsTimeRange = 'last7days';
@@ -53,7 +58,63 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
     _loadHeatmapSettings();
+    _loadContactsForFilter();
     _thresholdController.addListener(_updateThresholdAndSave);
+  }
+
+  // Fetch contacts from Contact Directories for filter dropdown
+  Future<void> _loadContactsForFilter() async {
+    setState(() {
+      _isLoadingContacts = true;
+    });
+
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      print('Loading contacts for filter, userId: $userId');
+      
+      QuerySnapshot snapshot = await firestore
+          .collection('Contact Directories')
+          .where('user_id', isEqualTo: userId)
+          .get();
+
+      print('Found ${snapshot.docs.length} contacts in Contact Directories');
+
+      List<Map<String, dynamic>> contacts = [];
+      for (var doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final contactData = {
+          'contact_name': data['contact_name'] ?? '',
+          'normalized_phone': data['normalized_phone'] ?? '',
+          'contact_phone_number': data['contact_phone_number'] ?? '',
+        };
+        contacts.add(contactData);
+        print('Added contact: ${contactData['contact_name']} - ${contactData['contact_phone_number']}');
+      }
+
+      // Sort contacts alphabetically by name in memory
+      contacts.sort((a, b) {
+        String nameA = (a['contact_name'] as String).toLowerCase();
+        String nameB = (b['contact_name'] as String).toLowerCase();
+        if (nameA.isEmpty) nameA = a['contact_phone_number'] as String;
+        if (nameB.isEmpty) nameB = b['contact_phone_number'] as String;
+        return nameA.compareTo(nameB);
+      });
+
+      if (mounted) {
+        setState(() {
+          _availableContacts = contacts;
+          _isLoadingContacts = false;
+        });
+        print('Contacts loaded successfully: ${contacts.length} contacts');
+      }
+    } catch (e) {
+      print('❌ Error loading contacts for filter: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingContacts = false;
+        });
+      }
+    }
   }
 
   // Load heatmap settings from Firebase
@@ -101,6 +162,9 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
           if (data.containsKey('custom_end_date')) {
             _customEndDate = (data['custom_end_date'] as Timestamp).toDate();
           }
+          if (data.containsKey('heatmap_contact_filter')) {
+            _selectedContactFilter = data['heatmap_contact_filter'] as String?;
+          }
         });
       }
     } catch (e) {
@@ -126,6 +190,11 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
       }
       if (_customEndDate != null) {
         dataToSave['custom_end_date'] = Timestamp.fromDate(_customEndDate!);
+      }
+      if (_selectedContactFilter != null) {
+        dataToSave['heatmap_contact_filter'] = _selectedContactFilter;
+      } else {
+        dataToSave['heatmap_contact_filter'] = null;
       }
 
       await firestore.collection('user_settings').doc(userId).set(dataToSave, SetOptions(merge: true));
@@ -352,6 +421,75 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                             ),
                           ),
                           const SizedBox(height: 16),
+                          // Contact filter dropdown
+                          Row(
+                            children: [
+                              Text(
+                                'Filter by Contact:',
+                                style: AppleTypography.withAppleFont(
+                                  AppleTypography.body1.copyWith(
+                                    color: Colors.grey[700],
+                                  )
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: _isLoadingContacts
+                                  ? const SizedBox(
+                                      height: 30,
+                                      child: Center(
+                                        child: SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(strokeWidth: 2),
+                                        ),
+                                      ),
+                                    )
+                                  : _availableContacts.isEmpty
+                                    ? Row(
+                                        children: [
+                                          const Text('No contacts found'),
+                                          const SizedBox(width: 8),
+                                          TextButton(
+                                            onPressed: _loadContactsForFilter,
+                                            child: const Text('Retry', style: TextStyle(fontSize: 12)),
+                                          ),
+                                        ],
+                                      )
+                                    : DropdownButton<String?>(
+                                        isExpanded: true,
+                                        value: _selectedContactFilter,
+                                        hint: Text('All Contacts (${_availableContacts.length} available)'),
+                                        onChanged: (String? newValue) {
+                                          setState(() {
+                                            _selectedContactFilter = newValue;
+                                          });
+                                          _saveHeatmapSettings();
+                                        },
+                                        items: [
+                                          const DropdownMenuItem<String?>(
+                                            value: null,
+                                            child: Text('All Contacts'),
+                                          ),
+                                          ..._availableContacts.map((contact) {
+                                            final name = contact['contact_name'] as String? ?? '';
+                                            final phone = contact['contact_phone_number'] as String? ?? '';
+                                            final displayText = name.isNotEmpty ? name : phone;
+                                            
+                                            return DropdownMenuItem<String?>(
+                                              value: contact['normalized_phone'] as String?,
+                                              child: Text(
+                                                displayText,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            );
+                                          }).toList(),
+                                        ],
+                                      ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
                           // Time scale selector
                           Row(
                             children: [
@@ -517,6 +655,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                               timeScale: _selectedTimeScale,
                               maxCallThreshold: _maxCallThreshold,
                               timeOffset: _timeOffset,
+                              contactFilter: _selectedContactFilter,
                             ),
                           ),
                         ],
