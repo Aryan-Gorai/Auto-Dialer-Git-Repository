@@ -645,72 +645,123 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
 @override
 Widget build(BuildContext context) {
   return Scaffold(
-    appBar: AppBar(
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    backgroundColor: const Color.fromRGBO(248, 248, 250, 1),
+    body: SafeArea(
+      child: Column(
         children: [
-          Text("Contacts in ${widget.listName}"),
-          Text(
-            "Drag to reorder",
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
-          ),
-        ],
-      ),
-    ),
-    body: Column(
-      children: [
-        // Settings Toggle Button
-        InkWell(
-          onTap: () {
-            setState(() {
-              isSettingsExpanded = !isSettingsExpanded;
-            });
-          },
-          child: Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          // Header
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 16, 20, 16),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              border: Border(
-                bottom: BorderSide(
-                  color: Colors.grey.shade300,
-                  width: 1,
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
                 ),
-              ),
+              ],
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Icon(
-                      Icons.settings,
-                      color: Colors.grey.shade700,
-                      size: 22,
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios),
+                      color: const Color.fromRGBO(64, 105, 225, 1),
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
-                    SizedBox(width: 8),
-                    Text(
-                      'List Settings',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade800,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.listName,
+                            style: AppleTypography.withAppleFont(
+                              AppleTypography.headline4.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: const Color.fromRGBO(64, 105, 225, 1),
+                              ),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${myTiles.length} contacts • Drag to reorder',
+                            style: AppleTypography.withAppleFont(
+                              AppleTypography.body2.copyWith(color: Colors.grey.shade600),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                AnimatedRotation(
-                  turns: isSettingsExpanded ? 0.5 : 0,
-                  duration: Duration(milliseconds: 300),
-                  child: Icon(
-                    Icons.keyboard_arrow_down,
-                    color: Colors.grey.shade700,
-                  ),
-                ),
               ],
             ),
           ),
-        ),
+          // Settings Toggle Button
+          InkWell(
+            onTap: () {
+              setState(() {
+                isSettingsExpanded = !isSettingsExpanded;
+              });
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  bottom: BorderSide(
+                    color: Colors.grey.shade200,
+                    width: 1,
+                  ),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color.fromRGBO(64, 105, 225, 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          Icons.settings,
+                          color: const Color.fromRGBO(64, 105, 225, 1),
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'List Settings',
+                        style: AppleTypography.withAppleFont(
+                          AppleTypography.subtitle1.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  AnimatedRotation(
+                    turns: isSettingsExpanded ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 300),
+                    child: Icon(
+                      Icons.keyboard_arrow_down,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         // Collapsible Settings Section
         AnimatedSize(
           duration: Duration(milliseconds: 300),
@@ -1254,50 +1305,47 @@ Widget build(BuildContext context) {
           child: Stack(
             children: [
               isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const CircularProgressIndicator(
+                            color: Color.fromRGBO(64, 105, 225, 1),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Loading contacts...',
+                            style: AppleTypography.withAppleFont(
+                              AppleTypography.body1.copyWith(color: Colors.grey.shade600),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
                   : currentCallIndex < 0
                       ? ReorderableListView(
-                          padding: const EdgeInsets.all(10),
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 280),
                           children: [
                             for (int i = 0; i < myTiles.length; i++)
-                              Padding(
+                              Container(
                                 key: ValueKey(myTiles[i]),
-                                padding: const EdgeInsets.all(8.0),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(4.0),
-                                  ),
-                                  child: ListTile(
-                                    leading: Icon(Icons.drag_handle, color: Colors.grey[600]), // Drag handle icon
-                                    title: Text(myTiles[i]),
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          icon: Icon(Icons.note_add),
-                                          onPressed: () {
-                                            if (i < contactsData.length) {
-                                              Navigator.of(context).push(
-                                                MaterialPageRoute(
-                                                  builder: (context) => ContactNotesView(
-                                                    contactName: contactsData[i]['contact_name'],
-                                                    contactPhoneNumber: contactsData[i]['contact_phone_number'],
-                                                    listName: widget.listName,
-                                                  ),
-                                                ),
-                                              );
-                                            }
-                                          },
-                                        ),
-                                        IconButton(
-                                          icon: Icon(Icons.delete),
-                                          onPressed: () {
-                                            deleteSpecificContact(myTiles[i]);
-                                          },
-                                        ),
-                                      ],
+                                margin: const EdgeInsets.only(bottom: 10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.04),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
                                     ),
+                                  ],
+                                ),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(16),
                                     onTap: () {
                                       if (i < contactsData.length) {
                                         Navigator.of(context).push(
@@ -1311,6 +1359,112 @@ Widget build(BuildContext context) {
                                         );
                                       }
                                     },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12),
+                                      child: Row(
+                                        children: [
+                                          // Drag handle
+                                          ReorderableDragStartListener(
+                                            index: i,
+                                            child: Container(
+                                              padding: const EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey.shade100,
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Icon(Icons.drag_handle, color: Colors.grey.shade600, size: 20),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          // Contact info
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  myTiles[i],
+                                                  style: AppleTypography.withAppleFont(
+                                                    AppleTypography.subtitle1.copyWith(
+                                                      fontWeight: FontWeight.w600,
+                                                      color: Colors.grey.shade800,
+                                                    ),
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                                if (i < contactsData.length) ...[
+                                                  const SizedBox(height: 4),
+                                                  Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.phone_outlined,
+                                                        size: 14,
+                                                        color: Colors.grey.shade500,
+                                                      ),
+                                                      const SizedBox(width: 4),
+                                                      Expanded(
+                                                        child: Text(
+                                                          contactsData[i]['contact_phone_number'] ?? '',
+                                                          style: AppleTypography.withAppleFont(
+                                                            AppleTypography.body2.copyWith(
+                                                              color: Colors.grey.shade600,
+                                                            ),
+                                                          ),
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow.ellipsis,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
+                                          ),
+                                          // Action buttons
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              color: const Color.fromRGBO(64, 105, 225, 0.1),
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            child: IconButton(
+                                              icon: const Icon(Icons.note_add),
+                                              color: const Color.fromRGBO(64, 105, 225, 1),
+                                              iconSize: 22,
+                                              onPressed: () {
+                                                if (i < contactsData.length) {
+                                                  Navigator.of(context).push(
+                                                    MaterialPageRoute(
+                                                      builder: (context) => ContactNotesView(
+                                                        contactName: contactsData[i]['contact_name'],
+                                                        contactPhoneNumber: contactsData[i]['contact_phone_number'],
+                                                        listName: widget.listName,
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                              tooltip: 'Add note',
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.red.shade50,
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            child: IconButton(
+                                              icon: const Icon(Icons.delete_outline),
+                                              color: Colors.red.shade400,
+                                              iconSize: 22,
+                                              onPressed: () {
+                                                deleteSpecificContact(myTiles[i]);
+                                              },
+                                              tooltip: 'Delete contact',
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -1320,45 +1474,33 @@ Widget build(BuildContext context) {
                           },
                         )
                       : ListView(
-                          padding: const EdgeInsets.all(10),
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
                           children: [
                             for (int i = 0; i < myTiles.length; i++)
-                              Padding(
+                              Container(
                                 key: ValueKey(myTiles[i]),
-                                padding: const EdgeInsets.all(8.0),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[200],
-                                    border: i == currentCallIndex 
-                                        ? Border.all(color: Colors.blue, width: 3.0)
-                                        : null,
-                                    borderRadius: BorderRadius.circular(4.0),
-                                  ),
-                                  child: ListTile(
-                                    // No drag handle icon during call cycle
-                                    title: Text(myTiles[i]),
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          icon: Icon(Icons.note_add),
-                                          onPressed: () {
-                                            if (i < contactsData.length) {
-                                              Navigator.of(context).push(
-                                                MaterialPageRoute(
-                                                  builder: (context) => ContactNotesView(
-                                                    contactName: contactsData[i]['contact_name'],
-                                                    contactPhoneNumber: contactsData[i]['contact_phone_number'],
-                                                    listName: widget.listName,
-                                                  ),
-                                                ),
-                                              );
-                                            }
-                                          },
-                                        ),
-                                        // Hide delete button during call cycle
-                                      ],
+                                margin: const EdgeInsets.only(bottom: 10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: i == currentCallIndex 
+                                      ? Border.all(color: const Color.fromRGBO(64, 105, 225, 1), width: 3.0)
+                                      : null,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: i == currentCallIndex 
+                                          ? const Color.fromRGBO(64, 105, 225, 0.2)
+                                          : Colors.black.withOpacity(0.04),
+                                      blurRadius: i == currentCallIndex ? 12 : 8,
+                                      offset: const Offset(0, 2),
                                     ),
+                                  ],
+                                ),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(16),
                                     onTap: () {
                                       if (i < contactsData.length) {
                                         Navigator.of(context).push(
@@ -1372,6 +1514,113 @@ Widget build(BuildContext context) {
                                         );
                                       }
                                     },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12),
+                                      child: Row(
+                                        children: [
+                                          // Current call indicator
+                                          if (i == currentCallIndex)
+                                            Container(
+                                              padding: const EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                color: const Color.fromRGBO(64, 105, 225, 0.15),
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: const Icon(Icons.call, color: Color.fromRGBO(64, 105, 225, 1), size: 20),
+                                            )
+                                          else
+                                            Container(
+                                              padding: const EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey.shade100,
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Text(
+                                                '${i + 1}',
+                                                style: AppleTypography.withAppleFont(
+                                                  AppleTypography.body2.copyWith(
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.grey.shade600,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          const SizedBox(width: 12),
+                                          // Contact info
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  myTiles[i],
+                                                  style: AppleTypography.withAppleFont(
+                                                    AppleTypography.subtitle1.copyWith(
+                                                      fontWeight: FontWeight.w600,
+                                                      color: i == currentCallIndex 
+                                                          ? const Color.fromRGBO(64, 105, 225, 1)
+                                                          : Colors.grey.shade800,
+                                                    ),
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                                if (i < contactsData.length) ...[
+                                                  const SizedBox(height: 4),
+                                                  Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.phone_outlined,
+                                                        size: 14,
+                                                        color: Colors.grey.shade500,
+                                                      ),
+                                                      const SizedBox(width: 4),
+                                                      Expanded(
+                                                        child: Text(
+                                                          contactsData[i]['contact_phone_number'] ?? '',
+                                                          style: AppleTypography.withAppleFont(
+                                                            AppleTypography.body2.copyWith(
+                                                              color: Colors.grey.shade600,
+                                                            ),
+                                                          ),
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow.ellipsis,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
+                                          ),
+                                          // Note button only during call cycle
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              color: const Color.fromRGBO(64, 105, 225, 0.1),
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            child: IconButton(
+                                              icon: const Icon(Icons.note_add),
+                                              color: const Color.fromRGBO(64, 105, 225, 1),
+                                              iconSize: 22,
+                                              onPressed: () {
+                                                if (i < contactsData.length) {
+                                                  Navigator.of(context).push(
+                                                    MaterialPageRoute(
+                                                      builder: (context) => ContactNotesView(
+                                                        contactName: contactsData[i]['contact_name'],
+                                                        contactPhoneNumber: contactsData[i]['contact_phone_number'],
+                                                        listName: widget.listName,
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                              tooltip: 'Add note',
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -1394,7 +1643,8 @@ Widget build(BuildContext context) {
                         fetchContactsData();
                       });
                     },
-                    child: Icon(Icons.add),
+                    backgroundColor: const Color.fromRGBO(64, 105, 225, 1),
+                    child: const Icon(Icons.add),
                     tooltip: 'Add Contact',
                   ),
                 ),
@@ -1408,8 +1658,9 @@ Widget build(BuildContext context) {
                       });
                       callCurrentContact();
                     },
-                    child: Icon(Icons.call),
-                    tooltip: 'Call Contact',
+                    backgroundColor: Colors.green.shade500,
+                    child: const Icon(Icons.call),
+                    tooltip: 'Start Call Cycle',
                   ),
                 ),
               ],
@@ -1422,7 +1673,8 @@ Widget build(BuildContext context) {
                     onPressed: () {
                       moveToNextContact();
                     },
-                    child: Icon(Icons.arrow_forward),
+                    backgroundColor: Colors.orange.shade500,
+                    child: const Icon(Icons.arrow_forward),
                     tooltip: 'Next Contact',
                   ),
                 ),
@@ -1431,7 +1683,8 @@ Widget build(BuildContext context) {
         ),
       ],
     ),
-  );
+  ),
+);
 }
 
 
@@ -1543,8 +1796,17 @@ void deleteSpecificContact(String contactName) async {
         .get();
 
     if (snapshot.docs.isNotEmpty) {
+      // Get the contact's phone number before deleting
+      final contactData = snapshot.docs.first.data() as Map<String, dynamic>;
+      final phoneNumber = contactData['contact_phone_number'] as String?;
+      
       DocumentReference docRef = snapshot.docs.first.reference;
       await docRef.delete();
+
+      // Also update Contact Directories to remove this list from the contact
+      if (phoneNumber != null && phoneNumber.isNotEmpty) {
+        await _removeListFromContactDirectory(phoneNumber, widget.listName);
+      }
 
       setState(() {
         myTiles.remove(contactName);
@@ -1554,6 +1816,32 @@ void deleteSpecificContact(String contactName) async {
     }
   } catch (e) {
     print('Error deleting contact: $e');
+  }
+}
+
+// Remove a list from a contact in Contact Directories
+Future<void> _removeListFromContactDirectory(String phoneNumber, String listName) async {
+  try {
+    final firestore = FirebaseFirestore.instance;
+    // Normalize phone number (last 9 digits)
+    final digitsOnly = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
+    final normalizedPhone = digitsOnly.length >= 9 
+        ? digitsOnly.substring(digitsOnly.length - 9) 
+        : digitsOnly;
+    
+    final docId = '${userId}_$normalizedPhone';
+    final docRef = firestore.collection('Contact Directories').doc(docId);
+    
+    final existing = await docRef.get();
+    if (existing.exists) {
+      await docRef.update({
+        'lists': FieldValue.arrayRemove([listName]),
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+      print('Removed list "$listName" from contact directory');
+    }
+  } catch (e) {
+    print('Error removing list from Contact Directories: $e');
   }
 }
 

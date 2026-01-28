@@ -8,6 +8,7 @@ import 'package:flutter_application_1/views/list/list_view_visible.dart';
 import 'package:flutter_application_1/views/profile/user_profile_editor.dart';
 import 'package:flutter_application_1/views/reports/reports_view_clean.dart';
 import 'package:flutter_application_1/views/call/call_history_view.dart';
+import 'package:flutter_application_1/views/contact_directory/contact_directory_view.dart';
 
 
 
@@ -18,11 +19,10 @@ class sliderScreen extends StatefulWidget {
   State<sliderScreen> createState() => _OnBoardingScreenState();
 }
 
-  PageController controller = PageController();
-
-bool onLastPage = false;
-
 class _OnBoardingScreenState extends State<sliderScreen> {
+  // Move controller inside the State class to fix hot reload issues
+  late PageController controller;
+  bool onLastPage = false;
 
 // STUFF FOR BOTTOMNAVIGATIONBAR
 
@@ -42,7 +42,17 @@ class _OnBoardingScreenState extends State<sliderScreen> {
 
 
 
+  @override
+  void initState() {
+    super.initState();
+    controller = PageController();
+  }
 
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
 // CONTROLLER TO CONTROL WHICH CURRENT PAGE WERE ON
 
@@ -57,17 +67,18 @@ class _OnBoardingScreenState extends State<sliderScreen> {
         children: [PageView(
           onPageChanged: (pageindex) {
             setState((){
-              onLastPage = (pageindex == 3);     // SHOW DONE WHEN ON LAST PAGE (last page index after removal)
+              onLastPage = (pageindex == 4);     // SHOW DONE WHEN ON LAST PAGE (last page index after removal)
             });
           },
           controller: controller,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
         children: [
           //ListScreen(),
-          list_view_visible(),
-          ReportsView(),
-          UserProfileEditor(),
-          CallHistoryView(),
+          const list_view_visible(),
+          const ReportsView(),
+          const UserProfileEditor(),
+          const ContactDirectoryView(),
+          const CallHistoryView(),
         ],
       ),
 
@@ -110,6 +121,7 @@ class _OnBoardingScreenState extends State<sliderScreen> {
         Icon(Icons.list, size: 30),
         Icon(Icons.bar_chart, size: 30),
         Icon(Icons.perm_identity, size: 30),
+        Icon(Icons.contacts, size: 30),
         Icon(Icons.history, size: 30),
       ],
       color: Colors.white,
@@ -158,7 +170,10 @@ Widget pageNavigator(int index) {
         controller.jumpToPage(2); // Profile
         break;
       case 3:
-        controller.jumpToPage(3); // History
+        controller.jumpToPage(3); // Contact Directory
+        break;
+      case 4:
+        controller.jumpToPage(4); // History
         break;
       // Add cases for other pages as needed
     }

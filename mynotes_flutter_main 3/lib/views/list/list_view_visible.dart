@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/views/dialer/dialer.dart';
 import 'package:flutter_application_1/views/list/firebase_services.dart';
@@ -103,20 +102,33 @@ class _list_view_visibleState extends State<list_view_visible> with SingleTicker
       vsync: this,
       duration: Duration(milliseconds: 300),
     );
-    Firebase.initializeApp();
-    
-    fetchTilesAsArray(userId).then((contacts) async {
+    _initializeAndFetch();
+  }
+
+  Future<void> _initializeAndFetch() async {
+    // Firebase is already initialized in home_page.dart, no need to re-initialize
+    try {
+      final contacts = await fetchTilesAsArray(userId);
       // Load descriptions for each list
       for (String listName in contacts) {
         String? description = await getListDescription(listName);
         descriptionControllers[listName] = TextEditingController(text: description ?? '');
       }
       
-      setState(() {
-        myTiles = contacts;
-        isLoading = false;
-      });
-    });
+      if (mounted) {
+        setState(() {
+          myTiles = contacts;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error fetching tiles: $e');
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
   }
 
   Future<String?> getListDescription(String listName) async {
@@ -245,158 +257,322 @@ class _list_view_visibleState extends State<list_view_visible> with SingleTicker
 @override
 Widget build(BuildContext context) {
   return Scaffold(
-    appBar: AppBar(
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    backgroundColor: const Color.fromRGBO(248, 248, 250, 1),
+    body: SafeArea(
+      child: Column(
         children: [
-          Text(
-            "Lists",
-            style: AppleTypography.withAppleFont(
-              AppleTypography.headline5.copyWith(
-                fontWeight: FontWeight.normal,
-              )
+          // Header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Lists',
+                  style: AppleTypography.withAppleFont(
+                    AppleTypography.headline3.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: const Color.fromRGBO(64, 105, 225, 1),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Drag to reorder',
+                  style: AppleTypography.withAppleFont(
+                    AppleTypography.body2.copyWith(color: Colors.grey.shade600),
+                  ),
+                ),
+              ],
             ),
           ),
-          Text(
-            "Drag to reorder",
-            style: AppleTypography.withAppleFont(AppleTypography.caption),
-          ),
-        ],
-      ),
-    ),
-    body: GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-      },
-      child: Stack(
-        children: [
-    // Your main content goes here
-    isLoading  // defined at the bottom of the page
-        ? const Center(child: CircularProgressIndicator())
-        : ReorderableListView.builder(
-            padding: const EdgeInsets.all(10),
-            itemCount: myTiles.length,
-            onReorder: onReorder,
-            itemBuilder: (context, index) {
-              final tile = myTiles[index];
-              return Padding(
-                key: ValueKey(tile), // Important: Each item needs a unique key
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  color: Colors.grey[200],
-                  child: ExpansionTile(
-                    leading: Icon(Icons.drag_handle, color: Colors.grey[600]), // Drag handle icon
-                    title: Text(tile),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.people),
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => DialerContactsView(listName: tile),
+          // Content
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                FocusScope.of(context).unfocus();
+              },
+              child: Stack(
+                children: [
+                  isLoading
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const CircularProgressIndicator(
+                                color: Color.fromRGBO(64, 105, 225, 1),
                               ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Loading lists...',
+                                style: AppleTypography.withAppleFont(
+                                  AppleTypography.body1.copyWith(color: Colors.grey.shade600),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ReorderableListView.builder(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+                          itemCount: myTiles.length,
+                          onReorder: onReorder,
+                          buildDefaultDragHandles: false,
+                          proxyDecorator: (child, index, animation) {
+                            return Material(
+                              color: Colors.transparent,
+                              child: child,
                             );
                           },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.info_outline),
-                          onPressed: null,
-                        ),
-                      ],
-                    ),
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            TextField(
-                              controller: descriptionControllers[tile],
-                              decoration: InputDecoration(
-                                hintText: 'Enter list description',
-                                border: OutlineInputBorder(),
-                              ),
-                              maxLines: 3,
-                              onChanged: (value) {
-                                updateListDescription(tile, value); 
-                              },
-                            ),
-                            SizedBox(height: 16),
-                            FutureBuilder(
-                              future: _getListStats(tile),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasData) {
-                                  final stats = snapshot.data as Map<String, dynamic>;
-                                  return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text('Contacts: ${stats['count']}'),
-                                      Text('Last dialed: ${stats['lastDialed'] ?? 'Never'}'),
-                                    ],
-                                  );
-                                }
-                                return CircularProgressIndicator();
-                              },
-                            ),
-                            SizedBox(height: 16),
-                            TextButton(
-                              onPressed: () {
-                                deleteSpecificContact(tile);
-                              },
-                              child: Text(
-                                'Delete',
-                                style: AppleTypography.withAppleFont(
-                                  AppleTypography.body2.copyWith(color: Colors.red)
+                          itemBuilder: (context, index) {
+                            final tile = myTiles[index];
+                            return Padding(
+                              key: ValueKey(tile),
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: Material(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                clipBehavior: Clip.antiAlias,
+                                elevation: 1,
+                                shadowColor: Colors.black.withOpacity(0.1),
+                                child: Theme(
+                                  data: Theme.of(context).copyWith(
+                                    dividerColor: Colors.transparent,
+                                    splashColor: Colors.transparent,
+                                    highlightColor: Colors.transparent,
+                                  ),
+                                  child: ExpansionTile(
+                                    initiallyExpanded: false,
+                                    maintainState: false,
+                                    tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                    childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                                    leading: ReorderableDragStartListener(
+                                      index: index,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade100,
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Icon(Icons.drag_handle, color: Colors.grey.shade600),
+                                      ),
+                                    ),
+                                    title: Text(
+                                      tile,
+                                      style: AppleTypography.withAppleFont(
+                                        AppleTypography.subtitle1.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.grey.shade800,
+                                        ),
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: const Color.fromRGBO(64, 105, 225, 0.1),
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          child: IconButton(
+                                            icon: const Icon(Icons.people),
+                                            color: const Color.fromRGBO(64, 105, 225, 1),
+                                            onPressed: () {
+                                              Navigator.of(context).push(
+                                                MaterialPageRoute(
+                                                  builder: (context) => DialerContactsView(listName: tile),
+                                                ),
+                                              );
+                                            },
+                                            tooltip: 'View contacts',
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.shade100,
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          child: IconButton(
+                                            icon: const Icon(Icons.info_outline),
+                                            color: Colors.grey.shade600,
+                                            onPressed: null,
+                                            tooltip: 'List info',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  children: [
+                                    TextField(
+                                      controller: descriptionControllers[tile],
+                                      decoration: InputDecoration(
+                                        hintText: 'Enter list description',
+                                        hintStyle: AppleTypography.withAppleFont(
+                                          AppleTypography.body2.copyWith(color: Colors.grey.shade500),
+                                        ),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: BorderSide(color: Colors.grey.shade300),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: BorderSide(color: Colors.grey.shade300),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: const BorderSide(
+                                            color: Color.fromRGBO(64, 105, 225, 1),
+                                            width: 2,
+                                          ),
+                                        ),
+                                        filled: true,
+                                        fillColor: Colors.grey.shade50,
+                                      ),
+                                      maxLines: 3,
+                                      onChanged: (value) {
+                                        updateListDescription(tile, value);
+                                      },
+                                    ),
+                                    const SizedBox(height: 16),
+                                    FutureBuilder(
+                                      future: _getListStats(tile),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.hasData) {
+                                          final stats = snapshot.data as Map<String, dynamic>;
+                                          return Row(
+                                            children: [
+                                              Expanded(
+                                                child: Container(
+                                                  padding: const EdgeInsets.all(12),
+                                                  decoration: BoxDecoration(
+                                                    color: const Color.fromRGBO(64, 105, 225, 0.08),
+                                                    borderRadius: BorderRadius.circular(12),
+                                                  ),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(
+                                                        'Contacts',
+                                                        style: AppleTypography.withAppleFont(
+                                                          AppleTypography.caption.copyWith(color: Colors.grey.shade600),
+                                                        ),
+                                                      ),
+                                                      const SizedBox(height: 4),
+                                                      Text(
+                                                        '${stats['count']}',
+                                                        style: AppleTypography.withAppleFont(
+                                                          AppleTypography.subtitle1.copyWith(
+                                                            fontWeight: FontWeight.w600,
+                                                            color: const Color.fromRGBO(64, 105, 225, 1),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Expanded(
+                                                child: Container(
+                                                  padding: const EdgeInsets.all(12),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.grey.shade100,
+                                                    borderRadius: BorderRadius.circular(12),
+                                                  ),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(
+                                                        'Last dialed',
+                                                        style: AppleTypography.withAppleFont(
+                                                          AppleTypography.caption.copyWith(color: Colors.grey.shade600),
+                                                        ),
+                                                      ),
+                                                      const SizedBox(height: 4),
+                                                      Text(
+                                                        '${stats['lastDialed'] ?? 'Never'}',
+                                                        style: AppleTypography.withAppleFont(
+                                                          AppleTypography.body2.copyWith(
+                                                            fontWeight: FontWeight.w600,
+                                                            color: Colors.grey.shade800,
+                                                          ),
+                                                        ),
+                                                        maxLines: 2,
+                                                        overflow: TextOverflow.ellipsis,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        }
+                                        return const Center(
+                                          child: SizedBox(
+                                            height: 24,
+                                            width: 24,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Color.fromRGBO(64, 105, 225, 1),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: TextButton.icon(
+                                        onPressed: () {
+                                          deleteSpecificContact(tile);
+                                        },
+                                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                                        label: Text(
+                                          'Delete',
+                                          style: AppleTypography.withAppleFont(
+                                            AppleTypography.body2.copyWith(color: Colors.red),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                  onExpansionChanged: (expanded) {
+                                    if (expanded) {
+                                      _animationController.forward();
+                                      FocusScope.of(context).unfocus();
+                                    } else {
+                                      _animationController.reverse();
+                                    }
+                                  },
                                 ),
                               ),
                             ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
-                    ],
-                    onExpansionChanged: (expanded) {
-                      if (expanded) {
-                        _animationController.forward();
-                        // Dismiss keyboard when expanding
-                        FocusScope.of(context).unfocus();
-                      } else {
-                        _animationController.reverse();
-                      }
-                    },
-                    initiallyExpanded: false,
-                    tilePadding: EdgeInsets.symmetric(horizontal: 16),
-                    childrenPadding: EdgeInsets.only(bottom: 16),
+                  Positioned(
+                    bottom: 30,
+                    right: 30,
+                    child: FloatingActionButton(
+                      onPressed: () async {
+                        await showListDialog(context);
+                        fetchTilesAsArray(userId).then((contacts) {
+                          setState(() {
+                            myTiles = contacts;
+                            isLoading = false;
+                          });
+                        });
+                      },
+                      backgroundColor: const Color.fromRGBO(64, 105, 225, 1),
+                      child: const Icon(Icons.add),
+                      tooltip: 'Add Contact',
+                    ),
                   ),
-                ),
-              );
-            },
+                ],
+              ),
+            ),
           ),
-    // FloatingActionButtons
-    Positioned(
-      bottom: 30, // Padding from the bottom
-      right: 30, // Padding from the right
-      child: FloatingActionButton(
-        onPressed: () async{
-
-      // Wait for the dialog to close
-      await showListDialog(context);
-
-      // After the dialog is dismissed, continue with the next part of the code
-      fetchTilesAsArray(userId).then((contacts) {
-        setState(() {
-          myTiles = contacts;
-          isLoading = false;
-        });
-      });
-
-
-      },
-        
-        child: Icon(Icons.add),
-        tooltip: 'Add Contact',
-      ),
-    ),
         ],
       ),
     ),
