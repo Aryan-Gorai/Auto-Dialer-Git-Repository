@@ -1,0 +1,11 @@
+framework module cupertino_native {
+  umbrella header "cupertino_native-umbrella.h"
+
+  export *
+  module * { export * }
+}
+
+module cupertino_native.Swift {
+  header "cupertino_native-Swift.h"
+  requires objc
+}

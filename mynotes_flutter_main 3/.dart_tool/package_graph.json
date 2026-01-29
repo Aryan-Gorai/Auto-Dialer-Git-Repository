@@ -10,6 +10,7 @@
         "bloc",
         "cloud_firestore",
         "cupertino_icons",
+        "cupertino_native",
         "curved_navigation_bar",
         "email_validator",
         "equatable",
@@ -101,6 +102,14 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "cupertino_native",
+      "version": "0.1.1",
+      "dependencies": [
+        "flutter",
+        "plugin_platform_interface"
       ]
     },
     {
@@ -694,6 +703,13 @@
       "dependencies": [
         "clock",
         "collection"
+      ]
+    },
+    {
+      "name": "plugin_platform_interface",
+      "version": "2.1.8",
+      "dependencies": [
+        "meta"
       ]
     },
     {
@@ -1392,13 +1408,6 @@
         "meta",
         "path",
         "vm_service"
-      ]
-    },
-    {
-      "name": "plugin_platform_interface",
-      "version": "2.1.8",
-      "dependencies": [
-        "meta"
       ]
     },
     {

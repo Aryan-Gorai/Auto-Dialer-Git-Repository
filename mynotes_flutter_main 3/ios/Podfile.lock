@@ -1198,6 +1198,8 @@ PODS:
     - Firebase/Firestore (= 11.15.0)
     - firebase_core
     - Flutter
+  - cupertino_native (0.0.1):
+    - Flutter
   - fast_contacts (0.0.1):
     - Flutter
   - Firebase/Analytics (11.15.0):
@@ -1484,6 +1486,7 @@ PODS:
 
 DEPENDENCIES:
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
+  - cupertino_native (from `.symlinks/plugins/cupertino_native/ios`)
   - fast_contacts (from `.symlinks/plugins/fast_contacts/ios`)
   - firebase_analytics (from `.symlinks/plugins/firebase_analytics/ios`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
@@ -1533,6 +1536,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   cloud_firestore:
     :path: ".symlinks/plugins/cloud_firestore/ios"
+  cupertino_native:
+    :path: ".symlinks/plugins/cupertino_native/ios"
   fast_contacts:
     :path: ".symlinks/plugins/fast_contacts/ios"
   firebase_analytics:
@@ -1570,6 +1575,7 @@ SPEC CHECKSUMS:
   abseil: a05cc83bf02079535e17169a73c5be5ba47f714b
   BoringSSL-GRPC: dded2a44897e45f28f08ae87a55ee4bcd19bc508
   cloud_firestore: fdcc87898326e396d6ef6df543acf9b5c2034b95
+  cupertino_native: 1db0611c94f9a9ea28433ed16a344dcb996370b5
   fast_contacts: dd81973c756255b622b9f272a8432ba230bcf13d
   Firebase: d99ac19b909cd2c548339c2241ecd0d1599ab02e
   firebase_analytics: 0e25ca1d4001ccedd40b4e5b74c0ec34e18f6425

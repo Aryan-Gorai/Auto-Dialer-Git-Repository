@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/views/dialer/dialer.dart';
 import 'package:flutter_application_1/views/list/firebase_services.dart';
 import 'package:flutter_application_1/utilities/apple_typography.dart';
+import 'package:cupertino_native/cupertino_native.dart';
 
 
 class list_view_visible extends StatefulWidget {
@@ -554,7 +555,9 @@ Widget build(BuildContext context) {
                   Positioned(
                     bottom: 30,
                     right: 30,
-                    child: FloatingActionButton(
+                    child: CNButton.icon(
+                      icon: const CNSymbol('plus', size: 22),
+                      style: CNButtonStyle.prominentGlass,
                       onPressed: () async {
                         await showListDialog(context);
                         fetchTilesAsArray(userId).then((contacts) {
@@ -564,9 +567,6 @@ Widget build(BuildContext context) {
                           });
                         });
                       },
-                      backgroundColor: const Color.fromRGBO(64, 105, 225, 1),
-                      child: const Icon(Icons.add),
-                      tooltip: 'Add Contact',
                     ),
                   ),
                 ],
