@@ -61,9 +61,10 @@ class _OnBoardingScreenState extends State<sliderScreen> {
           //ListScreen(),
           const list_view_visible(),
           const ReportsView(),
-          const UserProfileEditor(),
+          
           const ContactDirectoryView(),
           const CallHistoryView(),
+          const UserProfileEditor(),
         ],
       ),
 
@@ -96,10 +97,7 @@ class _OnBoardingScreenState extends State<sliderScreen> {
           label: 'Reports', 
           icon: CNSymbol('chart.bar.fill', size: 24)
         ),
-        CNTabBarItem(
-          label: 'Profile', 
-          icon: CNSymbol('person.crop.circle', size: 24)
-        ),
+
         CNTabBarItem(
           label: 'Contacts', 
           icon: CNSymbol('person.2.fill', size: 24)
@@ -107,6 +105,10 @@ class _OnBoardingScreenState extends State<sliderScreen> {
         CNTabBarItem(
           label: 'History', 
           icon: CNSymbol('clock.fill', size: 24)
+        ),
+        CNTabBarItem(
+          label: 'Profile', 
+          icon: CNSymbol('person.crop.circle', size: 24)
         ),
       ],
       currentIndex: _tabIndex,
