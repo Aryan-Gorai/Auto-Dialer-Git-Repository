@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter_application_1/views/list/firebase_services.dart';
 import 'package:flutter_application_1/views/notes/contact_notes_view.dart';
 import 'package:flutter_application_1/utilities/dialogs/call_feedback_dialog.dart';
@@ -833,119 +834,30 @@ Widget build(BuildContext context) {
                                   children: [
                                     Text(
                                       'Show feedback dialog',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.black87,
+                                      style: AppleTypography.withAppleFont(
+                                        AppleTypography.subtitle1.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black87,
+                                        ),
                                       ),
                                     ),
                                     SizedBox(height: 4),
                                     Text(
                                       'Ask for feedback after each call',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.grey[600],
+                                      style: AppleTypography.withAppleFont(
+                                        AppleTypography.body2.copyWith(
+                                          color: Colors.grey[600],
+                                        ),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              GestureDetector(
-                                onTap: () async {
-                                  await toggleFeedbackDialog(!showFeedbackDialogEnabled);
+                              CNSwitch(
+                                value: showFeedbackDialogEnabled,
+                                onChanged: (value) async {
+                                  await toggleFeedbackDialog(value);
                                 },
-                                child: AnimatedContainer(
-                                  duration: Duration(milliseconds: 300),
-                                  curve: Curves.easeInOut,
-                                  width: 56,
-                                  height: 32,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: showFeedbackDialogEnabled
-                                          ? [
-                                              Color(0xFF4CAF50).withOpacity(0.8),
-                                              Color(0xFF45A049).withOpacity(0.9),
-                                            ]
-                                          : [
-                                              Colors.grey.withOpacity(0.4),
-                                              Colors.grey.withOpacity(0.5),
-                                            ],
-                                    ),
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                      color: Colors.white.withOpacity(0.4),
-                                      width: 2,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: showFeedbackDialogEnabled
-                                            ? Color(0xFF4CAF50).withOpacity(0.3)
-                                            : Colors.grey.withOpacity(0.2),
-                                        blurRadius: 8,
-                                        offset: Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Stack(
-                                    children: [
-                                      // Glass reflection effect
-                                      Positioned(
-                                        top: 2,
-                                        left: 2,
-                                        right: 2,
-                                        child: Container(
-                                          height: 12,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.vertical(
-                                              top: Radius.circular(18),
-                                            ),
-                                            gradient: LinearGradient(
-                                              begin: Alignment.topCenter,
-                                              end: Alignment.bottomCenter,
-                                              colors: [
-                                                Colors.white.withOpacity(0.4),
-                                                Colors.white.withOpacity(0.0),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      // Toggle knob
-                                      AnimatedAlign(
-                                        duration: Duration(milliseconds: 300),
-                                        curve: Curves.easeInOut,
-                                        alignment: showFeedbackDialogEnabled
-                                            ? Alignment.centerRight
-                                            : Alignment.centerLeft,
-                                        child: Container(
-                                          margin: EdgeInsets.all(3),
-                                          width: 24,
-                                          height: 24,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            gradient: LinearGradient(
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                              colors: [
-                                                Colors.white,
-                                                Colors.grey.shade100,
-                                              ],
-                                            ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black.withOpacity(0.2),
-                                                blurRadius: 4,
-                                                offset: Offset(0, 2),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
                               ),
                             ],
                           ),
@@ -987,119 +899,30 @@ Widget build(BuildContext context) {
                                   children: [
                                     Text(
                                       'Auto-cycle to next contact',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.black87,
+                                      style: AppleTypography.withAppleFont(
+                                        AppleTypography.subtitle1.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black87,
+                                        ),
                                       ),
                                     ),
                                     SizedBox(height: 4),
                                     Text(
                                       'Automatically dial next contact when you return',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.grey[600],
+                                      style: AppleTypography.withAppleFont(
+                                        AppleTypography.body2.copyWith(
+                                          color: Colors.grey[600],
+                                        ),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              GestureDetector(
-                                onTap: () async {
-                                  await toggleAutoCycle(!autoCycleEnabled);
+                              CNSwitch(
+                                value: autoCycleEnabled,
+                                onChanged: (value) async {
+                                  await toggleAutoCycle(value);
                                 },
-                                child: AnimatedContainer(
-                                  duration: Duration(milliseconds: 300),
-                                  curve: Curves.easeInOut,
-                                  width: 56,
-                                  height: 32,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: autoCycleEnabled
-                                          ? [
-                                              Color(0xFF2196F3).withOpacity(0.8),
-                                              Color(0xFF1976D2).withOpacity(0.9),
-                                            ]
-                                          : [
-                                              Colors.grey.withOpacity(0.4),
-                                              Colors.grey.withOpacity(0.5),
-                                            ],
-                                    ),
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                      color: Colors.white.withOpacity(0.4),
-                                      width: 2,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: autoCycleEnabled
-                                            ? Color(0xFF2196F3).withOpacity(0.3)
-                                            : Colors.grey.withOpacity(0.2),
-                                        blurRadius: 8,
-                                        offset: Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Stack(
-                                    children: [
-                                      // Glass reflection effect
-                                      Positioned(
-                                        top: 2,
-                                        left: 2,
-                                        right: 2,
-                                        child: Container(
-                                          height: 12,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.vertical(
-                                              top: Radius.circular(18),
-                                            ),
-                                            gradient: LinearGradient(
-                                              begin: Alignment.topCenter,
-                                              end: Alignment.bottomCenter,
-                                              colors: [
-                                                Colors.white.withOpacity(0.4),
-                                                Colors.white.withOpacity(0.0),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      // Toggle knob
-                                      AnimatedAlign(
-                                        duration: Duration(milliseconds: 300),
-                                        curve: Curves.easeInOut,
-                                        alignment: autoCycleEnabled
-                                            ? Alignment.centerRight
-                                            : Alignment.centerLeft,
-                                        child: Container(
-                                          margin: EdgeInsets.all(3),
-                                          width: 24,
-                                          height: 24,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            gradient: LinearGradient(
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                              colors: [
-                                                Colors.white,
-                                                Colors.grey.shade100,
-                                              ],
-                                            ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black.withOpacity(0.2),
-                                                blurRadius: 4,
-                                                offset: Offset(0, 2),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
                               ),
                             ],
                           ),
@@ -1631,36 +1454,60 @@ Widget build(BuildContext context) {
                 Positioned(
                   bottom: 200,
                   right: 30,
-                  child: FloatingActionButton(
-                    onPressed: () async {
-                      await upload_button_on_dialer_contacts_view(context, widget.listName);
-                      fetchContactsAsArray(widget.listName).then((contacts) {
-                        setState(() {
-                          myTiles = contacts;
-                          isLoading = false;
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.orange.shade500,
+                          Colors.orange.shade600,
+                        ],
+                      ),
+                    ),
+                    child: CNButton.icon(
+                      icon: const CNSymbol('plus', size: 22),
+                      style: CNButtonStyle.prominentGlass,
+                      onPressed: () async {
+                        await upload_button_on_dialer_contacts_view(context, widget.listName);
+                        fetchContactsAsArray(widget.listName).then((contacts) {
+                          setState(() {
+                            myTiles = contacts;
+                            isLoading = false;
+                          });
+                          updateContactIndices();
+                          fetchContactsData();
                         });
-                        updateContactIndices();
-                        fetchContactsData();
-                      });
-                    },
-                    backgroundColor: const Color.fromRGBO(64, 105, 225, 1),
-                    child: const Icon(Icons.add),
-                    tooltip: 'Add Contact',
+                      },
+                    ),
                   ),
                 ),
                 Positioned(
                   bottom: 130,
                   right: 30,
-                  child: FloatingActionButton(
-                    onPressed: () {
-                      setState(() {
-                        currentCallIndex = 0;
-                      });
-                      callCurrentContact();
-                    },
-                    backgroundColor: Colors.green.shade500,
-                    child: const Icon(Icons.call),
-                    tooltip: 'Start Call Cycle',
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.green.shade500,
+                          Colors.green.shade600,
+                        ],
+                      ),
+                    ),
+                    child: CNButton.icon(
+                      icon: const CNSymbol('phone.fill', size: 22),
+                      style: CNButtonStyle.prominentGlass,
+                      onPressed: () {
+                        setState(() {
+                          currentCallIndex = 0;
+                        });
+                        callCurrentContact();
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -1669,13 +1516,25 @@ Widget build(BuildContext context) {
                 Positioned(
                   bottom: 60,
                   right: 30,
-                  child: FloatingActionButton(
-                    onPressed: () {
-                      moveToNextContact();
-                    },
-                    backgroundColor: Colors.orange.shade500,
-                    child: const Icon(Icons.arrow_forward),
-                    tooltip: 'Next Contact',
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          const Color(0xFF6BB6FF),
+                          const Color(0xFF5AA8EE),
+                        ],
+                      ),
+                    ),
+                    child: CNButton.icon(
+                      icon: const CNSymbol('arrow.right', size: 22),
+                      style: CNButtonStyle.prominentGlass,
+                      onPressed: () {
+                        moveToNextContact();
+                      },
+                    ),
                   ),
                 ),
             ],

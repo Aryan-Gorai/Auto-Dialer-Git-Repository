@@ -371,35 +371,26 @@ Widget build(BuildContext context) {
                                     trailing: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: const Color.fromRGBO(64, 105, 225, 0.1),
-                                            borderRadius: BorderRadius.circular(10),
-                                          ),
-                                          child: IconButton(
-                                            icon: const Icon(Icons.people),
-                                            color: const Color.fromRGBO(64, 105, 225, 1),
-                                            onPressed: () {
-                                              Navigator.of(context).push(
-                                                MaterialPageRoute(
-                                                  builder: (context) => DialerContactsView(listName: tile),
-                                                ),
-                                              );
-                                            },
-                                            tooltip: 'View contacts',
-                                          ),
+                                        CNButton.icon(
+                                          icon: const CNSymbol('person.2.fill', size: 20),
+                                          style: CNButtonStyle.prominentGlass,
+                                          onPressed: () {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (context) => DialerContactsView(listName: tile),
+                                              ),
+                                            );
+                                          },
                                         ),
                                         const SizedBox(width: 8),
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey.shade100,
-                                            borderRadius: BorderRadius.circular(10),
-                                          ),
-                                          child: IconButton(
-                                            icon: const Icon(Icons.info_outline),
-                                            color: Colors.grey.shade600,
-                                            onPressed: null,
-                                            tooltip: 'List info',
+                                        IgnorePointer(
+                                          child: Opacity(
+                                            opacity: 0.5,
+                                            child: CNButton.icon(
+                                              icon: const CNSymbol('info.circle', size: 20),
+                                              style: CNButtonStyle.prominentGlass,
+                                              onPressed: () {},
+                                            ),
                                           ),
                                         ),
                                       ],
