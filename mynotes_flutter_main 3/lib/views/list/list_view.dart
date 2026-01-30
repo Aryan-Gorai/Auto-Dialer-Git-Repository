@@ -18,6 +18,7 @@ import 'package:flutter_application_1/utilities/dialogs/welcome_dialog.dart';
 import 'package:flutter_application_1/views/list/firebase_services.dart';
 import 'package:flutter_application_1/views/list/list_view_visible.dart';
 import 'package:flutter_application_1/views/onBoarding/onBoarding.dart';
+import 'package:flutter_application_1/views/reports/reports_view.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
@@ -122,42 +123,29 @@ class MyColorsSample {
 
 
  Future<void>  DeleteAllContactsButtonFunction() async {
-
+        // Use the new Contact Directories structure
+        // This removes all list memberships for the current user's lists
         FirebaseFirestore firestore = FirebaseFirestore.instance;
-              CollectionReference listsRef = firestore.collection('lists');
-              
-              QuerySnapshot querySnapshot = await listsRef.get();
-              
-              for (QueryDocumentSnapshot docSnapshot in querySnapshot.docs) {
-                Map<String, dynamic> data = docSnapshot.data() as Map<String, dynamic>; // Cast to Map
-                // Check if the 'user_id' field matches the userId variable
-                if (data['user_id'] == userId) {
-                  await docSnapshot.reference.delete();
-                }
-              }
+        CollectionReference listsCollectionRef = firestore.collection('lists_collection');
+        
+        // Get all lists for this user
+        QuerySnapshot listsSnapshot = await listsCollectionRef
+            .where('user_id', isEqualTo: userId)
+            .get();
+        
+        // Delete contacts from each list
+        for (var listDoc in listsSnapshot.docs) {
+          String listName = listDoc['list_name'];
+          await deleteAllContactsFromList(listName);
+        }
 
-
-            fetchDataFromFirestore();
-
-
+        fetchDataFromFirestore();
  }
 
 
 Future<void> DeleteAllContactsFromListButtonFunction() async {
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
-  CollectionReference listsRef = firestore.collection('lists');
-
-  QuerySnapshot querySnapshot = await listsRef.get();
-
-  for (QueryDocumentSnapshot docSnapshot in querySnapshot.docs) {
-    Map<String, dynamic> data = docSnapshot.data() as Map<String, dynamic>;
-
-    // Check if both conditions are met before deleting
-    if (data['user_id'] == userId && data['list_name'] == selectedList) {
-      await docSnapshot.reference.delete();
-    }
-  }
-
+  // Use the new Contact Directories structure
+  await deleteAllContactsFromList(selectedList);
   fetchDataFromFirestore();
 }
 
@@ -362,6 +350,14 @@ Future<void> setStatefunction() async {
  Future<void>? _launched;
  final String _phone = '';
 
+ // Helper method to fetch contacts and update display
+ Future<void> fetchContactsAsArray(String listToFetch) async {
+   final contacts = await fetchContactsForList(listToFetch);
+   final names = contacts.map((c) => c['contact_name'] as String).toList();
+   listContactsJoined = names.join(", ");
+   listContactsJoinedforDialerView = listContactsJoined;
+   if (mounted) setState(() {});
+ }
 
  @override
  void initState() {
@@ -374,7 +370,7 @@ Future<void> setStatefunction() async {
 
 
    
-   fetchDataFromFirestore(userId);
+   fetchDataFromFirestore();
    // Check for phone call support.
    canLaunchUrl(Uri(scheme: 'tel', path: '123')).then((bool result) {
      setState(() {
@@ -484,28 +480,12 @@ String get userId => AuthService.firebase().currentUser!.id;
 
 Future<void> addNewContactData() async {
  try {
-   // Get the Firestore instance
-   FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-
-   // Create a reference to the 'lists' collection
-   CollectionReference listsRef = firestore.collection('lists');
-    
-
-   // Create a map with the new contact data
-   Map<String, dynamic> newContactData = {
-     'contact_name': kPickedName,
-     'contact_phone_number': kPickedNumber,
-     'user_id': userId,
-     'call_duration': '0',
-     'list_name': listName,
-   };
-
-
-   // Add the new document with an auto-generated ID
-   await listsRef.add(newContactData);
-
-
+   // Use the new Contact Directories structure
+   await addContactToList(
+     contactName: kPickedName,
+     contactPhoneNumber: kPickedNumber,
+     listName: listName,
+   );
    print('New contact data added successfully!');
  } catch (e) {
    print('Error adding new contact data to Firestore: $e');
@@ -522,7 +502,7 @@ Future<void> addNewList(String listName) async {
 
     // Create a reference to the 'lists_collection' collection
     CollectionReference listsRef = firestore.collection('lists_collection');
-     fetchDataFromFirestore(userId);
+     fetchDataFromFirestore();
 
     // Create a map with the new list data
     Map<String, dynamic> newListData = {
@@ -587,56 +567,18 @@ void showListDialog(BuildContext context) {
   List<String> listNames = []; // To store the list names from Firestore
 
   Future<void> addNewContactDataToList(selectedList) async {
-
     try {
       if (selectedList.isEmpty) {
         print('Please Upload Contacts.');
         return;
       }
 
-      FirebaseFirestore firestore = FirebaseFirestore.instance;
-      CollectionReference listsRef = firestore.collection('lists');
-
-
-  // Query to get the document with the highest contact_index
-    QuerySnapshot querySnapshot = await listsRef
-        .orderBy('contact_index', descending: true)
-        .limit(1)
-        .get();
-
-    int largestContactIndex = 0;
-    if (querySnapshot.docs.isNotEmpty) {
-      largestContactIndex = querySnapshot.docs.first['contact_index'];
-    }
-
-    print('The largest contact_index is: $largestContactIndex');
-
-
-
-
-
-
-
-
-      Map<String, dynamic> newContactData = {
-        'contact_name': kPickedName,
-        'contact_phone_number': kPickedNumber,
-        'user_id': userId,
-        'call_duration': '0',
-        // 'list_name': listName,
-        'list_name': selectedList,
-        'contact_index': largestContactIndex + 1,
-      };
-
-      // Get the reference to the selected list
-      DocumentReference selectedListRef = listsRef.doc(selectedList);
-
-      // Add the new contact data to the selected list
-      //await selectedListRef.collection('contacts').add(newContactData); THIS CODE WORKS EXTREMELy wELL BUT TEST IT LATER
-
-      //await selectedListRef.collection('lists').add(newContactData);
-
-      await listsRef.add(newContactData);
+      // Use the new Contact Directories structure
+      await addContactToList(
+        contactName: kPickedName,
+        contactPhoneNumber: kPickedNumber,
+        listName: selectedList,
+      );
       print('New contact data added successfully!');
     } catch (e) {
       print('Error adding new contact data to Firestore: $e');
@@ -674,38 +616,21 @@ void showListDialog(BuildContext context) {
 
 
 
-// TO READ DATA
+// TO READ DATA (using new Contact Directories structure)
 
 
 
 
-void fetchDocumentsInOrder() {
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
-  CollectionReference listsRef = firestore.collection('lists');
-
-  // You can add additional constraints to the query if needed, such as filtering by user ID
-  Query query = listsRef.where('user_id', isEqualTo: userId);
-
-  // Fetch the documents and listen for updates
-  query.snapshots().listen((QuerySnapshot snapshot) {
-    // Iterate through the documents
-    for (QueryDocumentSnapshot docSnapshot in snapshot.docs) {
-      // Handle the nullable return value and cast it to Map<String, dynamic>?
-      Map<String, dynamic>? documentData = docSnapshot.data() as Map<String, dynamic>?;
-
-      // Now you can do whatever you want with the document data
-      if (documentData != null) {
-        // For example, print the contact name and phone number
-        print('Contact Name: ${documentData['contact_name']}');
-        print('Contact Phone Number: ${documentData['contact_phone_number']}');
-        print('User ID: ${documentData['user_id']}');
-        print('Call Duration: ${documentData['call_duration'] ?? "Not available"}');
-        print('List NAme: ${documentData['list_name'] ?? "Not available"}');
-        // Here you can perform any logic or operations on the document
-        // You can cycle through the documents or use them as needed
-      }
-    }
-  });
+void fetchDocumentsInOrder() async {
+  // Fetch contacts from Contact Directories for the selected list
+  final contacts = await fetchContactsForList(selectedList);
+  
+  for (var contact in contacts) {
+    print('Contact Name: ${contact['contact_name']}');
+    print('Contact Phone Number: ${contact['contact_phone_number']}');
+    print('User ID: $userId');
+    print('Contact Index: ${contact['contact_index']}');
+  }
 }
 
 
@@ -715,56 +640,30 @@ void fetchDocumentsInOrder() {
 int totalDocuments = 0; 
 
 Future<void> fetchDocumentAtIndexAndShowDialog(int index, selectedList) async {
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
-  CollectionReference listsRef = firestore.collection('lists');
-
-  // You can add additional constraints to the query if needed, such as filtering by user ID
-  Query query = listsRef
-        .where('user_id', isEqualTo: userId)
-        .where('list_name', isEqualTo: selectedList);
-
-  QuerySnapshot snapshot = await query.get();
-  List<QueryDocumentSnapshot> documentSnapshots = snapshot.docs;
-  totalDocuments = snapshot.size; // Total number of documents
+  // Use the new Contact Directories structure
+  final contacts = await fetchContactsForList(selectedList);
+  totalDocuments = contacts.length;
 
   print('Total number of documents: $totalDocuments');
 
-  if (index >= 0 && index < documentSnapshots.length) {
-    QueryDocumentSnapshot docSnapshot = documentSnapshots[index];
-    Map<String, dynamic>? documentData = docSnapshot.data() as Map<String, dynamic>?;
+  if (index >= 0 && index < contacts.length) {
+    final contact = contacts[index];
 
-    if (documentData != null) {
-      print('Contact Name: ${documentData['contact_name']}');
-      print('Contact Phone Number: ${documentData['contact_phone_number']}');
-      print('User ID: ${documentData['user_id']}');
-      print('Call Duration: ${documentData['call_duration'] ?? "Not available"}');
-      print('List Name: ${documentData['list_name'] ?? "Not available"}');
+    print('Contact Name: ${contact['contact_name']}');
+    print('Contact Phone Number: ${contact['contact_phone_number']}');
+    print('Contact Index: ${contact['contact_index']}');
 
-      // Here you can perform any logic or operations on the document
-      // For example, you can wait for the user to call the contact
-
-      // Call the dialog function after fetching the document
-      showContactDialog(
-        documentData['contact_name'],
-        documentData['contact_phone_number'],
-        documentData['call_duration'] ?? "Not available",
-        
-      );
-      print(index);
-    }
+    // Call the dialog function after fetching the document
+    showContactDialog(
+      contact['contact_name'],
+      contact['contact_phone_number'],
+      "Not available", // call_duration is tracked in contact_notes now
+    );
+    print(index);
   } else {
     print('Invalid index. Document not found.');
     print(index);
   }
-
-
-
-
-
-
-
-
-
 }
 
 
@@ -865,327 +764,26 @@ _makePhoneCall(contactPhoneNumber);
  int previousIndex = 0;
 List<Map<String, dynamic>> documentArray = [];
 
-void fetchDocumentsInOrderAndSaveToArray() {
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
-  CollectionReference listsRef = firestore.collection('lists');
-
-  // Use the 'orderBy' method to sort documents by a specific field (e.g., 'contact_name')
-  // For ascending order, use 'asc' and for descending order, use 'desc'
-  Query query = listsRef.orderBy('contact_name', descending: true);
-
-  // Fetch the documents and listen for updates
-  query.snapshots().listen((QuerySnapshot snapshot) {
-    // Clear the array when new data is received to avoid duplicates
-    documentArray.clear();
-
-    // Iterate through the documents and add them to the array
-    for (QueryDocumentSnapshot docSnapshot in snapshot.docs) {
-      // Handle the nullable return value and cast it to Map<String, dynamic>?
-      Map<String, dynamic>? documentData = docSnapshot.data() as Map<String, dynamic>?;
-
-      // Add the document data to the array if it's not null
-      if (documentData != null) {
-        documentArray.add(documentData);
-      }
-    }
-
-    // Increment the index for the next iteration
-    index++;
-  });
+void fetchDocumentsInOrderAndSaveToArray() async {
+  // Use the new Contact Directories structure
+  documentArray = await fetchContactsForList(selectedList);
+  index++;
 }
 
-// Function to access the document data through the index array
+// Function to access the document data through the index array (top-level helper)
 Map<String, dynamic> getDocumentByIndex(int index) {
   if (index >= 0 && index < documentArray.length) {
-    print (documentArray[index]);
+    print(documentArray[index]);
     return documentArray[index];
-    
   } else {
-    // Handle index out of bounds or other error scenarios
     return {};
   }
 }
 
+// cycleThroughContacts is available from firebase_services.dart
 
-
-// TO TRY AND CYCLE THROUGH THE DATA
-
-
-Future<void> cycleThroughContacts() async {
- FirebaseFirestore firestore = FirebaseFirestore.instance;
- CollectionReference listsRef = firestore.collection('lists');
-
-
- // Use the 'orderBy' method to sort documents by a specific field (e.g., 'contact_name')
- // For ascending order, use 'asc' and for descending order, use 'desc'
- Query query = listsRef.orderBy('contact_name', descending: false);
-
-
- // You can also add additional constraints to the query, for example, to filter by a specific user ID
-  query = query.where('user_id', isEqualTo: userId);
-
-
- // Fetch the documents
- QuerySnapshot snapshot = await query.get();
-
-
- // Iterate through the documents
- for (QueryDocumentSnapshot docSnapshot in snapshot.docs) {
-   // Handle the nullable return value and cast it to Map<String, dynamic>?
-   Map<String, dynamic>? documentData = docSnapshot.data() as Map<String, dynamic>?;
-
-
-   // Now you can do whatever you want with the document data
-   if (documentData != null) {
-     // For example, print the contact name and phone number
-     print('Contact Name: ${documentData['contact_name']}');
-     print('Contact Phone Number: ${documentData['contact_phone_number']}');
-     print('User ID: ${documentData['user_id']}');
-     print('Call Duration: ${documentData['call_duration']}');
-     print('List Name: ${documentData['list_name']}');
-
-
-     // Here you can perform any logic or operations on the document
-     // For example, you can wait for the user to call the contact
-    
-
-
-     //await waitForUserToCallContact();
-    
-    // _startCallTimer();
-     // After the user has called the contact, you can proceed to the next contact
-   }
- }
-}
-
-
-
-
-
-
-
-
-// TO TRY AND CYCLE THROUGH THE DATA
-
-
-
-
-
-
-
-
-Timer? _callTimer;
- int _elapsedSeconds = 0;
-
-
-
-
-
-
-void _startCallTimer(Function setState) {
- _callTimer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
-   setState(() {
-     _elapsedSeconds++;
-   });
- });
-}
-
-
-
-
- @override
- void dispose() {
-   _callTimer?.cancel();
-   super.dispose();
- }
-
-
-
-
- void _stopTimer() {
-   _callTimer?.cancel();
- }
-
-
-
-
-
-
-
-
-// DIALOG WHEN USER RETURNS TO APP
-
-
-Future<void> _showCallFinishedDialog(String name) async {
-  // Start the timer when the dialog is shown
-  _startCallTimer(setState); // Start the timer
-
-  return showDialog<void>(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: const Text('Phone Call Finished'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              
-              children: [
-                Text('Elapsed Time: $_elapsedSeconds seconds'),
-                const SizedBox(height: 20),
-                Text('Call: $name'), // Display the parameter text in the dialog
-              ],
-            ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                     int index1 = 0;   
-                          Map<String, dynamic> documentDataAtIndex0 = getDocumentByIndex(index1);
-        
-                _makePhoneCall(({documentDataAtIndex0['contact_phone_number']}).toString());  
-                  index1 = index1 + 1;
-                  setState(() {
-                    _elapsedSeconds = 0; // Reset the counter
-                  });
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Yes'),
-              ),
-              TextButton(
-                onPressed: () {
-                   
-                  Navigator.of(context).pop();
-                },
-                child: const Text('No'),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
-
-
-
-
-
-
-
-
-
-Future<void> fetchDataFromFirestore(String userId) async {
-  try {
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection('lists_collection')
-        .where('user_id', isEqualTo: userId)
-        .get();
-
-    print("This is function on the lisT_view dart page");
-
-    // Sort the results
-    List<QueryDocumentSnapshot> docs = querySnapshot.docs.toList();
-    
-    // Check if any document has manual_order field
-    bool hasManualOrder = docs.any((doc) => 
-      (doc.data() as Map<String, dynamic>).containsKey('manual_order')
-    );
-    
-    if (hasManualOrder) {
-      // Sort by manual_order if it exists
-      docs.sort((a, b) {
-        int orderA = (a.data() as Map<String, dynamic>)['manual_order'] ?? 999999;
-        int orderB = (b.data() as Map<String, dynamic>)['manual_order'] ?? 999999;
-        return orderA.compareTo(orderB);
-      });
-    } else {
-      // Otherwise sort by list_order (timestamp), newest first
-      docs.sort((a, b) {
-        Timestamp? timeA = (a.data() as Map<String, dynamic>)['list_order'] as Timestamp?;
-        Timestamp? timeB = (b.data() as Map<String, dynamic>)['list_order'] as Timestamp?;
-        
-        if (timeA == null && timeB == null) return 0;
-        if (timeA == null) return 1;
-        if (timeB == null) return -1;
-        
-        return timeB.compareTo(timeA); // Descending order (newest first)
-      });
-    }
-
-    setState(() {
-      list = docs.map((doc) => doc['list_name'] as String).toList();
-
-      // If the list is not empty, set the dropdown value to the first item
-      if (list.isNotEmpty) {
-        dropdownValue = list.first;
-      }
-    });
-  } catch (error) {
-    showErrorDialog(context, "Could not load...");
-  }
-}
-
-
-
-
-
-
-
- 
-// CODE TO DISPLAY CONTACTS NAME IN LISTS
-
-
-
-List<String> listContacts = [];
-//late String listContactsJoined;
+// Top-level variable for contact display
 String listContactsJoined = "";
-
-  Future<void> fetchContactsAsArray(selectedList) async {
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    //QuerySnapshot snapshot = await firestore.collection('lists_collection').get();
-
-        QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('lists')
-        .where('user_id', isEqualTo: userId)
-        .where('list_name', isEqualTo: selectedList)
-        .get();
-
-
-
-    List<String> listContacts = snapshot.docs.map((DocumentSnapshot doc) {
-      return doc.get('contact_name') as String;
-    }).toList();
-
-    // Convert the listIndex values to double and update weeklySummary
-    // weeklySummary = listIndex.map((int value) => value.toDouble()).toList();
-    listContacts = listContacts.map((String value) => value.toString()).toList();
-
-    print(listContacts);
-    
-    listContactsJoined = listContacts.join(", ");
-    print(listContactsJoined);
-
-      // This line allows the data to be sent to the dialer view...
-    // Trigger a rebuild of the UI
-    setState(() {});
-
-    if (listContacts.isEmpty) {
-    
-    showWelcomeDialog(context);
-      }
-
-      listContactsJoinedforDialerView = listContacts.join(", "); 
-
-  }
-
-
-// CODE TO DISPLAY CONTACTS NAME IN LISTS
-
-
-
-
-
 
 // Dropdown
 
@@ -1216,7 +814,7 @@ String listContactsJoined = "";
         actions: [
           IconButton(
             onPressed: () {
-             fetchDataFromFirestore(userId);
+             fetchDataFromFirestore();
              fetchContactsAsArray(selectedList);
             },
             icon: const Icon(Icons.refresh),
@@ -1559,7 +1157,7 @@ Row(
                                 await showDeleteListViewDialog(context);
                                 
                              
-                              await fetchDataFromFirestore(userId);
+                              await fetchDataFromFirestore();
                                 await fetchContactsAsArray(selectedList);
                                 
                                 
@@ -1827,7 +1425,7 @@ ElevatedButton(
     
     if (result == true) {
       // Refresh data when returning from DialerContactsView
-      await fetchDataFromFirestore(userId);
+      await fetchDataFromFirestore();
       await fetchContactsAsArray(selectedList);
     }
   },

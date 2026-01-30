@@ -457,26 +457,17 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
     }
   }
   
-  // Fetch full contact data including phone numbers
+  // Fetch full contact data including phone numbers (using new Contact Directories structure)
   Future<void> fetchContactsData() async {
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    QuerySnapshot snapshot = await firestore
-        .collection('lists')
-        .where('list_name', isEqualTo: widget.listName)
-        .where('user_id', isEqualTo: userId)
-        .orderBy("contact_index")
-        .get();
-        
-    List<Map<String, dynamic>> data = snapshot.docs.map((doc) {
-      return doc.data() as Map<String, dynamic>;
-    }).toList();
+    // Use the new normalized Contact Directories
+    final contacts = await fetchContactsForList(widget.listName);
     
     if (mounted) {
       setState(() {
-        contactsData = data;
+        contactsData = contacts;
       });
     }
-    print('📇 Loaded ${data.length} contacts');
+    print('📇 Loaded ${contacts.length} contacts from Contact Directories');
   }
   
   // Method to call the current contact
@@ -592,45 +583,15 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
     // Start the next call regardless of whether feedback was submitted or dialog dismissed
     callCurrentContact();
   }
+
   Future<List<String>> fetchContactsAsArray(String selectedList) async {
-    
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    QuerySnapshot snapshot = await firestore
-        .collection('lists')
-        .where('list_name', isEqualTo: selectedList)
-        .orderBy("contact_index")
-        .get();
-
-    List<String> listContacts = snapshot.docs.map((doc) {
-      return doc.get('contact_name') as String;
-    }).toList();
-
-
-
-  print(listContacts);
-    return listContacts;
-    
+    // Use the new Contact Directories structure
+    return await fetchContactNamesForList(selectedList);
   }
 
   Future<void> updateContactIndices() async {
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    WriteBatch batch = firestore.batch();
-
-    for (int i = 0; i < myTiles.length; i++) {
-      String contactName = myTiles[i];
-      QuerySnapshot snapshot = await firestore
-          .collection('lists')
-          .where('list_name', isEqualTo: widget.listName)
-          .where('contact_name', isEqualTo: contactName)
-          .get();
-
-      if (snapshot.docs.isNotEmpty) {
-        DocumentReference docRef = snapshot.docs.first.reference;
-        batch.update(docRef, {'contact_index': i});
-      }
-    }
-
-    await batch.commit();
+    // Use the new Contact Directories structure
+    await updateContactIndicesForList(widget.listName, myTiles);
   }
 
   void updateMyTiles(int oldIndex, int newIndex) {
@@ -1645,71 +1606,34 @@ ${!answered ? '- Voicemail Left: ${voicemail ? 'Yes' : 'No'}\n' : ''}
     super.dispose();
   }
 
-void deleteSpecificContact(String contactName) async {
-  try {
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    QuerySnapshot snapshot = await firestore
-        .collection('lists')
-        .where('list_name', isEqualTo: widget.listName)
-        .where('contact_name', isEqualTo: contactName)
-        .get();
-
-    if (snapshot.docs.isNotEmpty) {
-      // Get the contact's phone number before deleting
-      final contactData = snapshot.docs.first.data() as Map<String, dynamic>;
-      final phoneNumber = contactData['contact_phone_number'] as String?;
+  void deleteSpecificContact(String contactName) async {
+    try {
+      // Find the contact's phone number from the loaded contacts data
+      final contact = contactsData.firstWhere(
+        (c) => c['contact_name'] == contactName,
+        orElse: () => {},
+      );
       
-      DocumentReference docRef = snapshot.docs.first.reference;
-      await docRef.delete();
+      if (contact.isNotEmpty) {
+        final phoneNumber = contact['contact_phone_number'] as String?;
+        
+        if (phoneNumber != null && phoneNumber.isNotEmpty) {
+          // Use the new Contact Directories structure to remove from list
+          await removeContactFromList(
+            contactPhoneNumber: phoneNumber,
+            listName: widget.listName,
+          );
+        }
 
-      // Also update Contact Directories to remove this list from the contact
-      if (phoneNumber != null && phoneNumber.isNotEmpty) {
-        await _removeListFromContactDirectory(phoneNumber, widget.listName);
+        setState(() {
+          myTiles.remove(contactName);
+          contactsData.removeWhere((c) => c['contact_name'] == contactName);
+        });
+
+        print('$contactName removed from ${widget.listName}');
       }
-
-      setState(() {
-        myTiles.remove(contactName);
-      });
-
-      print('$contactName deleted');
+    } catch (e) {
+      print('Error deleting contact: $e');
     }
-  } catch (e) {
-    print('Error deleting contact: $e');
   }
-}
-
-// Remove a list from a contact in Contact Directories
-Future<void> _removeListFromContactDirectory(String phoneNumber, String listName) async {
-  try {
-    final firestore = FirebaseFirestore.instance;
-    // Normalize phone number (last 9 digits)
-    final digitsOnly = phoneNumber.replaceAll(RegExp(r'[^0-9]'), '');
-    final normalizedPhone = digitsOnly.length >= 9 
-        ? digitsOnly.substring(digitsOnly.length - 9) 
-        : digitsOnly;
-    
-    final docId = '${userId}_$normalizedPhone';
-    final docRef = firestore.collection('Contact Directories').doc(docId);
-    
-    final existing = await docRef.get();
-    if (existing.exists) {
-      await docRef.update({
-        'lists': FieldValue.arrayRemove([listName]),
-        'updated_at': FieldValue.serverTimestamp(),
-      });
-      print('Removed list "$listName" from contact directory');
-    }
-  } catch (e) {
-    print('Error removing list from Contact Directories: $e');
-  }
-}
-
-
-
-
-
-
-
-
-
 }

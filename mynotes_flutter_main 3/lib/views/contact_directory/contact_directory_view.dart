@@ -42,12 +42,25 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
 
       final fetchedContacts = snapshot.docs.map((doc) {
         final data = doc.data();
+        
+        // Get list names from list_memberships (new structure) or lists (old structure)
+        List<String> listNames = [];
+        if (data['list_memberships'] != null) {
+          // New structure - extract list names from the map keys
+          final memberships = data['list_memberships'] as Map<String, dynamic>;
+          listNames = memberships.keys.toList();
+        } else if (data['lists'] != null) {
+          // Old structure - lists is an array
+          listNames = List<String>.from(data['lists'] ?? []);
+        }
+        
         return {
           'id': doc.id,
           'contact_name': data['contact_name'] ?? '',
           'contact_phone_number': data['contact_phone_number'] ?? '',
           'normalized_phone': data['normalized_phone'] ?? '',
-          'lists': data['lists'] ?? [],
+          'lists': listNames,
+          'list_memberships': data['list_memberships'] ?? {},
           'created_at': data['created_at'],
           'updated_at': data['updated_at'],
         };

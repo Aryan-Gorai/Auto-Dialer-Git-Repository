@@ -218,12 +218,8 @@ class _list_view_visibleState extends State<list_view_visible> with SingleTicker
 
   Future<Map<String, dynamic>> _getListStats(String listName) async {
     try {
-      // Get contact count
-      final contactsSnapshot = await FirebaseFirestore.instance
-          .collection('lists')
-          .where('list_name', isEqualTo: listName)
-          .where('user_id', isEqualTo: userId)
-          .get();
+      // Get contact count from Contact Directories (new normalized structure)
+      final contactCount = await getContactCountForList(listName);
 
       // Get last dialed time from contact_notes collection
       final lastDialedQuery = await FirebaseFirestore.instance
@@ -240,7 +236,7 @@ class _list_view_visibleState extends State<list_view_visible> with SingleTicker
       }
 
       return {
-        'count': contactsSnapshot.size,
+        'count': contactCount,
         'lastDialed': lastDialed != null 
             ? '${lastDialed.day}/${lastDialed.month}/${lastDialed.year} ${lastDialed.hour.toString().padLeft(2, '0')}:${lastDialed.minute.toString().padLeft(2, '0')}'
             : 'Never',
