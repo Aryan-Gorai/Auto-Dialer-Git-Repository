@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/enums/menu_action.dart';
@@ -8,8 +7,6 @@ import 'package:flutter_application_1/services/auth/auth_service.dart';
 import 'package:flutter_application_1/utilities/apple_typography.dart';
 import 'package:intl/intl.dart';
 
-import '../dialer/dialer.dart';
-import '../list/firebase_services.dart';
 import 'heatmap/call_heatmap.dart';
 import 'weekly_calls_chart.dart';
 import 'call_duration_chart.dart';
@@ -24,7 +21,6 @@ class ReportsView extends StatefulWidget {
 }
 
 class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStateMixin {
-  final GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
   late TabController _tabController;
 
   // Heatmap settings
@@ -41,6 +37,11 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
   String? _selectedContactFilter; // normalized_phone of selected contact, null = All Contacts
   List<Map<String, dynamic>> _availableContacts = [];
   bool _isLoadingContacts = false;
+
+  // List filter for heatmap
+  String? _selectedListFilter; // list_name to filter by specific list, null = All Lists
+  List<String> _availableLists = [];
+  bool _isLoadingLists = false;
 
   // Common time range settings for all tabs
   String _weeklyTrendsTimeRange = 'last7days';
@@ -59,6 +60,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
     _tabController = TabController(length: 5, vsync: this);
     _loadHeatmapSettings();
     _loadContactsForFilter();
+    _loadListsForFilter();
     _thresholdController.addListener(_updateThresholdAndSave);
   }
 
@@ -117,6 +119,53 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
     }
   }
 
+  // Fetch lists from lists_collection for filter dropdown
+  Future<void> _loadListsForFilter() async {
+    setState(() {
+      _isLoadingLists = true;
+    });
+
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      print('Loading lists for filter, userId: $userId');
+      
+      QuerySnapshot snapshot = await firestore
+          .collection('lists_collection')
+          .where('user_id', isEqualTo: userId)
+          .get();
+
+      print('Found ${snapshot.docs.length} lists in lists_collection');
+
+      List<String> lists = [];
+      for (var doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final listName = data['list_name'] as String?;
+        if (listName != null && listName.isNotEmpty) {
+          lists.add(listName);
+          print('Added list: $listName');
+        }
+      }
+
+      // Sort lists alphabetically
+      lists.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+
+      if (mounted) {
+        setState(() {
+          _availableLists = lists;
+          _isLoadingLists = false;
+        });
+        print('Lists loaded successfully: ${lists.length} lists');
+      }
+    } catch (e) {
+      print('❌ Error loading lists for filter: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingLists = false;
+        });
+      }
+    }
+  }
+
   // Load heatmap settings from Firebase
   Future<void> _loadHeatmapSettings() async {
     try {
@@ -165,6 +214,9 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
           if (data.containsKey('heatmap_contact_filter')) {
             _selectedContactFilter = data['heatmap_contact_filter'] as String?;
           }
+          if (data.containsKey('heatmap_list_filter')) {
+            _selectedListFilter = data['heatmap_list_filter'] as String?;
+          }
         });
       }
     } catch (e) {
@@ -195,6 +247,11 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
         dataToSave['heatmap_contact_filter'] = _selectedContactFilter;
       } else {
         dataToSave['heatmap_contact_filter'] = null;
+      }
+      if (_selectedListFilter != null) {
+        dataToSave['heatmap_list_filter'] = _selectedListFilter;
+      } else {
+        dataToSave['heatmap_list_filter'] = null;
       }
 
       await firestore.collection('user_settings').doc(userId).set(dataToSave, SetOptions(merge: true));
@@ -458,7 +515,9 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                                       )
                                     : DropdownButton<String?>(
                                         isExpanded: true,
-                                        value: _selectedContactFilter,
+                                        value: _availableContacts.any((c) => c['normalized_phone'] == _selectedContactFilter) 
+                                            ? _selectedContactFilter 
+                                            : null,
                                         hint: Text('All Contacts (${_availableContacts.length} available)'),
                                         onChanged: (String? newValue) {
                                           setState(() {
@@ -480,6 +539,73 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                                               value: contact['normalized_phone'] as String?,
                                               child: Text(
                                                 displayText,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            );
+                                          }).toList(),
+                                        ],
+                                      ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          // List filter dropdown
+                          Row(
+                            children: [
+                              Text(
+                                'Filter by List:',
+                                style: AppleTypography.withAppleFont(
+                                  AppleTypography.body1.copyWith(
+                                    color: Colors.grey[700],
+                                  )
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: _isLoadingLists
+                                  ? const SizedBox(
+                                      height: 30,
+                                      child: Center(
+                                        child: SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(strokeWidth: 2),
+                                        ),
+                                      ),
+                                    )
+                                  : _availableLists.isEmpty
+                                    ? Row(
+                                        children: [
+                                          const Text('No lists found'),
+                                          const SizedBox(width: 8),
+                                          TextButton(
+                                            onPressed: _loadListsForFilter,
+                                            child: const Text('Retry', style: TextStyle(fontSize: 12)),
+                                          ),
+                                        ],
+                                      )
+                                    : DropdownButton<String?>(
+                                        isExpanded: true,
+                                        value: _availableLists.contains(_selectedListFilter)
+                                            ? _selectedListFilter
+                                            : null,
+                                        hint: Text('All Lists (${_availableLists.length} available)'),
+                                        onChanged: (String? newValue) {
+                                          setState(() {
+                                            _selectedListFilter = newValue;
+                                          });
+                                          _saveHeatmapSettings();
+                                        },
+                                        items: [
+                                          const DropdownMenuItem<String?>(
+                                            value: null,
+                                            child: Text('All Lists'),
+                                          ),
+                                          ..._availableLists.map((listName) {
+                                            return DropdownMenuItem<String?>(
+                                              value: listName,
+                                              child: Text(
+                                                listName,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
                                             );
@@ -656,6 +782,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                               maxCallThreshold: _maxCallThreshold,
                               timeOffset: _timeOffset,
                               contactFilter: _selectedContactFilter,
+                              listFilter: _selectedListFilter,
                               customStartDate: _customStartDate,
                               customEndDate: _customEndDate,
                             ),
@@ -684,19 +811,95 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                 borderRadius: BorderRadius.circular(8),
               ),
               margin: const EdgeInsets.all(8.0),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: _buildTimeRangeDropdown(
-                  _weeklyTrendsTimeRange,
-                  (String newValue) {
-                    setState(() {
-                      _weeklyTrendsTimeRange = newValue;
-                    });
-                  },
-                  _selectWeeklyTrendsDateRange,
-                  _weeklyTrendsStartDate,
-                  _weeklyTrendsEndDate,
-                ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // List filter dropdown
+                        Row(
+                          children: [
+                            Text(
+                              'Filter by List:',
+                              style: AppleTypography.withAppleFont(
+                                AppleTypography.body1.copyWith(
+                                  color: Colors.grey[700],
+                                )
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _isLoadingLists
+                                ? const SizedBox(
+                                    height: 30,
+                                    child: Center(
+                                      child: SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      ),
+                                    ),
+                                  )
+                                : _availableLists.isEmpty
+                                  ? Row(
+                                      children: [
+                                        const Text('No lists found'),
+                                        const SizedBox(width: 8),
+                                        TextButton(
+                                          onPressed: _loadListsForFilter,
+                                          child: const Text('Retry', style: TextStyle(fontSize: 12)),
+                                        ),
+                                      ],
+                                    )
+                                  : DropdownButton<String?>(
+                                      isExpanded: true,
+                                      value: _availableLists.contains(_selectedListFilter)
+                                          ? _selectedListFilter
+                                          : null,
+                                      hint: Text('All Lists (${_availableLists.length} available)'),
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          _selectedListFilter = newValue;
+                                        });
+                                      },
+                                      items: [
+                                        const DropdownMenuItem<String?>(
+                                          value: null,
+                                          child: Text('All Lists'),
+                                        ),
+                                        ..._availableLists.map((listName) {
+                                          return DropdownMenuItem<String?>(
+                                            value: listName,
+                                            child: Text(
+                                              listName,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ],
+                                    ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        // Time range dropdown
+                        _buildTimeRangeDropdown(
+                          _weeklyTrendsTimeRange,
+                          (String newValue) {
+                            setState(() {
+                              _weeklyTrendsTimeRange = newValue;
+                            });
+                          },
+                          _selectWeeklyTrendsDateRange,
+                          _weeklyTrendsStartDate,
+                          _weeklyTrendsEndDate,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
             Card(
@@ -708,6 +911,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                 selectedTimeRange: _weeklyTrendsTimeRange,
                 customStartDate: _weeklyTrendsStartDate,
                 customEndDate: _weeklyTrendsEndDate,
+                              listFilter: _selectedListFilter,
               ),
             ),
           ],
@@ -818,47 +1022,6 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
         ),
       ),
     );
-  }
-
-  Widget buildCurvedNavigationBar() {
-    return CurvedNavigationBar(
-      key: _bottomNavigationKey,
-      index: 0,
-      height: 60.0,
-      items: const <Widget>[
-        Icon(Icons.add, size: 30),
-        Icon(Icons.list, size: 30),
-        Icon(Icons.compare_arrows, size: 30),
-        Icon(Icons.call_split, size: 30),
-        Icon(Icons.perm_identity, size: 30),
-      ],
-      color: Colors.white,
-      buttonBackgroundColor: Colors.white,
-      backgroundColor: const Color.fromRGBO(248, 225, 209, 1),
-      animationCurve: Curves.easeInOut,
-      animationDuration: const Duration(milliseconds: 600),
-      onTap: (index) {
-        navigateToPage(index);
-      },
-      letIndexChange: (index) => true,
-    );
-  }
-
-  Widget pageNavigator(int index) {
-    if (index == 2) {
-      return DialerContactsView(listName: selectedList);
-    } else {
-      return Container();
-    }
-  }
-
-  void navigateToPage(int index) {
-    switch (index) {
-      case 0:
-        break;
-      case 1:
-        break;
-    }
   }
 
   Widget _buildTimeRangeDropdown(

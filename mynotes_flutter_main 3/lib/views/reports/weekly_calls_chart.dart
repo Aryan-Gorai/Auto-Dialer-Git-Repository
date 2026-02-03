@@ -8,6 +8,7 @@ class WeeklyCallsChart extends StatefulWidget {
   final String? selectedTimeRange;
   final DateTime? customStartDate;
   final DateTime? customEndDate;
+  final String? listFilter; // Optional: list_name to filter by specific list
   final Function(String)? onTimeRangeChanged;
   final VoidCallback? onCustomRangeSelected;
 
@@ -16,6 +17,7 @@ class WeeklyCallsChart extends StatefulWidget {
     this.selectedTimeRange,
     this.customStartDate,
     this.customEndDate,
+    this.listFilter,
     this.onTimeRangeChanged,
     this.onCustomRangeSelected,
   }) : super(key: key);
@@ -40,7 +42,7 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
   List<FlSpot> _rollingAverageSpots = [];
   bool _useWeeklyView = true; // true = weekday aggregation, false = daily view
 
-  String get _userId => AuthService.firebase().currentUser!.id;
+  String? get _userId => AuthService.firebase().currentUser?.id;
 
   String get currentTimeRange => widget.selectedTimeRange ?? _selectedTimeRange;
   DateTime? get currentStartDate => widget.customStartDate ?? _customStartDate;
@@ -59,9 +61,32 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
     // Refresh data when external parameters change
     if (oldWidget.selectedTimeRange != widget.selectedTimeRange ||
         oldWidget.customStartDate != widget.customStartDate ||
-        oldWidget.customEndDate != widget.customEndDate) {
+        oldWidget.customEndDate != widget.customEndDate ||
+        oldWidget.listFilter != widget.listFilter) {
       _fetchCallData();
     }
+  }
+
+  // Helper function to normalize phone numbers for comparison
+  String _normalizePhoneNumber(String phone) {
+    final digitsOnly = phone.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digitsOnly.length >= 9) {
+      return digitsOnly.substring(digitsOnly.length - 9);
+    }
+    return digitsOnly;
+  }
+
+  int _parseInt(dynamic value) {
+    if (value is int) return value;
+    if (value is double) return value.round();
+    if (value is num) return value.toInt();
+    if (value is String) {
+      final parsed = int.tryParse(value);
+      if (parsed != null) return parsed;
+      final parsedDouble = double.tryParse(value);
+      if (parsedDouble != null) return parsedDouble.round();
+    }
+    return 0;
   }
 
   Future<void> _fetchCallData() async {
@@ -107,25 +132,16 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
         _useWeeklyView = daysDiff <= 7;
       }
 
-      // Fetch call history from Firebase
-      print('📞 Fetching call history from call_history collection');
-      print('Date range: $startDate to $endDate');
-      
-      final QuerySnapshot querySnapshot = await _firestore
-          .collection('call_history')
-          .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
-          .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
-          .get();
-
-      print('Total call records fetched: ${querySnapshot.docs.length}');
-
-      if (_useWeeklyView) {
-        // Aggregate by weekday
-        _processWeeklyData(querySnapshot, startDate, endDate);
-      } else {
-        // Aggregate by specific dates
-        _processDailyData(querySnapshot, startDate, endDate);
+      // If list filter is set, use list_cycles data instead of call_history
+      if (widget.listFilter != null && widget.listFilter!.isNotEmpty) {
+        print('📊 Using list_cycles data for list: ${widget.listFilter}');
+        await _fetchFromListCycles(startDate, endDate);
+        return;
       }
+
+      // Otherwise use call_history as before
+      print('📊 Using call_history data (no list filter)');
+      await _fetchFromCallHistory(startDate, endDate);
     } catch (e) {
       print('❌ Error fetching call data: $e');
       if (mounted) {
@@ -136,7 +152,242 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
     }
   }
 
-  void _processWeeklyData(QuerySnapshot querySnapshot, DateTime startDate, DateTime endDate) {
+  Future<void> _fetchFromListCycles(DateTime startDate, DateTime endDate) async {
+    print('📅 Fetching list_cycles for "${widget.listFilter}" from $startDate to $endDate');
+
+    final userId = _userId;
+    if (userId == null) {
+      print('⚠️ No authenticated user found. Skipping list_cycles fetch.');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      return;
+    }
+
+    // Query list_cycles for the specified list
+    final cyclesSnapshot = await _firestore
+        .collection('list_cycles')
+        .where('user_id', isEqualTo: userId)
+        .where('list_name', isEqualTo: widget.listFilter)
+        .get();
+
+    print('📂 Found ${cyclesSnapshot.docs.length} cycles');
+
+    if (_useWeeklyView) {
+      _processWeeklyCycleData(cyclesSnapshot, startDate, endDate);
+    } else {
+      _processDailyCycleData(cyclesSnapshot, startDate, endDate);
+    }
+  }
+
+  Future<void> _fetchFromCallHistory(DateTime startDate, DateTime endDate) async {
+    // Fetch call history from Firebase
+    print('📞 Fetching call history from call_history collection');
+    print('Date range: $startDate to $endDate');
+
+    final QuerySnapshot querySnapshot = await _firestore
+        .collection('call_history')
+        .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+        .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
+        .get();
+
+    print('Total call records fetched: ${querySnapshot.docs.length}');
+
+    if (_useWeeklyView) {
+      // Aggregate by weekday
+      _processWeeklyData(querySnapshot, startDate, endDate, {});
+    } else {
+      // Aggregate by specific dates
+      _processDailyData(querySnapshot, startDate, endDate, {});
+    }
+  }
+
+  void _processWeeklyCycleData(QuerySnapshot cyclesSnapshot, DateTime startDate, DateTime endDate) {
+      // Aggregate by weekday from cycle_events
+      final Map<int, CallDayData> dataByWeekday = {
+        1: CallDayData(weekday: 1, dayName: 'Mon'),
+        2: CallDayData(weekday: 2, dayName: 'Tue'),
+        3: CallDayData(weekday: 3, dayName: 'Wed'),
+        4: CallDayData(weekday: 4, dayName: 'Thu'),
+        5: CallDayData(weekday: 5, dayName: 'Fri'),
+        6: CallDayData(weekday: 6, dayName: 'Sat'),
+        7: CallDayData(weekday: 7, dayName: 'Sun'),
+      };
+
+      int totalEvents = 0;
+    
+      for (var cycleDoc in cyclesSnapshot.docs) {
+        final cycleData = cycleDoc.data() as Map<String, dynamic>;
+      
+        // Get cycle timestamp
+        final startedAtClient = cycleData['started_at_client'] as Timestamp?;
+        final startedAtServer = cycleData['started_at_server'] as Timestamp?;
+        final cycleTimestamp = startedAtClient ?? startedAtServer;
+      
+        if (cycleTimestamp == null) continue;
+      
+        final cycleTime = cycleTimestamp.toDate();
+      
+        // Check if cycle is within date range
+        if (cycleTime.isBefore(startDate) || cycleTime.isAfter(endDate)) {
+          continue;
+        }
+      
+        final weekday = cycleTime.weekday; // 1=Mon, 7=Sun
+      
+        // Get stats from cycle document
+        final stats = cycleData['stats'];
+        if (stats is Map<String, dynamic>) {
+          final outgoing = _parseInt(stats['outgoing']);
+          final cancelled = _parseInt(stats['cancelled']);
+          final missed = _parseInt(stats['missed']);
+        
+          // outgoing = successful calls
+          dataByWeekday[weekday]!.successfulCalls += outgoing;
+          // cancelled = failed calls (no answer, hung up, etc)
+          dataByWeekday[weekday]!.failedCalls += cancelled;
+          // missed = missed/no answer
+          dataByWeekday[weekday]!.missedCallbacks += missed;
+        
+          totalEvents += (outgoing + cancelled + missed);
+        }
+      }
+    
+      print('✅ Processed $totalEvents total call events');
+    
+      // Create chart data spots (same as before)
+      final List<FlSpot> successfulSpots = [];
+      final List<FlSpot> failedSpots = [];
+      final List<FlSpot> missedSpots = [];
+      final List<FlSpot> rollingAverageSpots = [];
+
+      final List<double> totalCallsPerDay = [];
+      for (int i = 1; i <= 7; i++) {
+        final dayData = dataByWeekday[i]!;
+        totalCallsPerDay.add((dayData.successfulCalls + dayData.failedCalls + dayData.missedCallbacks).toDouble());
+      }
+
+      for (int i = 1; i <= 7; i++) {
+        final dayData = dataByWeekday[i]!;
+        final xValue = (i - 1).toDouble();
+      
+        successfulSpots.add(FlSpot(xValue, dayData.successfulCalls.toDouble()));
+        failedSpots.add(FlSpot(xValue, dayData.failedCalls.toDouble()));
+        missedSpots.add(FlSpot(xValue, dayData.missedCallbacks.toDouble()));
+      
+        double rollingAvg = totalCallsPerDay.isNotEmpty ? totalCallsPerDay.reduce((a, b) => a + b) / 7 : 0;
+        rollingAverageSpots.add(FlSpot(xValue, rollingAvg));
+      }
+
+      if (mounted) {
+        setState(() {
+          _callDataByWeekday = dataByWeekday;
+          _successfulSpots = successfulSpots;
+          _failedSpots = failedSpots;
+          _missedSpots = missedSpots;
+          _rollingAverageSpots = rollingAverageSpots;
+          _isLoading = false;
+        });
+      }
+    }
+
+  void _processDailyCycleData(QuerySnapshot cyclesSnapshot, DateTime startDate, DateTime endDate) {
+    // Create map of dates with zero counts
+    final Map<String, DailyCallData> dataByDate = {};
+    DateTime currentDate = startDate;
+    while (currentDate.isBefore(endDate) || currentDate.isAtSameMomentAs(endDate)) {
+      final dateKey = DateFormat('yyyy-MM-dd').format(currentDate);
+      dataByDate[dateKey] = DailyCallData(
+        date: currentDate,
+        dateKey: dateKey,
+      );
+      currentDate = currentDate.add(const Duration(days: 1));
+    }
+
+    int totalEvents = 0;
+    for (var cycleDoc in cyclesSnapshot.docs) {
+      final cycleData = cycleDoc.data() as Map<String, dynamic>;
+
+      // Get cycle timestamp
+      final startedAtClient = cycleData['started_at_client'] as Timestamp?;
+      final startedAtServer = cycleData['started_at_server'] as Timestamp?;
+      final cycleTimestamp = startedAtClient ?? startedAtServer;
+
+      if (cycleTimestamp == null) continue;
+
+      final cycleTime = cycleTimestamp.toDate();
+
+      // Check if cycle is within date range
+      if (cycleTime.isBefore(startDate) || cycleTime.isAfter(endDate)) {
+        continue;
+      }
+
+      final dateKey = DateFormat('yyyy-MM-dd').format(cycleTime);
+      if (!dataByDate.containsKey(dateKey)) continue;
+
+      // Get stats from cycle document
+      final stats = cycleData['stats'];
+      if (stats is Map<String, dynamic>) {
+        final outgoing = _parseInt(stats['outgoing']);
+        final cancelled = _parseInt(stats['cancelled']);
+        final missed = _parseInt(stats['missed']);
+
+        // outgoing = successful calls
+        dataByDate[dateKey]!.successfulCalls += outgoing;
+        // cancelled = failed calls (no answer, hung up, etc)
+        dataByDate[dateKey]!.failedCalls += cancelled;
+        // missed = missed/no answer
+        dataByDate[dateKey]!.missedCallbacks += missed;
+
+        totalEvents += (outgoing + cancelled + missed);
+      }
+    }
+
+    print('✅ Processed $totalEvents total call events');
+
+    // Create chart data spots
+    final List<FlSpot> successfulSpots = [];
+    final List<FlSpot> failedSpots = [];
+    final List<FlSpot> missedSpots = [];
+    final List<FlSpot> rollingAverageSpots = [];
+
+    final sortedDates = dataByDate.keys.toList()..sort();
+    final List<double> totalCallsPerDay = [];
+
+    for (int i = 0; i < sortedDates.length; i++) {
+      final dateKey = sortedDates[i];
+      final dayData = dataByDate[dateKey]!;
+      final xValue = i.toDouble();
+
+      successfulSpots.add(FlSpot(xValue, dayData.successfulCalls.toDouble()));
+      failedSpots.add(FlSpot(xValue, dayData.failedCalls.toDouble()));
+      missedSpots.add(FlSpot(xValue, dayData.missedCallbacks.toDouble()));
+      totalCallsPerDay.add((dayData.successfulCalls + dayData.failedCalls + dayData.missedCallbacks).toDouble());
+    }
+
+    // Calculate rolling average
+    if (totalCallsPerDay.isNotEmpty) {
+      double avg = totalCallsPerDay.reduce((a, b) => a + b) / totalCallsPerDay.length;
+      for (int i = 0; i < sortedDates.length; i++) {
+        rollingAverageSpots.add(FlSpot(i.toDouble(), avg));
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _callDataByDate = dataByDate;
+        _successfulSpots = successfulSpots;
+        _failedSpots = failedSpots;
+        _missedSpots = missedSpots;
+        _rollingAverageSpots = rollingAverageSpots;
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _processWeeklyData(QuerySnapshot querySnapshot, DateTime startDate, DateTime endDate, Set<String> listPhoneNumbers) {
     // Aggregate data by day of week
     final Map<int, CallDayData> dataByWeekday = {
       1: CallDayData(weekday: 1, dayName: 'Mon'),
@@ -152,6 +403,16 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
     for (var doc in querySnapshot.docs) {
       try {
         final data = doc.data() as Map<String, dynamic>;
+        
+        // Apply list filter if specified
+        if (widget.listFilter != null && listPhoneNumbers.isNotEmpty) {
+          final address = data['address'] as String? ?? '';
+          final normalizedAddress = _normalizePhoneNumber(address);
+          if (!listPhoneNumbers.contains(normalizedAddress)) {
+            continue;
+          }
+        }
+        
         final timestamp = (data['timestamp'] as Timestamp).toDate();
         
         recordsInRange++;
@@ -222,7 +483,7 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
     }
   }
 
-  void _processDailyData(QuerySnapshot querySnapshot, DateTime startDate, DateTime endDate) {
+  void _processDailyData(QuerySnapshot querySnapshot, DateTime startDate, DateTime endDate, Set<String> listPhoneNumbers) {
     // Create map of dates with zero counts
     final Map<String, DailyCallData> dataByDate = {};
     DateTime currentDate = startDate;

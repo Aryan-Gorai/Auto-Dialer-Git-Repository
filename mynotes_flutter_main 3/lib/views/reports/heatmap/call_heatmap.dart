@@ -8,6 +8,7 @@ class CallHeatmap extends StatefulWidget {
   final int maxCallThreshold; // Value that represents the darkest green
   final int timeOffset; // Offset for navigation (0 = current, -1 = previous, 1 = next, etc.)
   final String? contactFilter; // Optional: normalized_phone to filter by specific contact
+  final String? listFilter; // Optional: list_name to filter by specific list
   final DateTime? customStartDate; // For custom date range
   final DateTime? customEndDate; // For custom date range
 
@@ -17,6 +18,7 @@ class CallHeatmap extends StatefulWidget {
     required this.maxCallThreshold,
     required this.timeOffset,
     this.contactFilter,
+    this.listFilter,
     this.customStartDate,
     this.customEndDate,
   }) : super(key: key);
@@ -146,83 +148,313 @@ class _CallHeatmapState extends State<CallHeatmap> {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
       
       print('📊 Fetching call history data...');
-      print('Time range: ${startDate} to ${endDate}');
+      print('Time range: $startDate to $endDate');
       print('Contact filter: ${widget.contactFilter}');
-      
-      // Build base query for call_history collection
-      // Note: call_history may not have user_id, so we fetch all and filter by timestamp
-      Query query = firestore
-          .collection('call_history')
-          .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
-          .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endDate));
+      print('List filter: ${widget.listFilter}');
 
-      // Execute the query
-      QuerySnapshot snapshot = await query.get();
-      print('Found ${snapshot.docs.length} call records in call_history');
-
-      // If contact filter is set, get the normalized phone to match against
-      String? normalizedFilterPhone;
-      if (widget.contactFilter != null) {
-        // The contactFilter is already the normalized_phone from Contact Directories
-        normalizedFilterPhone = widget.contactFilter;
-        print('Filtering by normalized phone: $normalizedFilterPhone');
+      // If list filter is set, use list_cycles/cycle_events data
+      if (widget.listFilter != null && widget.listFilter!.isNotEmpty) {
+        print('🔍 Using list_cycles data for list: ${widget.listFilter}');
+        await _fetchFromCycleEvents(firestore);
+        return;
       }
 
-      // Initialize the call data map
-      Map<String, int> newCallData = {};
-      int processedCalls = 0;
-      int filteredCalls = 0;
-      
-      // Process the query results
-      for (var doc in snapshot.docs) {
-        final data = doc.data() as Map<String, dynamic>;
-        
-        // Get the address (phone number) from call_history
-        final address = data['address'] as String?;
-        if (address == null || address.isEmpty) {
-          continue; // Skip if no phone number
-        }
-        
-        // Apply contact filter if specified
-        if (normalizedFilterPhone != null) {
-          // Normalize the address from call_history for comparison
-          final normalizedAddress = _normalizePhoneNumber(address);
-          
-          if (normalizedAddress != normalizedFilterPhone) {
-            filteredCalls++;
-            continue; // Skip this record if it doesn't match the filtered contact
-          }
-        }
-        
-        final timestamp = (data['timestamp'] as Timestamp).toDate();
-        
-        String key;
-        if (widget.timeScale == 'day') {
-          // For day view, use hour as key
-          key = timestamp.hour.toString();
-        } else {
-          // For month and week views, use date as key
-          key = DateFormat('yyyy-MM-dd').format(timestamp);
-        }
-        
-        // Increment the call count for this key
-        newCallData[key] = (newCallData[key] ?? 0) + 1;
-        processedCalls++;
+      // If only contact filter is set (no list filter), use cycle_events across all lists
+      if (widget.contactFilter != null && widget.contactFilter!.isNotEmpty) {
+        print('🔍 Using cycle_events data for contact: ${widget.contactFilter}');
+        await _fetchFromAllCycleEvents(firestore);
+        return;
       }
-      
-      print('✅ Processed $processedCalls calls, filtered out $filteredCalls');
-      print('Heatmap data: $newCallData');
-      
-      setState(() {
-        callData = newCallData;
-        isLoading = false;
-      });
+
+      // Otherwise, use the original call_history logic (no filters)
+      print('🔍 Using call_history data (no filters)');
+      await _fetchFromCallHistory(firestore);
     } catch (e) {
       print('❌ Error fetching call data: $e');
       setState(() {
         isLoading = false;
       });
     }
+  }
+
+  Future<void> _fetchFromCycleEvents(FirebaseFirestore firestore) async {
+    print('📊 Fetching from list_cycles for list: ${widget.listFilter}');
+    print('📅 Date range: $startDate to $endDate');
+    print('👤 Contact filter: ${widget.contactFilter}');
+
+    // Query list_cycles for the specified list
+    Query cyclesQuery = firestore
+        .collection('list_cycles')
+        .where('user_id', isEqualTo: userId)
+        .where('list_name', isEqualTo: widget.listFilter);
+
+    // Fetch all matching cycles
+    QuerySnapshot cyclesSnapshot = await cyclesQuery.get();
+    print('📂 Found ${cyclesSnapshot.docs.length} cycles for list "${widget.listFilter}"');
+
+    Map<String, int> newCallData = {};
+    int processedEvents = 0;
+    int filteredEvents = 0;
+    int totalOutgoingFromStats = 0;
+
+    // Iterate through each cycle
+    for (var cycleDoc in cyclesSnapshot.docs) {
+      final cycleId = cycleDoc.id;
+      final cycleData = cycleDoc.data() as Map<String, dynamic>;
+      
+      // Get the cycle start time to determine which day/hour it belongs to
+      final startedAtClient = cycleData['started_at_client'] as Timestamp?;
+      final startedAtServer = cycleData['started_at_server'] as Timestamp?;
+      final cycleTimestamp = startedAtClient ?? startedAtServer;
+      
+      if (cycleTimestamp == null) {
+        print('⚠️ Cycle $cycleId has no timestamp, skipping');
+        continue;
+      }
+      
+      final cycleTime = cycleTimestamp.toDate();
+      
+      // Check if cycle is within date range
+      if (cycleTime.isBefore(startDate) || cycleTime.isAfter(endDate)) {
+        print('⏭️ Cycle $cycleId outside date range (${cycleTime}), skipping');
+        continue;
+      }
+
+      // If NO contact filter is set, use stats.outgoing for efficiency
+      if (widget.contactFilter == null || widget.contactFilter!.isEmpty) {
+        // Get stats.outgoing count from this cycle
+        final stats = cycleData['stats'] as Map<String, dynamic>?;
+        final outgoingCount = stats?['outgoing'] as int? ?? 0;
+        
+        print('📈 Cycle $cycleId has $outgoingCount outgoing calls (from stats)');
+        totalOutgoingFromStats += outgoingCount;
+        
+        // Generate key based on time scale
+        String key;
+        if (widget.timeScale == 'day') {
+          key = cycleTime.hour.toString();
+        } else {
+          key = DateFormat('yyyy-MM-dd').format(cycleTime);
+        }
+        
+        // Add outgoing count to the appropriate time bucket
+        newCallData[key] = (newCallData[key] ?? 0) + outgoingCount;
+        processedEvents += outgoingCount;
+      } else {
+        // If contact filter IS set, we need to check individual cycle_events
+        print('👤 Contact filter active, fetching cycle_events for cycle $cycleId');
+        
+        QuerySnapshot eventsSnapshot = await firestore
+            .collection('list_cycles')
+            .doc(cycleId)
+            .collection('cycle_events')
+            .get();
+
+        print('   Found ${eventsSnapshot.docs.length} events in this cycle');
+
+        // Process each event
+        for (var eventDoc in eventsSnapshot.docs) {
+          final eventData = eventDoc.data() as Map<String, dynamic>;
+
+          // Get timestamp from dial_pressed_at_client
+          final dialPressedTimestamp = eventData['dial_pressed_at_client'] as Timestamp?;
+          if (dialPressedTimestamp == null) {
+            continue; // Skip if no timestamp
+          }
+
+          final eventTime = dialPressedTimestamp.toDate();
+
+          // Check if event is within date range
+          if (eventTime.isBefore(startDate) || eventTime.isAfter(endDate)) {
+            filteredEvents++;
+            continue;
+          }
+
+          // Apply contact filter
+          final normalizedPhone = eventData['normalized_phone'] as String?;
+          if (normalizedPhone != widget.contactFilter) {
+            filteredEvents++;
+            continue;
+          }
+
+          print('   ✓ Event matches contact filter: ${eventData['contact_name']} ($normalizedPhone)');
+
+          // Generate key based on time scale
+          String key;
+          if (widget.timeScale == 'day') {
+            key = eventTime.hour.toString();
+          } else {
+            key = DateFormat('yyyy-MM-dd').format(eventTime);
+          }
+
+          // Increment call count
+          newCallData[key] = (newCallData[key] ?? 0) + 1;
+          processedEvents++;
+        }
+      }
+    }
+
+    if (widget.contactFilter == null || widget.contactFilter!.isEmpty) {
+      print('✅ Processed ${cyclesSnapshot.docs.length} cycles with total $totalOutgoingFromStats outgoing calls');
+    } else {
+      print('✅ Processed $processedEvents matching events, filtered out $filteredEvents');
+    }
+    print('📊 Final heatmap data: $newCallData');
+
+    setState(() {
+      callData = newCallData;
+      isLoading = false;
+    });
+  }
+
+  // Fetch data from all cycle_events (when only contact filter is set, no list filter)
+  Future<void> _fetchFromAllCycleEvents(FirebaseFirestore firestore) async {
+    print('📊 Fetching from all list_cycles for contact: ${widget.contactFilter}');
+    print('📅 Date range: $startDate to $endDate');
+
+    // Query all list_cycles for this user
+    Query cyclesQuery = firestore
+        .collection('list_cycles')
+        .where('user_id', isEqualTo: userId);
+
+    // Fetch all cycles
+    QuerySnapshot cyclesSnapshot = await cyclesQuery.get();
+    print('📂 Found ${cyclesSnapshot.docs.length} total cycles');
+
+    Map<String, int> newCallData = {};
+    int processedEvents = 0;
+    int filteredEvents = 0;
+
+    // Iterate through each cycle
+    for (var cycleDoc in cyclesSnapshot.docs) {
+      final cycleId = cycleDoc.id;
+      
+      // Fetch cycle_events subcollection
+      QuerySnapshot eventsSnapshot = await firestore
+          .collection('list_cycles')
+          .doc(cycleId)
+          .collection('cycle_events')
+          .get();
+
+      // Process each event
+      for (var eventDoc in eventsSnapshot.docs) {
+        final eventData = eventDoc.data() as Map<String, dynamic>;
+
+        // Get timestamp from dial_pressed_at_client
+        final dialPressedTimestamp = eventData['dial_pressed_at_client'] as Timestamp?;
+        if (dialPressedTimestamp == null) {
+          continue; // Skip if no timestamp
+        }
+
+        final eventTime = dialPressedTimestamp.toDate();
+
+        // Check if event is within date range
+        if (eventTime.isBefore(startDate) || eventTime.isAfter(endDate)) {
+          filteredEvents++;
+          continue;
+        }
+
+        // Apply contact filter
+        final normalizedPhone = eventData['normalized_phone'] as String?;
+        if (normalizedPhone != widget.contactFilter) {
+          filteredEvents++;
+          continue;
+        }
+
+        print('   ✓ Event matches contact: ${eventData['contact_name']} ($normalizedPhone)');
+
+        // Generate key based on time scale
+        String key;
+        if (widget.timeScale == 'day') {
+          key = eventTime.hour.toString();
+        } else {
+          key = DateFormat('yyyy-MM-dd').format(eventTime);
+        }
+
+        // Increment call count
+        newCallData[key] = (newCallData[key] ?? 0) + 1;
+        processedEvents++;
+      }
+    }
+
+    print('✅ Processed $processedEvents matching events, filtered out $filteredEvents');
+    print('📊 Final heatmap data: $newCallData');
+
+    setState(() {
+      callData = newCallData;
+      isLoading = false;
+    });
+  }
+
+  Future<void> _fetchFromCallHistory(FirebaseFirestore firestore) async {
+    // Build set of normalized phones to filter by (for contact filter)
+    Set<String>? allowedPhones;
+
+    // If contact filter is set
+    if (widget.contactFilter != null) {
+      allowedPhones = {widget.contactFilter!};
+      print('Filtering by normalized phone: ${widget.contactFilter}');
+    }
+      
+    // Build base query for call_history collection
+    Query query = firestore
+        .collection('call_history')
+        .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+        .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endDate));
+
+    // Execute the query
+    QuerySnapshot snapshot = await query.get();
+    print('Found ${snapshot.docs.length} call records in call_history');
+
+    // Initialize the call data map
+    Map<String, int> newCallData = {};
+    int processedCalls = 0;
+    int filteredCalls = 0;
+      
+    // Process the query results
+    for (var doc in snapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+        
+      // Get the address (phone number) from call_history
+      final address = data['address'] as String?;
+      if (address == null || address.isEmpty) {
+        continue; // Skip if no phone number
+      }
+        
+      // Apply filters if specified
+      if (allowedPhones != null) {
+        // Normalize the address from call_history for comparison
+        final normalizedAddress = _normalizePhoneNumber(address);
+          
+        if (!allowedPhones.contains(normalizedAddress)) {
+          filteredCalls++;
+          continue; // Skip this record if it doesn't match the filters
+        }
+      }
+        
+      final timestamp = (data['timestamp'] as Timestamp).toDate();
+        
+      String key;
+      if (widget.timeScale == 'day') {
+        // For day view, use hour as key
+        key = timestamp.hour.toString();
+      } else {
+        // For month and week views, use date as key
+        key = DateFormat('yyyy-MM-dd').format(timestamp);
+      }
+        
+      // Increment the call count for this key
+      newCallData[key] = (newCallData[key] ?? 0) + 1;
+      processedCalls++;
+    }
+      
+    print('✅ Processed $processedCalls calls, filtered out $filteredCalls');
+    print('Heatmap data: $newCallData');
+      
+    setState(() {
+      callData = newCallData;
+      isLoading = false;
+    });
   }
 
   // Get color based on call count and threshold

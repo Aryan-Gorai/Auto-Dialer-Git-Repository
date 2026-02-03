@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_application_1/constants/routes.dart';
 
 import 'package:flutter_application_1/home_page.dart';
@@ -18,14 +19,17 @@ import 'package:flutter_application_1/views/call/contact_upload.dart';
 import 'package:flutter_application_1/views/notes/create_update_note_view.dart';
 import 'package:flutter_application_1/views/profile/user_profile_editor.dart';
 import 'package:flutter_application_1/utilities/apple_typography.dart';
+import 'package:flutter_application_1/firebase_options.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   runApp(
     MaterialApp(
