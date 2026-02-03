@@ -1016,7 +1016,7 @@ Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          "Upload Contact",
+                          "Upload Contacts",
                           style: TextStyle(
                             fontSize: 20,
                             color: Colors.grey[800],
@@ -1032,18 +1032,17 @@ Row(
                         ),
                         Row(
                           children: <Widget>[
-                            const Spacer(),
                             TextButton(
                               style: TextButton.styleFrom(
                                 foregroundColor: Colors.transparent,
                               ),
                               child: const Text(
-                                "Upload",
+                                "Upload Single",
                                 style: TextStyle(color: MyColorsSample.accent),
                               ),
                               onPressed: () async {
 
-                                    await fetchContactsAsArray(selectedList);   // THIS IS REQURESTED TWICE
+                                    await fetchContactsAsArray(selectedList);
 
                                     bool permission = await FlutterContactPicker.requestPermission();
 
@@ -1073,7 +1072,30 @@ Row(
                                 addNewContactDataToList(selectedList);
 
                                 fetchDocumentsInOrder();
-                                await fetchContactsAsArray(selectedList);       // THIS IS REQURESTED TWICE
+                                await fetchContactsAsArray(selectedList);
+                              },
+                            ),
+                            const Spacer(),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.transparent,
+                              ),
+                              child: const Text(
+                                "Upload Multiple",
+                                style: TextStyle(color: Colors.orange),
+                              ),
+                              onPressed: () async {
+                                int addedCount = await uploadMultipleContacts(context, selectedList);
+                                if (addedCount > 0 && mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Added $addedCount contact${addedCount == 1 ? '' : 's'} to $selectedList'),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                }
+                                fetchDocumentsInOrder();
+                                await fetchContactsAsArray(selectedList);
                               },
                             ),
                           ],

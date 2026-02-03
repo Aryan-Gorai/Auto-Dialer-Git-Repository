@@ -963,8 +963,8 @@
     }
   ],
   "generator": "pub",
-  "generatorVersion": "3.10.7",
+  "generatorVersion": "3.10.8",
   "flutterRoot": "file:///Users/aryangorai/Developer/flutter",
-  "flutterVersion": "3.38.6",
+  "flutterVersion": "3.38.9",
   "pubCache": "file:///Users/aryangorai/.pub-cache"
 }

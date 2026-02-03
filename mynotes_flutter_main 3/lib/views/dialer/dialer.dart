@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:flutter_application_1/services/call_cycle_service.dart';
 import 'package:flutter_application_1/views/list/firebase_services.dart';
 import 'package:flutter_application_1/views/notes/contact_notes_view.dart';
 import 'package:flutter_application_1/utilities/dialogs/call_feedback_dialog.dart';
@@ -58,6 +59,11 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
   bool isPaused = false; // Track if auto-cycle is paused
   bool isSettingsExpanded = false; // Track if settings section is expanded
 
+  // Call Cycle Tracking
+  String? _activeCycleId; // Current cycle document ID
+  String? _currentEventId; // Current call intent event ID
+  bool _isReconciling = false; // Track if reconciliation is in progress
+
   @override
   void initState() {
     super.initState();
@@ -89,15 +95,15 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
       // User left the app (likely to take a call)
       _isInCall = true;
       print('📱 App paused - user likely in a call');
-    } else if (state == AppLifecycleState.resumed && _isInCall && autoCycleEnabled && !isPaused) {
-      // User returned to the app after being in a call
+    } else if (state == AppLifecycleState.resumed && _isInCall && autoCycleEnabled && !isPaused && currentCallIndex >= 0) {
+      // User returned to the app after being in a call AND there's an active cycle
       print('📱 App resumed - auto-cycling to next contact in 2 seconds...');
       _isInCall = false;
       
       // Wait 2 seconds before auto-cycling to give user time to see what's happening
       _autoCycleTimer?.cancel();
       _autoCycleTimer = Timer(Duration(seconds: 2), () {
-        if (mounted && autoCycleEnabled && !isPaused) {
+        if (mounted && autoCycleEnabled && !isPaused && currentCallIndex >= 0) {
           print('🔄 Auto-cycling to next contact now');
           moveToNextContact();
         }
@@ -471,13 +477,36 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
   }
   
   // Method to call the current contact
-  void callCurrentContact() {
+  Future<void> callCurrentContact() async {
     if (currentCallIndex >= 0 && currentCallIndex < contactsData.length) {
       String phoneNumber = contactsData[currentCallIndex]['contact_phone_number'];
       String contactName = contactsData[currentCallIndex]['contact_name'];
+      String contactDocId = contactsData[currentCallIndex]['doc_id'] ?? '';
       
       // Save progress to Firestore for cross-device sync
       saveProgressToFirestore(currentCallIndex);
+
+      // --- CYCLE TRACKING: Start cycle if not started ---
+      if (_activeCycleId == null) {
+        _activeCycleId = await CallCycleService.startCycle(
+          listName: widget.listName,
+          totalContacts: contactsData.length,
+        );
+        print('🚀 Started call cycle: $_activeCycleId');
+      }
+
+      // --- CYCLE TRACKING: Record dialog shown (intent created) ---
+      final dialogShownAt = DateTime.now();
+      _currentEventId = await CallCycleService.recordCallDialogShown(
+        cycleId: _activeCycleId!,
+        listName: widget.listName,
+        contactDocId: contactDocId,
+        contactName: contactName,
+        contactPhoneNumber: phoneNumber,
+        contactIndex: currentCallIndex,
+        dialogShownAt: dialogShownAt,
+      );
+      print('📝 Recorded call intent: $_currentEventId');
       
       // Start timer and record call start time
       callStartTime = DateTime.now();
@@ -493,6 +522,17 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
       
       // Record the call timestamp in Firebase
       recordCallTimestamp(contactName, phoneNumber, widget.listName);
+
+      // --- CYCLE TRACKING: Record dial pressed ---
+      if (_activeCycleId != null && _currentEventId != null) {
+        await CallCycleService.recordDialPressed(
+          cycleId: _activeCycleId!,
+          eventId: _currentEventId!,
+          contactIndex: currentCallIndex,
+          dialPressedAt: DateTime.now(),
+        );
+        print('📞 Recorded dial pressed for event: $_currentEventId');
+      }
       
       // Make the phone call
       makePhoneCall(phoneNumber);
@@ -889,6 +929,75 @@ Widget build(BuildContext context) {
                           ),
                         ),
                       ),
+                      // Manual Refresh Stats Button
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Colors.white.withOpacity(0.7),
+                                Colors.white.withOpacity(0.3),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.5),
+                              width: 1.5,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 10,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Refresh Call Stats',
+                                      style: AppleTypography.withAppleFont(
+                                        AppleTypography.subtitle1.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      'Sync with Mac call history',
+                                      style: AppleTypography.withAppleFont(
+                                        AppleTypography.body2.copyWith(
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              _isReconciling
+                                  ? SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    )
+                                  : IconButton(
+                                      icon: Icon(Icons.refresh, color: Color.fromRGBO(64, 105, 225, 1)),
+                                      onPressed: _runReconciliation,
+                                    ),
+                            ],
+                          ),
+                        ),
+                      ),
                       SizedBox(height: 8),
                     ],
                   ),
@@ -1048,14 +1157,7 @@ Widget build(BuildContext context) {
                     Expanded(
                       child: ElevatedButton.icon(
                         onPressed: () async {
-                          setState(() {
-                            currentCallIndex = -1;
-                            isPaused = false;
-                          });
-                          _autoCycleTimer?.cancel();
-                          callTimer?.cancel();
-                          await clearSavedProgress();
-                          print('🛑 Call cycle ended');
+                          await _endCycleAndReconcile();
                         },
                         icon: Icon(
                           Icons.stop_circle,
@@ -1413,6 +1515,7 @@ Widget build(BuildContext context) {
               // Only show add and call buttons when call cycle is not active
               if (currentCallIndex < 0) ...[
                 Positioned(
+                  key: const ValueKey('add_contact_button'),
                   bottom: 200,
                   right: 30,
                   child: Container(
@@ -1431,7 +1534,89 @@ Widget build(BuildContext context) {
                       icon: const CNSymbol('plus', size: 22),
                       style: CNButtonStyle.prominentGlass,
                       onPressed: () async {
-                        await upload_button_on_dialer_contacts_view(context, widget.listName);
+                        // Show options: single or multiple contact upload
+                        final choice = await showModalBottomSheet<String>(
+                          context: context,
+                          backgroundColor: Colors.transparent,
+                          builder: (BuildContext context) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(20),
+                                  topRight: Radius.circular(20),
+                                ),
+                              ),
+                              padding: EdgeInsets.all(20),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 40,
+                                    height: 4,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade300,
+                                      borderRadius: BorderRadius.circular(2),
+                                    ),
+                                  ),
+                                  SizedBox(height: 20),
+                                  Text(
+                                    'Add Contacts',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(height: 20),
+                                  ListTile(
+                                    leading: Container(
+                                      padding: EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.shade100,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Icon(Icons.person_add, color: Colors.blue.shade700),
+                                    ),
+                                    title: Text('Add Single Contact'),
+                                    subtitle: Text('Pick one contact from your phone'),
+                                    onTap: () => Navigator.pop(context, 'single'),
+                                  ),
+                                  SizedBox(height: 8),
+                                  ListTile(
+                                    leading: Container(
+                                      padding: EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange.shade100,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Icon(Icons.people, color: Colors.orange.shade700),
+                                    ),
+                                    title: Text('Add Multiple Contacts'),
+                                    subtitle: Text('Select multiple contacts at once'),
+                                    onTap: () => Navigator.pop(context, 'multiple'),
+                                  ),
+                                  SizedBox(height: 20),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+
+                        if (choice == 'single') {
+                          await upload_button_on_dialer_contacts_view(context, widget.listName);
+                        } else if (choice == 'multiple') {
+                          int addedCount = await uploadMultipleContacts(context, widget.listName);
+                          if (addedCount > 0 && mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Added $addedCount contact${addedCount == 1 ? '' : 's'} to ${widget.listName}'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          }
+                        }
+                        
+                        // Refresh the contact list
                         fetchContactsAsArray(widget.listName).then((contacts) {
                           setState(() {
                             myTiles = contacts;
@@ -1445,6 +1630,7 @@ Widget build(BuildContext context) {
                   ),
                 ),
                 Positioned(
+                  key: const ValueKey('start_call_button'),
                   bottom: 130,
                   right: 30,
                   child: Container(
@@ -1475,6 +1661,7 @@ Widget build(BuildContext context) {
               // Always show next button when contacts exist
               if (contactsData.isNotEmpty)
                 Positioned(
+                  key: const ValueKey('next_contact_button'),
                   bottom: 60,
                   right: 30,
                   child: Container(
@@ -1594,6 +1781,81 @@ ${!answered ? '- Voicemail Left: ${voicemail ? 'Yes' : 'No'}\n' : ''}
     } catch (e) {
       print('❌ Error updating call feedback: $e');
       print('Error details: ${e.toString()}');
+    }
+  }
+
+  /// End the active call cycle, compute completion, and run reconciliation.
+  Future<void> _endCycleAndReconcile() async {
+    final completedContacts = currentCallIndex >= 0 ? currentCallIndex + 1 : 0;
+    final totalContacts = contactsData.length;
+
+    // Clean up local state
+    setState(() {
+      currentCallIndex = -1;
+      isPaused = false;
+    });
+    _autoCycleTimer?.cancel();
+    callTimer?.cancel();
+    await clearSavedProgress();
+
+    // End cycle in Firestore
+    if (_activeCycleId != null) {
+      await CallCycleService.endCycle(
+        cycleId: _activeCycleId!,
+        completedContacts: completedContacts,
+        totalContacts: totalContacts,
+      );
+      print('🛑 Call cycle ended: $_activeCycleId ($completedContacts/$totalContacts)');
+
+      // Auto-run reconciliation
+      await _runReconciliation();
+    }
+
+    // Clear cycle tracking
+    _activeCycleId = null;
+    _currentEventId = null;
+  }
+
+  /// Manually trigger reconciliation for the most recent cycle (or active one).
+  Future<void> _runReconciliation() async {
+    if (_isReconciling) return;
+    setState(() => _isReconciling = true);
+
+    try {
+      String? cycleIdToReconcile = _activeCycleId;
+
+      // If no active cycle, find the most recent ended cycle for this list
+      if (cycleIdToReconcile == null) {
+        final snap = await FirebaseFirestore.instance
+            .collection(CallCycleService.listCyclesCollection)
+            .where('user_id', isEqualTo: userId)
+            .where('list_name', isEqualTo: widget.listName)
+            .orderBy('started_at_server', descending: true)
+            .limit(1)
+            .get();
+        if (snap.docs.isNotEmpty) {
+          cycleIdToReconcile = snap.docs.first.id;
+        }
+      }
+
+      if (cycleIdToReconcile != null) {
+        await CallCycleService.reconcileCycle(cycleId: cycleIdToReconcile);
+        print('🔄 Reconciliation complete for cycle: $cycleIdToReconcile');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Stats refreshed from call history')),
+          );
+        }
+      }
+    } catch (e) {
+      print('❌ Reconciliation error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to refresh stats: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isReconciling = false);
     }
   }
 

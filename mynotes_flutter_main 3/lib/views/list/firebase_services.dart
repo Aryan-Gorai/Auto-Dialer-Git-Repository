@@ -15,6 +15,7 @@ import 'package:flutter_application_1/views/onBoarding/onBoarding.dart';
 // import 'package:flutter_application_1/views/profile/user_profile_editor.dart';
 import 'package:flutter_application_1/views/reports/reports_view_clean.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
+import 'package:flutter_contacts/flutter_contacts.dart' as fc;
 import 'package:google_nav_bar/google_nav_bar.dart';
 
 import 'package:url_launcher/url_launcher.dart';
@@ -667,12 +668,391 @@ Future<void> upload_button_on_dialer_contacts_view(BuildContext context, String 
   }
 }
 
+/// Simple contact data class to avoid holding heavy Contact objects
+class SimpleContact {
+  final String id;
+  final String displayName;
+  final String phoneNumber;
 
+  SimpleContact({
+    required this.id,
+    required this.displayName,
+    required this.phoneNumber,
+  });
+}
 
+/// Upload multiple contacts at once using a multi-select dialog
+/// This fetches all device contacts and shows a searchable multi-select UI
+Future<int> uploadMultipleContacts(BuildContext context, String selectedList) async {
+  try {
+    // Request permission using flutter_contacts
+    bool permission = await fc.FlutterContacts.requestPermission();
+    if (!permission) {
+      if (context.mounted) {
+        await showErrorDialog(context, 'Contact permission denied');
+      }
+      return 0;
+    }
 
+    if (selectedList.isEmpty) {
+      if (context.mounted) {
+        await showErrorDialog(context, 'Please select a list first');
+      }
+      return 0;
+    }
 
+    // Show loading dialog while fetching contacts
+    if (context.mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(width: 20),
+                  Text('Loading contacts...'),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
 
+    List<SimpleContact> simpleContacts = [];
+    
+    try {
+      // First get all contact IDs without properties (lightweight)
+      List<fc.Contact> lightContacts = await fc.FlutterContacts.getContacts(
+        withProperties: false,
+        withPhoto: false,
+      );
 
+      // Process contacts in batches to avoid memory pressure
+      const int batchSize = 50;
+      for (int i = 0; i < lightContacts.length; i += batchSize) {
+        int end = (i + batchSize < lightContacts.length) ? i + batchSize : lightContacts.length;
+        List<fc.Contact> batch = lightContacts.sublist(i, end);
+        
+        for (fc.Contact lightContact in batch) {
+          try {
+            // Fetch full contact details one at a time
+            fc.Contact? fullContact = await fc.FlutterContacts.getContact(lightContact.id);
+            if (fullContact != null && fullContact.phones.isNotEmpty) {
+              simpleContacts.add(SimpleContact(
+                id: fullContact.id,
+                displayName: fullContact.displayName,
+                phoneNumber: fullContact.phones.first.number,
+              ));
+            }
+          } catch (e) {
+            // Skip contacts that fail to load
+            continue;
+          }
+        }
+        
+        // Small delay between batches to reduce memory pressure
+        await Future.delayed(Duration(milliseconds: 10));
+      }
+    } catch (e) {
+      print('Error loading contacts: $e');
+    }
+
+    // Dismiss loading dialog
+    if (context.mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
+
+    if (simpleContacts.isEmpty) {
+      if (context.mounted) {
+        await showErrorDialog(context, 'No contacts with phone numbers found');
+      }
+      return 0;
+    }
+
+    // Show multi-select dialog
+    List<SimpleContact>? selectedContacts;
+    if (context.mounted) {
+      selectedContacts = await showDialog<List<SimpleContact>>(
+        context: context,
+        builder: (BuildContext context) {
+          return MultiContactSelectDialog(contacts: simpleContacts);
+        },
+      );
+    }
+
+    if (selectedContacts == null || selectedContacts.isEmpty) {
+      return 0; // User cancelled or selected nothing
+    }
+
+    // Show progress while adding contacts
+    if (context.mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(width: 20),
+                  Text('Adding ${selectedContacts!.length} contacts...'),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    // Add all selected contacts to the list
+    int addedCount = 0;
+    for (SimpleContact contact in selectedContacts) {
+      if (contact.displayName.isNotEmpty && contact.phoneNumber.isNotEmpty) {
+        await addContactToList(
+          contactName: contact.displayName,
+          contactPhoneNumber: contact.phoneNumber,
+          listName: selectedList,
+        );
+        addedCount++;
+      }
+    }
+
+    // Dismiss progress dialog
+    if (context.mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
+
+    return addedCount;
+  } catch (e) {
+    // Dismiss any open dialogs
+    if (context.mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+      await showErrorDialog(context, 'Failed to upload contacts: ${e.toString()}');
+    }
+    return 0;
+  }
+}
+
+/// Multi-select dialog widget for choosing multiple contacts
+class MultiContactSelectDialog extends StatefulWidget {
+  final List<SimpleContact> contacts;
+
+  const MultiContactSelectDialog({Key? key, required this.contacts}) : super(key: key);
+
+  @override
+  State<MultiContactSelectDialog> createState() => _MultiContactSelectDialogState();
+}
+
+class _MultiContactSelectDialogState extends State<MultiContactSelectDialog> {
+  final Set<SimpleContact> _selectedContacts = {};
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
+  List<SimpleContact> get _filteredContacts {
+    if (_searchQuery.isEmpty) {
+      return widget.contacts;
+    }
+    final query = _searchQuery.toLowerCase();
+    return widget.contacts.where((contact) {
+      return contact.displayName.toLowerCase().contains(query) ||
+          contact.phoneNumber.contains(query);
+    }).toList();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      insetPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      child: Container(
+        width: double.maxFinite,
+        height: MediaQuery.of(context).size.height * 0.8,
+        child: Column(
+          children: [
+            // Header
+            Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade600,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Select Contacts',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '${_selectedContacts.length} selected',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+                  // Search bar
+                  TextField(
+                    controller: _searchController,
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Search contacts...',
+                      prefixIcon: Icon(Icons.search, color: Colors.grey),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Select All / Deselect All buttons
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              color: Colors.grey.shade100,
+              child: Row(
+                children: [
+                  TextButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _selectedContacts.addAll(_filteredContacts);
+                      });
+                    },
+                    icon: Icon(Icons.select_all, size: 18),
+                    label: Text('Select All'),
+                  ),
+                  SizedBox(width: 8),
+                  TextButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _selectedContacts.clear();
+                      });
+                    },
+                    icon: Icon(Icons.deselect, size: 18),
+                    label: Text('Deselect All'),
+                  ),
+                ],
+              ),
+            ),
+            // Contact list
+            Expanded(
+              child: ListView.builder(
+                itemCount: _filteredContacts.length,
+                itemBuilder: (context, index) {
+                  final contact = _filteredContacts[index];
+                  final isSelected = _selectedContacts.contains(contact);
+
+                  return CheckboxListTile(
+                    value: isSelected,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        if (value == true) {
+                          _selectedContacts.add(contact);
+                        } else {
+                          _selectedContacts.remove(contact);
+                        }
+                      });
+                    },
+                    title: Text(
+                      contact.displayName,
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                    subtitle: Text(
+                      contact.phoneNumber,
+                      style: TextStyle(color: Colors.grey.shade600),
+                    ),
+                    secondary: CircleAvatar(
+                      backgroundColor: Colors.blue.shade100,
+                      child: Text(
+                        contact.displayName.isNotEmpty 
+                            ? contact.displayName[0].toUpperCase() 
+                            : '?',
+                        style: TextStyle(
+                          color: Colors.blue.shade700,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    activeColor: Colors.blue,
+                    checkColor: Colors.white,
+                  );
+                },
+              ),
+            ),
+            // Action buttons
+            Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(12),
+                  bottomRight: Radius.circular(12),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.of(context).pop(null),
+                      child: Text('Cancel'),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _selectedContacts.isEmpty
+                          ? null
+                          : () => Navigator.of(context).pop(_selectedContacts.toList()),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: Text('Add ${_selectedContacts.length} Contact${_selectedContacts.length == 1 ? '' : 's'}'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 
 void showListDialogForIntroScreen(BuildContext context) {
