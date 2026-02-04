@@ -132,7 +132,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
     }
   }
 
-  Future<void> _deleteContact(String docId, String contactName) async {
+  Future<bool> _deleteContact(String docId, String contactName) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -193,6 +193,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
             ),
           );
         }
+        return true;
       } catch (e) {
         print('Error deleting contact: $e');
         if (mounted) {
@@ -205,8 +206,10 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
             ),
           );
         }
+        return false;
       }
     }
+    return false;
   }
 
   void _showEditDialog(Map<String, dynamic> contact) {
@@ -552,42 +555,50 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                                   ? name.split(' ').map((e) => e.isNotEmpty ? e[0] : '').take(2).join().toUpperCase()
                                   : '?';
 
-                              return Container(
-                                margin: EdgeInsets.only(bottom: 10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.04),
-                                      blurRadius: 8,
-                                      offset: Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Material(
-                                  color: Colors.transparent,
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: InkWell(
+                              return Dismissible(
+                                key: Key(contact['id']),
+                                direction: DismissDirection.endToStart,
+                                confirmDismiss: (direction) async {
+                                  return await _deleteContact(contact['id'], name);
+                                },
+                                background: Container(
+                                  margin: EdgeInsets.only(bottom: 10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
                                     borderRadius: BorderRadius.circular(16),
-                                    onTap: () => _showEditDialog(contact),
-                                    child: Padding(
-                                      padding: EdgeInsets.all(12),
-                                      child: Row(
-                                        children: [
-                                          // Delete button
-                                          IconButton(
-                                            onPressed: () => _deleteContact(contact['id'], name),
-                                            icon: Icon(
-                                              Icons.delete_outline,
-                                              color: Colors.red.shade400,
-                                              size: 22,
-                                            ),
-                                            splashRadius: 24,
-                                            tooltip: 'Delete contact',
-                                          ),
-                                          SizedBox(width: 4),
-                                          // Avatar
+                                  ),
+                                  alignment: Alignment.centerRight,
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Icon(
+                                    Icons.delete_outline,
+                                    color: Colors.white,
+                                    size: 28,
+                                  ),
+                                ),
+                                child: Container(
+                                  margin: EdgeInsets.only(bottom: 10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.04),
+                                        blurRadius: 8,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    borderRadius: BorderRadius.circular(16),
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(16),
+                                      onTap: () => _showEditDialog(contact),
+                                      child: Padding(
+                                        padding: EdgeInsets.all(12),
+                                        child: Row(
+                                          children: [
+                                            // Avatar
                                           Container(
                                             width: 50,
                                             height: 50,
@@ -720,10 +731,11 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                                     ),
                                   ),
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            );
+                          },
                         ),
+                      ),
             ),
           ],
         ),

@@ -370,7 +370,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
       backgroundColor: const Color.fromRGBO(248, 225, 209, 1),
       appBar: AppBar(
         title: Text(
-          'Reports View (% Completion)',
+          'Reports View',
           style: AppleTypography.withAppleFont(
             AppleTypography.headline5.copyWith(
               fontWeight: FontWeight.normal,
@@ -932,19 +932,95 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                 borderRadius: BorderRadius.circular(8),
               ),
               margin: const EdgeInsets.all(8.0),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: _buildTimeRangeDropdown(
-                  _callDurationTimeRange,
-                  (String newValue) {
-                    setState(() {
-                      _callDurationTimeRange = newValue;
-                    });
-                  },
-                  _selectCallDurationDateRange,
-                  _callDurationStartDate,
-                  _callDurationEndDate,
-                ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // List filter dropdown
+                        Row(
+                          children: [
+                            Text(
+                              'Filter by List:',
+                              style: AppleTypography.withAppleFont(
+                                AppleTypography.body1.copyWith(
+                                  color: Colors.grey[700],
+                                )
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _isLoadingLists
+                                ? const SizedBox(
+                                    height: 30,
+                                    child: Center(
+                                      child: SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      ),
+                                    ),
+                                  )
+                                : _availableLists.isEmpty
+                                  ? Row(
+                                      children: [
+                                        const Text('No lists found'),
+                                        const SizedBox(width: 8),
+                                        TextButton(
+                                          onPressed: _loadListsForFilter,
+                                          child: const Text('Retry', style: TextStyle(fontSize: 12)),
+                                        ),
+                                      ],
+                                    )
+                                  : DropdownButton<String?>(
+                                      isExpanded: true,
+                                      value: _availableLists.contains(_selectedListFilter)
+                                          ? _selectedListFilter
+                                          : null,
+                                      hint: Text('All Lists (${_availableLists.length} available)'),
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          _selectedListFilter = newValue;
+                                        });
+                                      },
+                                      items: [
+                                        const DropdownMenuItem<String?>(
+                                          value: null,
+                                          child: Text('All Lists'),
+                                        ),
+                                        ..._availableLists.map((listName) {
+                                          return DropdownMenuItem<String?>(
+                                            value: listName,
+                                            child: Text(
+                                              listName,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ],
+                                    ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        // Time range dropdown
+                        _buildTimeRangeDropdown(
+                          _callDurationTimeRange,
+                          (String newValue) {
+                            setState(() {
+                              _callDurationTimeRange = newValue;
+                            });
+                          },
+                          _selectCallDurationDateRange,
+                          _callDurationStartDate,
+                          _callDurationEndDate,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
             Card(
@@ -956,6 +1032,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                 selectedTimeRange: _callDurationTimeRange,
                 customStartDate: _callDurationStartDate,
                 customEndDate: _callDurationEndDate,
+                listFilter: _selectedListFilter,
               ),
             ),
           ],
@@ -974,7 +1051,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
             borderRadius: BorderRadius.circular(8),
           ),
           margin: const EdgeInsets.all(8.0),
-          child: const ListPerformanceChart(),
+          child: ListPerformanceChart(selectedList: _selectedListFilter),
         ),
       ),
     );

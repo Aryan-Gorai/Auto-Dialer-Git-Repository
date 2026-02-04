@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
 import 'package:flutter_application_1/utilities/apple_typography.dart';
+import 'package:intl/intl.dart';
 
 class ListPerformanceChart extends StatefulWidget {
-  const ListPerformanceChart({Key? key}) : super(key: key);
+  final String? selectedList;
+  
+  const ListPerformanceChart({Key? key, this.selectedList}) : super(key: key);
 
   @override
   State<ListPerformanceChart> createState() => _ListPerformanceChartState();
@@ -14,135 +16,229 @@ class ListPerformanceChart extends StatefulWidget {
 class _ListPerformanceChartState extends State<ListPerformanceChart> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isLoading = true;
-  String _sortBy = 'successRate'; // 'successRate', 'totalCalls', 'alphabetical'
-  
-  List<ListPerformanceData> _listData = [];
+  String? _selectedList;
+  List<String> _availableLists = [];
+  List<CycleData> _cyclesData = [];
 
   String get _userId => AuthService.firebase().currentUser!.id;
 
   @override
   void initState() {
     super.initState();
-    _fetchListPerformance();
+    _selectedList = widget.selectedList;
+    _loadLists();
   }
 
-  Future<void> _fetchListPerformance() async {
+  @override
+  void didUpdateWidget(ListPerformanceChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedList != widget.selectedList) {
+      _selectedList = widget.selectedList;
+      if (_selectedList != null && _selectedList!.isNotEmpty) {
+        _fetchCycleData();
+      }
+    }
+  }
+
+  Future<void> _loadLists() async {
+    try {
+      final snapshot = await _firestore
+          .collection('lists_collection')
+          .where('user_id', isEqualTo: _userId)
+          .get();
+
+      List<String> lists = [];
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        final listName = data['list_name'] as String?;
+        if (listName != null && listName.isNotEmpty) {
+          lists.add(listName);
+        }
+      }
+
+      lists.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+
+      if (mounted) {
+        setState(() {
+          _availableLists = lists;
+          if (_selectedList == null && lists.isNotEmpty) {
+            _selectedList = lists.first;
+            _fetchCycleData();
+          } else if (_selectedList != null) {
+            _fetchCycleData();
+          } else {
+            _isLoading = false;
+          }
+        });
+      }
+    } catch (e) {
+      print('Error loading lists: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _fetchCycleData() async {
+    if (_selectedList == null || _selectedList!.isEmpty) {
+      setState(() {
+        _cyclesData = [];
+        _isLoading = false;
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
 
     try {
-      print('Fetching list performance for user: $_userId');
+      print('📊 Fetching cycles for list: $_selectedList');
 
-      // Fetch all Contact Directories for this user
-      final QuerySnapshot directoriesSnapshot = await _firestore
-          .collection('Contact Directories')
+      // Fetch all cycles for this list
+      final cyclesSnapshot = await _firestore
+          .collection('list_cycles')
           .where('user_id', isEqualTo: _userId)
+          .where('list_name', isEqualTo: _selectedList)
+          .orderBy('started_at_server', descending: true)
           .get();
 
-      print('Total contact directories: ${directoriesSnapshot.docs.length}');
+      print('📂 Found ${cyclesSnapshot.docs.length} cycles');
 
-      // Group contacts by list name
-      Map<String, ListPerformanceData> listPerformanceMap = {};
+      List<CycleData> cycles = [];
+      int cycleNumber = cyclesSnapshot.docs.length;
 
-      for (var doc in directoriesSnapshot.docs) {
-        try {
-          final data = doc.data() as Map<String, dynamic>;
-          final listName = data['list_name'] as String? ?? 'Unnamed List';
-          final phoneNumber = data['phone_number'] as String? ?? '';
+      for (var cycleDoc in cyclesSnapshot.docs) {
+        final cycleData = cycleDoc.data();
+        final cycleId = cycleDoc.id;
 
-          if (phoneNumber.isEmpty) continue;
+        // Get cycle basic info
+        final startedAtClient = cycleData['started_at_client'] as Timestamp?;
+        final startedAtServer = cycleData['started_at_server'] as Timestamp?;
+        final endedAt = cycleData['ended_at'] as Timestamp?;
+        final stats = cycleData['stats'] as Map<String, dynamic>?;
+        final totalContacts = cycleData['total_contacts'] as int? ?? 0;
+        final completedContacts = cycleData['completed_contacts'] as int? ?? 0;
 
-          // Initialize list data if not exists
-          if (!listPerformanceMap.containsKey(listName)) {
-            listPerformanceMap[listName] = ListPerformanceData(listName: listName);
-          }
+        final startTime = startedAtClient?.toDate() ?? startedAtServer?.toDate();
+        final endTime = endedAt?.toDate();
 
-          listPerformanceMap[listName]!.totalContactsInList++;
-        } catch (e) {
-          print('Error parsing directory doc: $e');
+        // Calculate completion percentage
+        double completionPct = 0;
+        if (totalContacts > 0) {
+          completionPct = (completedContacts / totalContacts) * 100;
         }
-      }
 
-      // Fetch all call history
-      final QuerySnapshot callHistorySnapshot = await _firestore
-          .collection('call_history')
-          .where('user_id', isEqualTo: _userId)
-          .get();
-
-      print('Total call history records: ${callHistorySnapshot.docs.length}');
-
-      // Create a map of phone numbers to list names from directories
-      Map<String, String> phoneToListMap = {};
-      for (var doc in directoriesSnapshot.docs) {
-        final data = doc.data() as Map<String, dynamic>;
-        final phoneNumber = _normalizePhone(data['phone_number'] as String? ?? '');
-        final listName = data['list_name'] as String? ?? 'Unnamed List';
-        if (phoneNumber.isNotEmpty) {
-          phoneToListMap[phoneNumber] = listName;
+        // Calculate total duration
+        Duration? totalDuration;
+        if (startTime != null && endTime != null) {
+          totalDuration = endTime.difference(startTime);
         }
-      }
 
-      // Process call history and match to lists
-      for (var doc in callHistorySnapshot.docs) {
-        try {
-          final data = doc.data() as Map<String, dynamic>;
-          final phoneNumber = _normalizePhone(data['address'] as String? ?? '');
+        // Fetch cycle_events for this cycle
+        final eventsSnapshot = await _firestore
+            .collection('list_cycles')
+            .doc(cycleId)
+            .collection('cycle_events')
+            .orderBy('dial_pressed_at_client', descending: false)
+            .get();
+
+        // Fetch call_history for duration data
+        final callHistorySnapshot = await _firestore
+            .collection('call_history')
+            .where('user_id', isEqualTo: _userId)
+            .get();
+
+        // Create a map of normalized phone -> duration for quick lookup
+        Map<String, Map<DateTime, double>> callDurationMap = {};
+        for (var historyDoc in callHistorySnapshot.docs) {
+          final historyData = historyDoc.data();
+          final address = historyData['address'] as String? ?? '';
+          final duration = (historyData['duration'] as num?)?.toDouble() ?? 0.0;
+          final timestamp = historyData['timestamp'] as Timestamp?;
           
-          if (phoneNumber.isEmpty) continue;
-
-          // Find which list this phone number belongs to
-          final listName = phoneToListMap[phoneNumber];
-          if (listName == null) continue;
-
-          if (!listPerformanceMap.containsKey(listName)) {
-            listPerformanceMap[listName] = ListPerformanceData(listName: listName);
+          if (address.isNotEmpty && timestamp != null) {
+            final normalizedPhone = _normalizePhone(address);
+            if (!callDurationMap.containsKey(normalizedPhone)) {
+              callDurationMap[normalizedPhone] = {};
+            }
+            callDurationMap[normalizedPhone]![timestamp.toDate()] = duration;
           }
+        }
 
-          final listData = listPerformanceMap[listName]!;
-          listData.totalCalls++;
-
-          final duration = (data['duration'] as num?)?.toDouble() ?? 0.0;
-          final callType = data['call_type'] as String? ?? '';
+        List<CallEventData> callEvents = [];
+        for (var eventDoc in eventsSnapshot.docs) {
+          final eventData = eventDoc.data();
           
-          bool answered;
-          if (data['answered'] is bool) {
-            answered = data['answered'] as bool;
-          } else if (data['answered'] is int) {
-            answered = (data['answered'] as int) == 1;
-          } else {
-            answered = false;
+          final contactName = eventData['contact_name'] as String? ?? 'Unknown';
+          final contactPhone = eventData['contact_phone_number'] as String? ?? '';
+          final dialPressed = eventData['dial_pressed_at_client'] as Timestamp?;
+          final action = eventData['action'] as String? ?? '';
+          
+          // Check if call was answered by looking for matched_at timestamp
+          final matchedAt = eventData['matched_at'] as Timestamp?;
+          bool wasAnswered = matchedAt != null;
+
+          // Get duration from call_history by matching phone and timestamp
+          double? callDuration;
+          if (contactPhone.isNotEmpty && dialPressed != null) {
+            final normalizedPhone = _normalizePhone(contactPhone);
+            final callTime = dialPressed.toDate();
+            
+            // Try to find exact match or close match (within 30 seconds)
+            if (callDurationMap.containsKey(normalizedPhone)) {
+              final phoneDurations = callDurationMap[normalizedPhone]!;
+              callDuration = phoneDurations[callTime];
+              
+              // If no exact match, try to find within 30 seconds
+              if (callDuration == null) {
+                for (var entry in phoneDurations.entries) {
+                  if ((entry.key.difference(callTime).inSeconds.abs() <= 30)) {
+                    callDuration = entry.value;
+                    break;
+                  }
+                }
+              }
+            }
           }
 
-          // Count connected calls
-          if (callType.toLowerCase() != 'missed' && (answered || duration > 0)) {
-            listData.connectedCalls++;
+          if (action == 'dialed' && dialPressed != null) {
+            callEvents.add(CallEventData(
+              contactName: contactName,
+              contactPhone: contactPhone,
+              timestamp: dialPressed.toDate(),
+              wasAnswered: wasAnswered,
+              durationSeconds: callDuration,
+            ));
           }
-        } catch (e) {
-          print('Error parsing call history doc: $e');
         }
-      }
 
-      // Calculate success rates
-      List<ListPerformanceData> listDataList = listPerformanceMap.values.toList();
-      for (var listData in listDataList) {
-        if (listData.totalCalls > 0) {
-          listData.successRate = (listData.connectedCalls / listData.totalCalls) * 100;
-        }
-        print('${listData.listName}: ${listData.totalCalls} calls, ${listData.connectedCalls} connected, ${listData.successRate.toStringAsFixed(1)}%');
-      }
+        cycles.add(CycleData(
+          cycleNumber: cycleNumber,
+          cycleId: cycleId,
+          dateStarted: startTime,
+          dateEnded: endTime,
+          completionPercentage: completionPct,
+          totalDuration: totalDuration,
+          totalContacts: totalContacts,
+          completedContacts: completedContacts,
+          outgoingCalls: stats?['outgoing'] as int? ?? 0,
+          callEvents: callEvents,
+        ));
 
-      // Sort the list
-      _sortListData(listDataList);
+        cycleNumber--;
+      }
 
       if (mounted) {
         setState(() {
-          _listData = listDataList;
+          _cyclesData = cycles;
           _isLoading = false;
         });
       }
     } catch (e) {
-      print('Error fetching list performance: $e');
+      print('❌ Error fetching cycle data: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -150,21 +246,6 @@ class _ListPerformanceChartState extends State<ListPerformanceChart> {
       }
     }
   }
-
-  void _sortListData(List<ListPerformanceData> data) {
-    switch (_sortBy) {
-      case 'successRate':
-        data.sort((a, b) => b.successRate.compareTo(a.successRate));
-        break;
-      case 'totalCalls':
-        data.sort((a, b) => b.totalCalls.compareTo(a.totalCalls));
-        break;
-      case 'alphabetical':
-        data.sort((a, b) => a.listName.compareTo(b.listName));
-        break;
-    }
-  }
-
   String _normalizePhone(String input) {
     final digitsOnly = input.replaceAll(RegExp(r'[^0-9]'), '');
     if (digitsOnly.length >= 9) {
@@ -172,429 +253,340 @@ class _ListPerformanceChartState extends State<ListPerformanceChart> {
     }
     return digitsOnly;
   }
-
-  Color _getSuccessRateColor(double successRate) {
-    if (successRate >= 70) {
-      return Colors.green;
-    } else if (successRate >= 40) {
-      return Colors.yellow.shade700;
+  String _formatDuration(Duration? duration) {
+    if (duration == null) return 'N/A';
+    
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
+    
+    if (hours > 0) {
+      return '${hours}h ${minutes}m ${seconds}s';
+    } else if (minutes > 0) {
+      return '${minutes}m ${seconds}s';
     } else {
-      return Colors.red;
+      return '${seconds}s';
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Title
           Text(
-            'List Performance Comparison',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
+            'List Performance',
+            style: AppleTypography.withAppleFont(
+              AppleTypography.headline5.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[800],
+              ),
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Compare effectiveness across all your contact lists',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
+            'View detailed cycle statistics for each list',
+            style: AppleTypography.withAppleFont(
+              AppleTypography.body2.copyWith(
+                color: Colors.grey[600],
+              ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
 
-          // Sort options
+          // List selector dropdown
           Row(
             children: [
               Text(
-                'Sort by:',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[700],
-                  fontWeight: FontWeight.bold,
+                'Choose List:',
+                style: AppleTypography.withAppleFont(
+                  AppleTypography.body1.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[700],
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    ChoiceChip(
-                      label: const Text('Success Rate'),
-                      selected: _sortBy == 'successRate',
-                      onSelected: (selected) {
-                        if (selected) {
+                child: _availableLists.isEmpty
+                    ? const Text('No lists found')
+                    : DropdownButton<String>(
+                        isExpanded: true,
+                        value: _availableLists.contains(_selectedList) ? _selectedList : null,
+                        hint: const Text('Select a list'),
+                        onChanged: (String? newValue) {
                           setState(() {
-                            _sortBy = 'successRate';
-                            _sortListData(_listData);
+                            _selectedList = newValue;
+                            _fetchCycleData();
                           });
-                        }
-                      },
-                    ),
-                    ChoiceChip(
-                      label: const Text('Total Calls'),
-                      selected: _sortBy == 'totalCalls',
-                      onSelected: (selected) {
-                        if (selected) {
-                          setState(() {
-                            _sortBy = 'totalCalls';
-                            _sortListData(_listData);
-                          });
-                        }
-                      },
-                    ),
-                    ChoiceChip(
-                      label: const Text('Alphabetical'),
-                      selected: _sortBy == 'alphabetical',
-                      onSelected: (selected) {
-                        if (selected) {
-                          setState(() {
-                            _sortBy = 'alphabetical';
-                            _sortListData(_listData);
-                          });
-                        }
-                      },
-                    ),
-                  ],
-                ),
+                        },
+                        items: _availableLists.map((listName) {
+                          return DropdownMenuItem<String>(
+                            value: listName,
+                            child: Text(listName),
+                          );
+                        }).toList(),
+                      ),
               ),
             ],
           ),
-
           const SizedBox(height: 24),
 
-          // Legend
-          Wrap(
-            spacing: 16,
-            runSpacing: 8,
-            children: [
-              _buildLegendItem('High (70%+)', Colors.green),
-              _buildLegendItem('Medium (40-70%)', Colors.yellow.shade700),
-              _buildLegendItem('Low (<40%)', Colors.red),
-            ],
-          ),
-
-          const SizedBox(height: 24),
-
-          // Chart
+          // Content
           if (_isLoading)
-            const SizedBox(
-              height: 400,
-              child: Center(child: CircularProgressIndicator()),
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(40.0),
+                child: CircularProgressIndicator(),
+              ),
             )
-          else if (_listData.isEmpty)
-            SizedBox(
-              height: 400,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.list_alt, size: 64, color: Colors.grey[400]),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No list data found',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Create contact lists and make calls to see performance',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[500],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+          else if (_selectedList == null)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(40.0),
+                child: Text(
+                  'Please select a list to view cycle data',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ),
+            )
+          else if (_cyclesData.isEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(40.0),
+                child: Text(
+                  'No cycles found for "$_selectedList"',
+                  style: TextStyle(color: Colors.grey[600]),
                 ),
               ),
             )
           else
-            SizedBox(
-              height: (_listData.length * 60.0).clamp(300, 600),
-              child: BarChart(
-                BarChartData(
-                  alignment: BarChartAlignment.spaceAround,
-                  maxY: 100,
-                  barTouchData: BarTouchData(
-                    enabled: true,
-                    touchTooltipData: BarTouchTooltipData(
-                      getTooltipColor: (group) => Colors.blueGrey,
-                      tooltipRoundedRadius: 8,
-                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                        final listData = _listData[groupIndex];
-                        return BarTooltipItem(
-                          '${listData.listName}\n',
-                          const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                          children: [
-                            TextSpan(
-                              text: 'Success: ${listData.successRate.toStringAsFixed(1)}%\n',
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            TextSpan(
-                              text: 'Calls: ${listData.totalCalls}\n',
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            TextSpan(
-                              text: 'Connected: ${listData.connectedCalls}',
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                  titlesData: FlTitlesData(
-                    show: true,
-                    rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 40,
-                        getTitlesWidget: (double value, TitleMeta meta) {
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(
-                              '${value.toInt()}%',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 120,
-                        getTitlesWidget: (double value, TitleMeta meta) {
-                          final index = value.toInt();
-                          if (index >= 0 && index < _listData.length) {
-                            final listName = _listData[index].listName;
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: Text(
-                                listName,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.right,
-                              ),
-                            );
-                          }
-                          return const Text('');
-                        },
-                      ),
-                    ),
-                  ),
-                  borderData: FlBorderData(
-                    show: true,
-                    border: Border.all(color: Colors.grey.shade400),
-                  ),
-                  gridData: FlGridData(
-                    show: true,
-                    drawVerticalLine: true,
-                    drawHorizontalLine: false,
-                    verticalInterval: 10,
-                    getDrawingVerticalLine: (value) {
-                      return FlLine(
-                        color: Colors.grey.shade300,
-                        strokeWidth: 1,
-                      );
-                    },
-                  ),
-                  barGroups: _buildBarGroups(),
-                ),
-              ),
-            ),
-
-          const SizedBox(height: 24),
-
-          // Detailed breakdown
-          if (!_isLoading && _listData.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Detailed Breakdown',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  ..._listData.map((listData) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  listData.listName,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: _getSuccessRateColor(listData.successRate).withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  '${listData.successRate.toStringAsFixed(1)}%',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: _getSuccessRateColor(listData.successRate),
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              _buildStatBadge('Contacts: ${listData.totalContactsInList}', Colors.blue),
-                              const SizedBox(width: 8),
-                              _buildStatBadge('Calls: ${listData.totalCalls}', Colors.purple),
-                              const SizedBox(width: 8),
-                              _buildStatBadge('Connected: ${listData.connectedCalls}', Colors.green),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          LinearProgressIndicator(
-                            value: listData.successRate / 100,
-                            backgroundColor: Colors.grey.shade300,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              _getSuccessRateColor(listData.successRate),
-                            ),
-                            minHeight: 8,
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ],
-              ),
+            // Cycle data table
+            Column(
+              children: _cyclesData.map((cycle) => _buildCycleRow(cycle)).toList(),
             ),
         ],
       ),
     );
   }
 
-  Widget _buildLegendItem(String label, Color color) {
+  Widget _buildCycleRow(CycleData cycle) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header with cycle number
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.blue[50],
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(8),
+                topRight: Radius.circular(8),
+              ),
+            ),
+            child: Row(
+              children: [
+                Text(
+                  'Cycle ${cycle.cycleNumber}',
+                  style: AppleTypography.withAppleFont(
+                    AppleTypography.subtitle1.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue[900],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Cycle info
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildInfoRow('Date Started', 
+                  cycle.dateStarted != null 
+                    ? DateFormat('MMM d, yyyy h:mm a').format(cycle.dateStarted!)
+                    : 'N/A'),
+                const SizedBox(height: 8),
+                _buildInfoRow('Date Ended', 
+                  cycle.dateEnded != null 
+                    ? DateFormat('MMM d, yyyy h:mm a').format(cycle.dateEnded!)
+                    : 'In Progress'),
+                const SizedBox(height: 8),
+                _buildInfoRow('% Completion', 
+                  '${cycle.completionPercentage.toStringAsFixed(1)}%'),
+                const SizedBox(height: 8),
+                _buildInfoRow('Total Duration', 
+                  _formatDuration(cycle.totalDuration)),
+                const SizedBox(height: 16),
+
+                // Total Call Statistics
+                Text(
+                  'Total Call Statistics:',
+                  style: AppleTypography.withAppleFont(
+                    AppleTypography.subtitle2.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Call events list
+                if (cycle.callEvents.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: Text(
+                      'No calls in this cycle',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                    ),
+                  )
+                else
+                  ...cycle.callEvents.map((event) => _buildCallEventRow(event)).toList(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 16,
-          height: 16,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(2),
+        SizedBox(
+          width: 140,
+          child: Text(
+            label,
+            style: AppleTypography.withAppleFont(
+              AppleTypography.body2.copyWith(
+                color: Colors.grey[700],
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12),
+        Expanded(
+          child: Text(
+            value,
+            style: AppleTypography.withAppleFont(
+              AppleTypography.body2.copyWith(
+                color: Colors.grey[900],
+              ),
+            ),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildStatBadge(String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-          color: color,
-        ),
+  Widget _buildCallEventRow(CallEventData event) {
+    // Format duration in minutes
+    String durationText = 'N/A';
+    if (event.durationSeconds != null && event.durationSeconds! >= 60) {
+      final minutes = (event.durationSeconds! / 60).floor();
+      durationText = '${minutes}m';
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, bottom: 4, top: 4),
+      child: Row(
+        children: [
+          // Arrow indicator
+          Icon(
+            event.wasAnswered ? Icons.arrow_forward : Icons.arrow_forward_outlined,
+            size: 16,
+            color: event.wasAnswered ? Colors.green : Colors.red,
+          ),
+          const SizedBox(width: 8),
+          // Contact name only (no phone number)
+          Expanded(
+            child: Text(
+              event.contactName,
+              style: AppleTypography.withAppleFont(
+                AppleTypography.body2.copyWith(
+                  color: event.wasAnswered ? Colors.green[700] : Colors.red[700],
+                ),
+              ),
+            ),
+          ),
+          // Duration
+          Text(
+            durationText,
+            style: AppleTypography.withAppleFont(
+              AppleTypography.caption.copyWith(
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Time
+          Text(
+            DateFormat('h:mm a').format(event.timestamp),
+            style: AppleTypography.withAppleFont(
+              AppleTypography.caption.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
-
-  List<BarChartGroupData> _buildBarGroups() {
-    List<BarChartGroupData> groups = [];
-
-    for (int i = 0; i < _listData.length; i++) {
-      final listData = _listData[i];
-      groups.add(
-        BarChartGroupData(
-          x: i,
-          barRods: [
-            BarChartRodData(
-              toY: listData.successRate,
-              color: _getSuccessRateColor(listData.successRate),
-              width: 20,
-              borderRadius: const BorderRadius.only(
-                topRight: Radius.circular(4),
-                bottomRight: Radius.circular(4),
-              ),
-              gradient: LinearGradient(
-                colors: [
-                  _getSuccessRateColor(listData.successRate).withOpacity(0.7),
-                  _getSuccessRateColor(listData.successRate),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return groups;
-  }
 }
 
-class ListPerformanceData {
-  final String listName;
-  int totalContactsInList = 0;
-  int totalCalls = 0;
-  int connectedCalls = 0;
-  double successRate = 0.0;
+// Data models
+class CycleData {
+  final int cycleNumber;
+  final String cycleId;
+  final DateTime? dateStarted;
+  final DateTime? dateEnded;
+  final double completionPercentage;
+  final Duration? totalDuration;
+  final int totalContacts;
+  final int completedContacts;
+  final int outgoingCalls;
+  final List<CallEventData> callEvents;
 
-  ListPerformanceData({required this.listName});
+  CycleData({
+    required this.cycleNumber,
+    required this.cycleId,
+    this.dateStarted,
+    this.dateEnded,
+    required this.completionPercentage,
+    this.totalDuration,
+    required this.totalContacts,
+    required this.completedContacts,
+    required this.outgoingCalls,
+    required this.callEvents,
+  });
+}
+
+class CallEventData {
+  final String contactName;
+  final String contactPhone;
+  final DateTime timestamp;
+  final bool wasAnswered;
+  final double? durationSeconds;
+
+  CallEventData({
+    required this.contactName,
+    required this.contactPhone,
+    required this.timestamp,
+    required this.wasAnswered,
+    this.durationSeconds,
+  });
 }

@@ -9,6 +9,7 @@ class CallDurationChart extends StatefulWidget {
   final String? selectedTimeRange;
   final DateTime? customStartDate;
   final DateTime? customEndDate;
+  final String? listFilter; // Optional: list_name to filter by specific list
   final Function(String)? onTimeRangeChanged;
   final VoidCallback? onCustomRangeSelected;
 
@@ -17,6 +18,7 @@ class CallDurationChart extends StatefulWidget {
     this.selectedTimeRange,
     this.customStartDate,
     this.customEndDate,
+    this.listFilter,
     this.onTimeRangeChanged,
     this.onCustomRangeSelected,
   }) : super(key: key);
@@ -67,7 +69,8 @@ class _CallDurationChartState extends State<CallDurationChart> {
     // Refresh data when external parameters change
     if (oldWidget.selectedTimeRange != widget.selectedTimeRange ||
         oldWidget.customStartDate != widget.customStartDate ||
-        oldWidget.customEndDate != widget.customEndDate) {
+        oldWidget.customEndDate != widget.customEndDate ||
+        oldWidget.listFilter != widget.listFilter) {
       _fetchCallData();
     }
   }
@@ -110,14 +113,189 @@ class _CallDurationChartState extends State<CallDurationChart> {
       print('Fetching call durations for user: $_userId');
       print('Date range: $startDate to $endDate');
 
-      // Fetch call history
-      final QuerySnapshot querySnapshot = await _firestore
-          .collection('call_history')
-          .where('user_id', isEqualTo: _userId)
-          .orderBy('timestamp', descending: true)
-          .get();
+      // If list filter is set, get contacts from that list and filter call_history
+      if (widget.listFilter != null && widget.listFilter!.isNotEmpty) {
+        print('📊 Filtering call_history by list: ${widget.listFilter}');
+        await _fetchFromCallHistoryWithListFilter(startDate, endDate);
+        return;
+      }
 
-      print('Total call records fetched: ${querySnapshot.docs.length}');
+      // Otherwise use call_history without filter
+      print('📊 Using call_history data (no list filter)');
+      await _fetchFromCallHistory(startDate, endDate);
+    } catch (e) {
+      print('Error fetching call duration data: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  // Helper function to normalize phone numbers for comparison
+  String _normalizePhoneNumber(String phone) {
+    final digitsOnly = phone.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digitsOnly.length >= 9) {
+      return digitsOnly.substring(digitsOnly.length - 9);
+    }
+    return digitsOnly;
+  }
+
+  Future<void> _fetchFromCallHistoryWithListFilter(DateTime startDate, DateTime endDate) async {
+    print('📅 Fetching contacts for list: ${widget.listFilter}');
+    
+    // Get all contacts from the specified list
+    Set<String> listPhoneNumbers = {};
+    final contactsSnapshot = await _firestore
+        .collection('Contact Directories')
+        .where('user_id', isEqualTo: _userId)
+        .get();
+    
+    for (var doc in contactsSnapshot.docs) {
+      final data = doc.data();
+      final memberships = data['list_memberships'] as Map<String, dynamic>?;
+      if (memberships != null && memberships.containsKey(widget.listFilter)) {
+        final normalizedPhone = data['normalized_phone'] as String?;
+        if (normalizedPhone != null && normalizedPhone.isNotEmpty) {
+          listPhoneNumbers.add(normalizedPhone);
+        }
+      }
+    }
+    
+    print('📂 Found ${listPhoneNumbers.length} contacts in list "${widget.listFilter}"');
+    
+    if (listPhoneNumbers.isEmpty) {
+      // No contacts in this list, return empty data
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    // Now fetch call_history and filter by these phone numbers
+    final QuerySnapshot querySnapshot = await _firestore
+        .collection('call_history')
+        .where('user_id', isEqualTo: _userId)
+        .orderBy('timestamp', descending: true)
+        .get();
+
+    print('Total call records fetched: ${querySnapshot.docs.length}');
+
+    // Reset bins
+    for (var bin in _durationBins.values) {
+      bin.reset();
+    }
+
+    List<double> allDurations = [];
+
+    int recordsInRange = 0;
+    int filteredByList = 0;
+    for (var doc in querySnapshot.docs) {
+      try {
+        final data = doc.data() as Map<String, dynamic>;
+        final timestamp = (data['timestamp'] as Timestamp).toDate();
+
+        // Filter by date range
+        if (timestamp.isBefore(startDate) || timestamp.isAfter(endDate)) {
+          continue;
+        }
+
+        recordsInRange++;
+
+        // Filter by list contacts
+        final address = data['address'] as String? ?? '';
+        final normalizedAddress = _normalizePhoneNumber(address);
+        if (!listPhoneNumbers.contains(normalizedAddress)) {
+          filteredByList++;
+          continue;
+        }
+
+        final duration = (data['duration'] as num?)?.toDouble() ?? 0.0;
+        final callType = data['call_type'] as String? ?? '';
+
+        bool answered;
+        if (data['answered'] is bool) {
+          answered = data['answered'] as bool;
+        } else if (data['answered'] is int) {
+          answered = (data['answered'] as int) == 1;
+        } else {
+          answered = false;
+        }
+
+        // Only include calls with duration > 0
+        if (duration > 0) {
+          allDurations.add(duration);
+
+          // Determine if successful
+          bool isSuccessful = false;
+          if (callType.toLowerCase() != 'missed' && (answered || duration > 0)) {
+            isSuccessful = true;
+          }
+
+          // Bin the duration
+          for (var bin in _durationBins.values) {
+            if (duration >= bin.minSeconds && duration < bin.maxSeconds) {
+              if (isSuccessful) {
+                bin.successfulCalls++;
+              } else {
+                bin.unsuccessfulCalls++;
+              }
+              break;
+            }
+          }
+        }
+      } catch (e) {
+        print('Error parsing call record: $e');
+      }
+    }
+
+    print('Records in date range: $recordsInRange');
+    print('Filtered out by list: $filteredByList');
+    print('Calls with duration > 0: ${allDurations.length}');
+
+    // Calculate statistics
+    if (allDurations.isNotEmpty) {
+      allDurations.sort();
+      _allDurations = allDurations;
+
+      _percentile25 = _calculatePercentile(allDurations, 25);
+      _percentile50 = _calculatePercentile(allDurations, 50);
+      _percentile75 = _calculatePercentile(allDurations, 75);
+      _medianDuration = _percentile50;
+
+      print('Median: $_medianDuration seconds');
+      print('25th percentile: $_percentile25 seconds');
+      print('75th percentile: $_percentile75 seconds');
+    } else {
+      _allDurations = [];
+      _percentile25 = 0;
+      _percentile50 = 0;
+      _percentile75 = 0;
+      _medianDuration = 0;
+    }
+
+    // Print bin data
+    for (var bin in _durationBins.values) {
+      print('${bin.label}: S=${bin.successfulCalls}, U=${bin.unsuccessfulCalls}');
+    }
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _fetchFromCallHistory(DateTime startDate, DateTime endDate) async {
+    // Fetch call history from Firebase
+    final QuerySnapshot querySnapshot = await _firestore
+        .collection('call_history')
+        .where('user_id', isEqualTo: _userId)
+        .orderBy('timestamp', descending: true)
+        .get();
+
+    print('Total call records fetched: ${querySnapshot.docs.length}');
 
       // Reset bins
       for (var bin in _durationBins.values) {
@@ -202,23 +380,15 @@ class _CallDurationChartState extends State<CallDurationChart> {
         _medianDuration = 0;
       }
 
-      // Print bin data
-      for (var bin in _durationBins.values) {
-        print('${bin.label}: S=${bin.successfulCalls}, U=${bin.unsuccessfulCalls}');
-      }
+    // Print bin data
+    for (var bin in _durationBins.values) {
+      print('${bin.label}: S=${bin.successfulCalls}, U=${bin.unsuccessfulCalls}');
+    }
 
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      print('Error fetching call duration data: $e');
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
