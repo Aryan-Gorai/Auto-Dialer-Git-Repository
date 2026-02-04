@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/utilities/apple_typography.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
+import 'package:flutter_application_1/views/contact_directory/call_prediction_view.dart';
 
 class ContactDirectoryView extends StatefulWidget {
   const ContactDirectoryView({Key? key}) : super(key: key);
@@ -243,6 +244,26 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                   AppleTypography.headline5.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
+            ),
+            // Prediction button
+            IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CallPredictionView(
+                      contactName: contact['contact_name'] ?? 'Unknown',
+                      phoneNumber: contact['contact_phone_number'] ?? '',
+                    ),
+                  ),
+                );
+              },
+              icon: Icon(
+                Icons.analytics_outlined,
+                color: Color.fromRGBO(64, 105, 225, 1),
+              ),
+              tooltip: 'View Call Predictions',
             ),
           ],
         ),
