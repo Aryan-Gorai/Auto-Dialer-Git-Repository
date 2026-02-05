@@ -12,6 +12,7 @@ import 'weekly_calls_chart.dart';
 import 'call_duration_chart.dart';
 import 'list_performance_chart.dart';
 import 'call_outcome_donut_chart.dart';
+import 'linear_regression_stats_view.dart';
 
 class ReportsView extends StatefulWidget {
   const ReportsView({Key? key}) : super(key: key);
@@ -57,7 +58,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
     _loadHeatmapSettings();
     _loadContactsForFilter();
     _loadListsForFilter();
@@ -401,6 +402,10 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
               icon: Icon(Icons.pie_chart),
               text: 'Outcomes',
             ),
+            Tab(
+              icon: Icon(Icons.functions),
+              text: 'Stats',
+            ),
           ],
         ),
         actions: [
@@ -440,6 +445,8 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
           _buildListPerformanceTab(),
           // Tab 5: Call Outcomes
           _buildCallOutcomesTab(),
+          // Tab 6: Stats (Linear Regression)
+          _buildStatsTab(),
         ],
       ),
     );
@@ -1167,5 +1174,9 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
           ),
       ],
     );
+  }
+
+  Widget _buildStatsTab() {
+    return const LinearRegressionStatsView();
   }
 }
