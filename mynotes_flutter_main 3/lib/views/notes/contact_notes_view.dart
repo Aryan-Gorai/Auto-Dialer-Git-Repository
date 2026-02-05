@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
+import 'package:flutter_application_1/services/trie/trie.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -23,7 +24,22 @@ class ContactNotesView extends StatefulWidget {
 class _ContactNotesViewState extends State<ContactNotesView> {
   bool isLoading = true;
   List<Map<String, dynamic>> callNotes = [];
+  List<Map<String, dynamic>> filteredNotes = []; // Notes filtered by search query
   final TextEditingController _noteController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
+  
+  /// Trie data structure for efficient autocomplete search
+  /// Stores all words from all notes for O(k) prefix search where k = word length
+  final Trie _noteTrie = Trie();
+  
+  /// Current search query
+  String _searchQuery = '';
+  
+  /// Autocomplete suggestions based on current search query
+  List<String> _autocompleteSuggestions = [];
+  
+  /// Whether to show autocomplete suggestions
+  bool _showSuggestions = false;
   
   String get userId => AuthService.firebase().currentUser!.id;
 
@@ -31,12 +47,85 @@ class _ContactNotesViewState extends State<ContactNotesView> {
   void initState() {
     super.initState();
     fetchCallNotes();
+    
+    // Listen to search query changes for real-time autocomplete
+    _searchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
     _noteController.dispose();
+    _searchController.dispose();
     super.dispose();
+  }
+  
+  /// Handle search query changes
+  /// Updates autocomplete suggestions and filters notes in real-time
+  void _onSearchChanged() {
+    setState(() {
+      _searchQuery = _searchController.text.toLowerCase().trim();
+      _showSuggestions = _searchQuery.isNotEmpty;
+      
+      if (_searchQuery.isEmpty) {
+        // No search query - show all notes
+        filteredNotes = callNotes;
+        _autocompleteSuggestions = [];
+      } else {
+        // Get autocomplete suggestions from Trie (O(k) time complexity)
+        _autocompleteSuggestions = _noteTrie.getAutocompleteSuggestions(
+          _searchQuery,
+          maxSuggestions: 5,
+        );
+        
+        // Filter notes based on search query
+        // Two approaches:
+        // 1. Use Trie to get document IDs (fast for prefix search)
+        // 2. Fall back to full-text search for non-prefix matches
+        _filterNotes();
+      }
+    });
+  }
+  
+  /// Filter notes based on current search query
+  /// Uses Trie for efficient prefix matching
+  void _filterNotes() {
+    if (_searchQuery.isEmpty) {
+      filteredNotes = callNotes;
+      return;
+    }
+    
+    // Get document IDs from Trie for prefix match
+    Set<String> trieMatchedIds = _noteTrie.getDocumentIdsWithPrefix(_searchQuery);
+    
+    // Filter notes: include if ID matches from Trie OR if text contains query
+    filteredNotes = callNotes.where((note) {
+      String noteId = note['id'] ?? '';
+      String noteText = (note['note_text'] ?? '').toLowerCase();
+      
+      // Match if Trie found this document OR if text contains search query
+      return trieMatchedIds.contains(noteId) || noteText.contains(_searchQuery);
+    }).toList();
+  }
+  
+  /// Build the Trie from all notes
+  /// This enables fast O(k) autocomplete searches
+  void _buildTrieFromNotes() {
+    // Clear existing Trie
+    _noteTrie.clear();
+    
+    // Insert all note texts into the Trie
+    for (var note in callNotes) {
+      String noteId = note['id'] ?? '';
+      String noteText = note['note_text'] ?? '';
+      
+      if (noteText.isNotEmpty) {
+        // Insert entire text - Trie will split into words automatically
+        _noteTrie.insertText(noteText, noteId);
+      }
+    }
+    
+    print('📚 Trie built with ${_noteTrie.wordCount} unique words');
+    print('📊 Trie stats: ${_noteTrie.getStats()}');
   }
 
   Future<void> fetchCallNotes() async {
@@ -65,8 +154,12 @@ class _ContactNotesViewState extends State<ContactNotesView> {
 
       setState(() {
         callNotes = notes;
+        filteredNotes = notes; // Initially show all notes
         isLoading = false;
       });
+      
+      // Build Trie from all notes for autocomplete
+      _buildTrieFromNotes();
       
       print('Total notes fetched: ${notes.length}');
     } catch (e) {
@@ -229,6 +322,133 @@ class _ContactNotesViewState extends State<ContactNotesView> {
             ),
           ),
           
+          // Search bar with autocomplete (Trie-based)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Search input field
+                TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search notes...',
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                            },
+                          )
+                        : null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                  ),
+                ),
+                
+                // Autocomplete suggestions dropdown
+                if (_showSuggestions && _autocompleteSuggestions.isNotEmpty)
+                  Container(
+                    margin: const EdgeInsets.only(top: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            'Suggestions:',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        ..._autocompleteSuggestions.map((suggestion) {
+                          return InkWell(
+                            onTap: () {
+                              // When user taps suggestion, update search query
+                              _searchController.text = suggestion;
+                              setState(() {
+                                _showSuggestions = false;
+                              });
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  top: BorderSide(color: Colors.grey.shade200),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.search,
+                                    size: 16,
+                                    color: Colors.grey[600],
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: RichText(
+                                      text: TextSpan(
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black87,
+                                        ),
+                                        children: _highlightMatch(
+                                          suggestion,
+                                          _searchQuery,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ],
+                    ),
+                  ),
+                
+                // Search results count
+                if (_searchQuery.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text(
+                      'Found ${filteredNotes.length} note${filteredNotes.length == 1 ? '' : 's'}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 8),
+          
           // Add new note section
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -253,16 +473,23 @@ class _ContactNotesViewState extends State<ContactNotesView> {
             ),
           ),
           
-          // Notes list
+          // Notes list (filtered by search query)
           Expanded(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : callNotes.isEmpty
-                    ? const Center(child: Text('No notes yet. Add your first note!'))
+                : filteredNotes.isEmpty
+                    ? Center(
+                        child: Text(
+                          _searchQuery.isEmpty
+                              ? 'No notes yet. Add your first note!'
+                              : 'No notes match your search.',
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                      )
                     : ListView.builder(
-                        itemCount: callNotes.length,
+                        itemCount: filteredNotes.length,
                         itemBuilder: (context, index) {
-                          final note = callNotes[index];
+                          final note = filteredNotes[index];
                           bool isCallFeedback = note['note_text']?.contains('Call Feedback:') ?? false;
                           bool hasFeedback = note['has_feedback'] == true;
                           bool hasRating = note['rating'] != null && (note['rating'] is int ? note['rating'] : int.tryParse(note['rating'].toString()) ?? 0) > 0;
@@ -463,5 +690,34 @@ class _ContactNotesViewState extends State<ContactNotesView> {
         ],
       );
     }
+  }
+  
+  /// Highlight the matching prefix in autocomplete suggestions
+  /// 
+  /// Creates a TextSpan with bold, colored text for the matching part
+  /// and normal text for the rest of the word
+  /// 
+  /// Parameters:
+  /// - text: The full suggestion text
+  /// - query: The search query to highlight
+  /// 
+  /// Returns: List of TextSpan objects for RichText widget
+  List<TextSpan> _highlightMatch(String text, String query) {
+    if (query.isEmpty || !text.toLowerCase().startsWith(query.toLowerCase())) {
+      return [TextSpan(text: text)];
+    }
+    
+    return [
+      TextSpan(
+        text: text.substring(0, query.length),
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Colors.blue,
+        ),
+      ),
+      TextSpan(
+        text: text.substring(query.length),
+      ),
+    ];
   }
 }

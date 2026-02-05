@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter_application_1/services/call_cycle_service.dart';
+import 'package:flutter_application_1/services/nlp/nlp_service.dart';
 import 'package:flutter_application_1/views/list/firebase_services.dart';
 import 'package:flutter_application_1/views/notes/contact_notes_view.dart';
 import 'package:flutter_application_1/utilities/dialogs/call_feedback_dialog.dart';
@@ -539,9 +540,79 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
     }
   }
 
-  void showFeedbackDialog(String contactName, String phoneNumber) {
+  /// Fetch previous notes for a contact and generate NLP summary
+  /// 
+  /// Uses multiple NLP techniques:
+  /// - Tokenization: Split text into words
+  /// - Stop word removal: Filter common words
+  /// - Stemming: Reduce to root forms
+  /// - TF-IDF: Calculate word importance
+  /// - N-grams: Find common phrases
+  /// 
+  /// Returns: Map with keywords, phrases, and summary text
+  Future<Map<String, dynamic>> _generateNoteSummary(
+    String contactName,
+    String phoneNumber,
+  ) async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      
+      // Fetch all previous notes for this contact
+      QuerySnapshot snapshot = await firestore
+          .collection('contact_notes')
+          .where('user_id', isEqualTo: userId)
+          .where('contact_name', isEqualTo: contactName)
+          .where('contact_phone_number', isEqualTo: phoneNumber)
+          .orderBy('timestamp', descending: true)
+          .get();
+      
+      // Extract note texts (exclude the current "Call initiated" note if it exists)
+      List<String> noteTexts = [];
+      for (var doc in snapshot.docs) {
+        String noteText = doc.data() is Map<String, dynamic> 
+            ? (doc.data() as Map<String, dynamic>)['note_text'] ?? ''
+            : '';
+        
+        // Only include notes with actual content (not just "Call initiated")
+        if (noteText.isNotEmpty && noteText.trim().toLowerCase() != 'call initiated') {
+          noteTexts.add(noteText);
+        }
+      }
+      
+      print('📝 Fetched ${noteTexts.length} previous notes for NLP analysis');
+      
+      // Generate summary using NLP techniques
+      Map<String, dynamic> summary = NLPService.generateNoteSummary(noteTexts);
+      
+      print('🤖 NLP Summary generated:');
+      print('   Keywords: ${summary['keywords']}');
+      print('   Phrases: ${summary['common_phrases']}');
+      print('   Summary: ${summary['summary_text']}');
+      
+      return summary;
+    } catch (e) {
+      print('❌ Error generating note summary: $e');
+      return {
+        'keywords': [],
+        'common_phrases': [],
+        'total_notes': 0,
+        'total_words': 0,
+        'summary_text': 'No previous notes available.',
+      };
+    }
+  }
+
+  Future<void> showFeedbackDialog(String contactName, String phoneNumber) async {
     // Only show if enabled
     if (!showFeedbackDialogEnabled) return;
+    
+    // Generate NLP summary of previous notes
+    Map<String, dynamic> noteSummary = await _generateNoteSummary(
+      contactName,
+      phoneNumber,
+    );
+    
+    if (!mounted) return;
     
     showDialog(
       context: context,
@@ -551,14 +622,14 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
         phoneNumber: phoneNumber,
         listName: widget.listName,
         callDuration: callDuration,
-        onFeedbackSubmitted: (answered, voicemail, rating) async {
+        noteSummary: noteSummary, // Pass NLP summary to dialog
+        onFeedbackSubmitted: (rating, notes) async {
           await updateCallFeedback(
             contactName,
             phoneNumber,
             widget.listName,
-            answered,
-            voicemail,
             rating,
+            notes,
             callDuration.inSeconds
           );
         },
@@ -586,27 +657,35 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
 
     // Show feedback dialog for the CURRENT contact (only once per contact)
     if (showFeedbackDialogEnabled) {
-      await showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (context) => CallFeedbackDialog(
-          contactName: contactName,
-          phoneNumber: phoneNumber,
-          listName: widget.listName,
-          callDuration: callDuration,
-          onFeedbackSubmitted: (answered, voicemail, rating) async {
-            await updateCallFeedback(
-              contactName,
-              phoneNumber,
-              widget.listName,
-              answered,
-              voicemail,
-              rating,
-              callDuration.inSeconds,
-            );
-          },
-        ),
+      // Generate NLP summary of previous notes
+      Map<String, dynamic> noteSummary = await _generateNoteSummary(
+        contactName,
+        phoneNumber,
       );
+      
+      if (mounted) {
+        await showDialog(
+          context: context,
+          barrierDismissible: true,
+          builder: (context) => CallFeedbackDialog(
+            contactName: contactName,
+            phoneNumber: phoneNumber,
+            listName: widget.listName,
+            callDuration: callDuration,
+            noteSummary: noteSummary, // Pass NLP summary to dialog
+            onFeedbackSubmitted: (rating, notes) async {
+              await updateCallFeedback(
+                contactName,
+                phoneNumber,
+                widget.listName,
+                rating,
+                notes,
+                callDuration.inSeconds,
+              );
+            },
+          ),
+        );
+      }
     }
 
     // Advance to the next contact and place the next call AFTER the feedback dialog is closed
@@ -1702,9 +1781,8 @@ Widget build(BuildContext context) {
     String contactName,
     String phoneNumber,
     String listName,
-    bool answered,
-    bool voicemail,
     int rating,
+    String notes,
     int durationSeconds
   ) async {
     try {
@@ -1725,19 +1803,6 @@ Widget build(BuildContext context) {
 
       print('Found ${snapshot.docs.length} matching call records');
 
-      // Create comprehensive note text with star rating
-      String noteText = '''
-Call Feedback:
-- Answered: ${answered ? 'Yes' : 'No'}
-${!answered ? '- Voicemail Left: ${voicemail ? 'Yes' : 'No'}\n' : ''}
-- Rating: ${rating > 0 ? '$rating/5 stars' : 'Not rated'}
-- Duration: ${durationSeconds} seconds
-''';
-      
-      if (voicemail) {
-        noteText += 'Notes about voicemail...\n';
-      }
-
       if (snapshot.docs.isNotEmpty) {
         // Update existing call record
         DocumentReference docRef = snapshot.docs.first.reference;
@@ -1746,12 +1811,10 @@ ${!answered ? '- Voicemail Left: ${voicemail ? 'Yes' : 'No'}\n' : ''}
         print('Updating document ID: $docId with rating: $rating');
         
         await docRef.update({
-          'answered': answered,
-          'voicemail': voicemail,
           'rating': rating,
           'duration_seconds': durationSeconds,
           'has_feedback': true,
-          'note_text': noteText,
+          'note_text': notes,
         });
 
         print('✅ Call feedback updated successfully! Doc ID: $docId, Rating: $rating/5');
@@ -1767,12 +1830,10 @@ ${!answered ? '- Voicemail Left: ${voicemail ? 'Yes' : 'No'}\n' : ''}
           'contact_phone_number': phoneNumber,
           'list_name': listName,
           'timestamp': timestamp,
-          'answered': answered,
-          'voicemail': voicemail,
           'rating': rating,
           'duration_seconds': durationSeconds,
           'has_feedback': true,
-          'note_text': noteText,
+          'note_text': notes,
         };
 
         DocumentReference newDoc = await notesRef.add(callFeedbackData);
