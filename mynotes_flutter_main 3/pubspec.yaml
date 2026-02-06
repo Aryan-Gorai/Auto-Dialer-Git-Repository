@@ -67,6 +67,8 @@ dependencies:
   email_validator: ^2.1.17
   flutter_rating_bar: ^4.0.1
   cupertino_native: ^0.1.1
+  file_picker: ^8.0.0+1
+  excel: ^4.0.3
   
 
 dev_dependencies:

@@ -1,8 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter_application_1/utilities/apple_typography.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
+import 'package:flutter_application_1/services/excel_import_service.dart';
 import 'package:flutter_application_1/views/contact_directory/call_prediction_view.dart';
+import 'package:flutter_application_1/views/list/firebase_services.dart';
+import 'package:flutter_contacts/flutter_contacts.dart' as fc;
 
 class ContactDirectoryView extends StatefulWidget {
   const ContactDirectoryView({Key? key}) : super(key: key);
@@ -431,10 +435,518 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
     }).toList();
   }
 
+  // ============================================================================
+  // Upload methods
+  // ============================================================================
+
+  /// Show the add contacts bottom sheet menu
+  void _showAddContactsMenu() {
+    showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+          ),
+          padding: EdgeInsets.fromLTRB(20, 12, 20, 30),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Drag handle
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Add Contacts to Directory',
+                style: AppleTypography.withAppleFont(
+                  AppleTypography.headline5.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+              SizedBox(height: 6),
+              Text(
+                'Choose how you want to import contacts',
+                style: AppleTypography.withAppleFont(
+                  AppleTypography.body2.copyWith(color: Colors.grey.shade500),
+                ),
+              ),
+              SizedBox(height: 20),
+              // Option 1: Upload from Phone Contacts
+              _buildMenuOption(
+                icon: Icons.contacts,
+                iconColor: Colors.blue.shade700,
+                bgColor: Colors.blue.shade100,
+                title: 'Upload from Phone Contacts',
+                subtitle: 'Select contacts from your device',
+                onTap: () {
+                  Navigator.pop(context);
+                  _uploadFromPhoneContacts();
+                },
+              ),
+              SizedBox(height: 10),
+              // Option 2: Upload from Excel Spreadsheet
+              _buildMenuOption(
+                icon: Icons.table_chart,
+                iconColor: Colors.green.shade700,
+                bgColor: Colors.green.shade100,
+                title: 'Upload from Spreadsheet',
+                subtitle: 'Import contacts from Excel or CSV file',
+                onTap: () {
+                  Navigator.pop(context);
+                  _uploadFromExcel();
+                },
+              ),
+              SizedBox(height: 16),
+              // Spreadsheet format info
+              Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blue.shade100),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.blue.shade600, size: 18),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Spreadsheet columns: "Name" and "Phone" (supports .xlsx, .xls, .csv)',
+                        style: AppleTypography.withAppleFont(
+                          AppleTypography.caption.copyWith(color: Colors.blue.shade700),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMenuOption({
+    required IconData icon,
+    required Color iconColor,
+    required Color bgColor,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Container(
+          padding: EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: iconColor, size: 24),
+              ),
+              SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: AppleTypography.withAppleFont(
+                        AppleTypography.subtitle1.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: AppleTypography.withAppleFont(
+                        AppleTypography.body2.copyWith(color: Colors.grey.shade500),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: Colors.grey.shade400),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Upload contacts from the device's phone contacts
+  Future<void> _uploadFromPhoneContacts() async {
+    try {
+      // Request permission
+      bool permission = await fc.FlutterContacts.requestPermission();
+      if (!permission) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Contact permission denied'),
+              backgroundColor: Colors.red.shade600,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Show loading
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(color: Color.fromRGBO(64, 105, 225, 1)),
+                  SizedBox(width: 20),
+                  Text('Loading contacts...', style: AppleTypography.withAppleFont(AppleTypography.body1)),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Fetch all phone contacts
+      List<SimpleContact> simpleContacts = [];
+      try {
+        List<fc.Contact> lightContacts = await fc.FlutterContacts.getContacts(
+          withProperties: false,
+          withPhoto: false,
+        );
+
+        const int batchSize = 50;
+        for (int i = 0; i < lightContacts.length; i += batchSize) {
+          int end = (i + batchSize < lightContacts.length) ? i + batchSize : lightContacts.length;
+          List<fc.Contact> batch = lightContacts.sublist(i, end);
+
+          for (fc.Contact lightContact in batch) {
+            try {
+              fc.Contact? fullContact = await fc.FlutterContacts.getContact(lightContact.id);
+              if (fullContact != null && fullContact.phones.isNotEmpty) {
+                simpleContacts.add(SimpleContact(
+                  id: fullContact.id,
+                  displayName: fullContact.displayName,
+                  phoneNumber: fullContact.phones.first.number,
+                ));
+              }
+            } catch (e) {
+              continue;
+            }
+          }
+          await Future.delayed(Duration(milliseconds: 10));
+        }
+      } catch (e) {
+        print('Error loading contacts: $e');
+      }
+
+      // Dismiss loading dialog
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+
+      if (simpleContacts.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('No contacts with phone numbers found'),
+              backgroundColor: Colors.orange.shade600,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Show multi-select dialog
+      if (!mounted) return;
+      List<SimpleContact>? selectedContacts = await showDialog<List<SimpleContact>>(
+        context: context,
+        builder: (context) => MultiContactSelectDialog(contacts: simpleContacts),
+      );
+
+      if (selectedContacts == null || selectedContacts.isEmpty) return;
+
+      // Convert to ExcelContact for duplicate checking
+      final excelContacts = selectedContacts.map((c) => ExcelContact(
+        name: c.displayName,
+        phoneNumber: c.phoneNumber,
+      )).toList();
+
+      // Check for duplicates
+      final duplicateResult = await ExcelImportService.checkForDuplicates(excelContacts);
+
+      List<ExcelContact> contactsToUpload = List.from(duplicateResult.newContacts);
+
+      if (duplicateResult.duplicateContacts.isNotEmpty && mounted) {
+        final action = await ExcelImportService.showDuplicateDialog(
+          context,
+          duplicateResult.duplicateContacts,
+        );
+
+        if (action == null) return; // Cancelled
+        if (action == 'overwrite') {
+          contactsToUpload.addAll(duplicateResult.duplicateContacts);
+        }
+        // 'skip' means we just upload newContacts
+      }
+
+      if (contactsToUpload.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('No new contacts to import'),
+              backgroundColor: Colors.orange.shade600,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Show uploading progress
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(color: Color.fromRGBO(64, 105, 225, 1)),
+                  SizedBox(width: 20),
+                  Text('Uploading ${contactsToUpload.length} contacts...', style: AppleTypography.withAppleFont(AppleTypography.body1)),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+
+      final uploadedCount = await ExcelImportService.uploadContactsToDirectory(
+        contactsToUpload,
+        overwriteExisting: duplicateResult.duplicateContacts.isNotEmpty,
+      );
+
+      // Dismiss progress dialog
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+
+      // Refresh and show success
+      await _fetchContacts();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Successfully imported $uploadedCount contact${uploadedCount == 1 ? '' : 's'}'),
+            backgroundColor: Colors.green.shade600,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error uploading phone contacts: $e');
+      if (mounted) {
+        // Dismiss any open dialogs
+        Navigator.of(context, rootNavigator: true).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to import contacts: ${e.toString()}'),
+            backgroundColor: Colors.red.shade600,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    }
+  }
+
+  /// Upload contacts from an Excel/CSV spreadsheet
+  Future<void> _uploadFromExcel() async {
+    try {
+      // Pick and parse Excel file
+      final contacts = await ExcelImportService.pickAndParseExcel(context);
+      if (contacts == null || contacts.isEmpty) return;
+
+      // Show parsed contact count
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(color: Color.fromRGBO(64, 105, 225, 1)),
+                  SizedBox(width: 20),
+                  Text('Checking ${contacts.length} contacts...', style: AppleTypography.withAppleFont(AppleTypography.body1)),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Check for duplicates
+      final duplicateResult = await ExcelImportService.checkForDuplicates(contacts);
+
+      // Dismiss checking dialog
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+
+      List<ExcelContact> contactsToUpload = List.from(duplicateResult.newContacts);
+      bool overwrite = false;
+
+      // If there are duplicates, ask the user
+      if (duplicateResult.duplicateContacts.isNotEmpty && mounted) {
+        final action = await ExcelImportService.showDuplicateDialog(
+          context,
+          duplicateResult.duplicateContacts,
+        );
+
+        if (action == null) return; // Cancelled
+        if (action == 'overwrite') {
+          contactsToUpload.addAll(duplicateResult.duplicateContacts);
+          overwrite = true;
+        }
+      }
+
+      if (contactsToUpload.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('No new contacts to import'),
+              backgroundColor: Colors.orange.shade600,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Show uploading progress
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(color: Color.fromRGBO(64, 105, 225, 1)),
+                  SizedBox(width: 20),
+                  Text('Uploading ${contactsToUpload.length} contacts...', style: AppleTypography.withAppleFont(AppleTypography.body1)),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+
+      final uploadedCount = await ExcelImportService.uploadContactsToDirectory(
+        contactsToUpload,
+        overwriteExisting: overwrite,
+      );
+
+      // Dismiss progress dialog
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+
+      // Refresh and show success
+      await _fetchContacts();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Successfully imported $uploadedCount contact${uploadedCount == 1 ? '' : 's'} from spreadsheet'),
+            backgroundColor: Colors.green.shade600,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error uploading from Excel: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to import spreadsheet: ${e.toString()}'),
+            backgroundColor: Colors.red.shade600,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromRGBO(248, 248, 250, 1),
+      // Floating Action Button with Apple Liquid Glass style
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color.fromRGBO(64, 105, 225, 1),
+              Color.fromRGBO(100, 140, 255, 1),
+            ],
+          ),
+        ),
+        child: CNButton.icon(
+          icon: const CNSymbol('plus', size: 22),
+          style: CNButtonStyle.prominentGlass,
+          onPressed: _showAddContactsMenu,
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: [

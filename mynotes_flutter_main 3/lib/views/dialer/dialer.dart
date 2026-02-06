@@ -2,7 +2,9 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:cupertino_native/cupertino_native.dart';
+import 'package:flutter_application_1/services/auth/auth_service.dart';
 import 'package:flutter_application_1/services/call_cycle_service.dart';
+import 'package:flutter_application_1/services/excel_import_service.dart';
 import 'package:flutter_application_1/services/nlp/nlp_service.dart';
 import 'package:flutter_application_1/services/priority_queue/contact_priority_queue.dart';
 import 'package:flutter_application_1/views/list/firebase_services.dart';
@@ -1776,7 +1778,7 @@ Widget build(BuildContext context) {
                       icon: const CNSymbol('plus', size: 22),
                       style: CNButtonStyle.prominentGlass,
                       onPressed: () async {
-                        // Show options: single or multiple contact upload
+                        // Show options: single, spreadsheet, or from contact directory
                         final choice = await showModalBottomSheet<String>(
                           context: context,
                           backgroundColor: Colors.transparent,
@@ -1785,12 +1787,13 @@ Widget build(BuildContext context) {
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(20),
-                                  topRight: Radius.circular(20),
+                                  topLeft: Radius.circular(24),
+                                  topRight: Radius.circular(24),
                                 ),
                               ),
-                              padding: EdgeInsets.all(20),
-                              child: Column(
+                              padding: EdgeInsets.fromLTRB(20, 12, 20, 20),
+                              child: SingleChildScrollView(
+                                child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Container(
@@ -1803,11 +1806,18 @@ Widget build(BuildContext context) {
                                   ),
                                   SizedBox(height: 20),
                                   Text(
-                                    'Add Contacts',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
+                                    'Add Contacts to List',
+                                    style: AppleTypography.withAppleFont(
+                                      AppleTypography.headline5.copyWith(fontWeight: FontWeight.bold),
                                     ),
+                                  ),
+                                  SizedBox(height: 6),
+                                  Text(
+                                    'Choose how to add contacts to "${widget.listName}"',
+                                    style: AppleTypography.withAppleFont(
+                                      AppleTypography.body2.copyWith(color: Colors.grey.shade500),
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
                                   SizedBox(height: 20),
                                   ListTile(
@@ -1819,8 +1829,8 @@ Widget build(BuildContext context) {
                                       ),
                                       child: Icon(Icons.person_add, color: Colors.blue.shade700),
                                     ),
-                                    title: Text('Add Single Contact'),
-                                    subtitle: Text('Pick one contact from your phone'),
+                                    title: Text('Add Single Contact', style: AppleTypography.withAppleFont(AppleTypography.subtitle1.copyWith(fontWeight: FontWeight.w600))),
+                                    subtitle: Text('Pick one contact from your phone', style: AppleTypography.withAppleFont(AppleTypography.body2.copyWith(color: Colors.grey.shade500))),
                                     onTap: () => Navigator.pop(context, 'single'),
                                   ),
                                   SizedBox(height: 8),
@@ -1828,17 +1838,54 @@ Widget build(BuildContext context) {
                                     leading: Container(
                                       padding: EdgeInsets.all(10),
                                       decoration: BoxDecoration(
-                                        color: Colors.orange.shade100,
+                                        color: Colors.green.shade100,
                                         borderRadius: BorderRadius.circular(12),
                                       ),
-                                      child: Icon(Icons.people, color: Colors.orange.shade700),
+                                      child: Icon(Icons.table_chart, color: Colors.green.shade700),
                                     ),
-                                    title: Text('Add Multiple Contacts'),
-                                    subtitle: Text('Select multiple contacts at once'),
-                                    onTap: () => Navigator.pop(context, 'multiple'),
+                                    title: Text('Upload from Spreadsheet', style: AppleTypography.withAppleFont(AppleTypography.subtitle1.copyWith(fontWeight: FontWeight.w600))),
+                                    subtitle: Text('Import contacts from Excel or CSV file', style: AppleTypography.withAppleFont(AppleTypography.body2.copyWith(color: Colors.grey.shade500))),
+                                    onTap: () => Navigator.pop(context, 'spreadsheet'),
                                   ),
-                                  SizedBox(height: 20),
+                                  SizedBox(height: 8),
+                                  ListTile(
+                                    leading: Container(
+                                      padding: EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.purple.shade100,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Icon(Icons.folder_shared, color: Colors.purple.shade700),
+                                    ),
+                                    title: Text('Upload from App Contact Directory', style: AppleTypography.withAppleFont(AppleTypography.subtitle1.copyWith(fontWeight: FontWeight.w600))),
+                                    subtitle: Text('Add contacts already in your directory', style: AppleTypography.withAppleFont(AppleTypography.body2.copyWith(color: Colors.grey.shade500))),
+                                    onTap: () => Navigator.pop(context, 'directory'),
+                                  ),
+                                  SizedBox(height: 16),
+                                  Container(
+                                    padding: EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.shade50,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: Colors.blue.shade100),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.info_outline, color: Colors.blue.shade600, size: 18),
+                                        SizedBox(width: 10),
+                                        Expanded(
+                                          child: Text(
+                                            'Spreadsheet columns: "Name" and "Phone" (.xlsx, .xls, .csv)',
+                                            style: AppleTypography.withAppleFont(
+                                              AppleTypography.caption.copyWith(color: Colors.blue.shade700),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ],
+                              ),
                               ),
                             );
                           },
@@ -1846,16 +1893,10 @@ Widget build(BuildContext context) {
 
                         if (choice == 'single') {
                           await upload_button_on_dialer_contacts_view(context, widget.listName);
-                        } else if (choice == 'multiple') {
-                          int addedCount = await uploadMultipleContacts(context, widget.listName);
-                          if (addedCount > 0 && mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Added $addedCount contact${addedCount == 1 ? '' : 's'} to ${widget.listName}'),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
-                          }
+                        } else if (choice == 'spreadsheet') {
+                          await _uploadFromSpreadsheetToList();
+                        } else if (choice == 'directory') {
+                          await _uploadFromAppDirectory();
                         }
                         
                         // Refresh the contact list
@@ -2083,6 +2124,278 @@ Widget build(BuildContext context) {
     }
   }
 
+  /// Upload contacts from a spreadsheet (Excel/CSV) directly into this list
+  Future<void> _uploadFromSpreadsheetToList() async {
+    try {
+      // Pick and parse spreadsheet
+      final contacts = await ExcelImportService.pickAndParseExcel(context);
+      if (contacts == null || contacts.isEmpty) return;
+
+      // Show progress
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(color: Color.fromRGBO(64, 105, 225, 1)),
+                  SizedBox(width: 20),
+                  Text('Checking ${contacts.length} contacts...'),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Check for duplicates in the directory
+      final duplicateResult = await ExcelImportService.checkForDuplicates(contacts);
+
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+
+      List<ExcelContact> contactsToUpload = List.from(duplicateResult.newContacts);
+      bool overwrite = false;
+
+      if (duplicateResult.duplicateContacts.isNotEmpty && mounted) {
+        final action = await ExcelImportService.showDuplicateDialog(
+          context,
+          duplicateResult.duplicateContacts,
+        );
+
+        if (action == null) return;
+        if (action == 'overwrite') {
+          contactsToUpload.addAll(duplicateResult.duplicateContacts);
+          overwrite = true;
+        }
+      }
+
+      if (contactsToUpload.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('No new contacts to import'),
+              backgroundColor: Colors.orange,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+        return;
+      }
+
+      // Show uploading progress
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(color: Color.fromRGBO(64, 105, 225, 1)),
+                  SizedBox(width: 20),
+                  Text('Adding ${contactsToUpload.length} contacts to ${widget.listName}...'),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Upload to both directory AND this list
+      int addedCount = await ExcelImportService.uploadContactsToList(
+        contactsToUpload,
+        widget.listName,
+        overwriteExisting: overwrite,
+      );
+
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+
+      if (addedCount > 0 && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Added $addedCount contact${addedCount == 1 ? '' : 's'} from spreadsheet to ${widget.listName}'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error uploading spreadsheet to list: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to import spreadsheet: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Upload contacts from the App's Contact Directory to this list
+  Future<void> _uploadFromAppDirectory() async {
+    try {
+      final currentUserId = AuthService.firebase().currentUser!.id;
+
+      // Show loading
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(color: Color.fromRGBO(64, 105, 225, 1)),
+                  SizedBox(width: 20),
+                  Text('Loading your contacts...'),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Fetch all contacts from Contact Directories
+      final snapshot = await FirebaseFirestore.instance
+          .collection('Contact Directories')
+          .where('user_id', isEqualTo: currentUserId)
+          .get();
+
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+
+      if (snapshot.docs.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('No contacts found in your directory. Add contacts to your directory first.'),
+              backgroundColor: Colors.orange,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+        return;
+      }
+
+      // Build list of contacts, marking which ones are already in this list
+      List<Map<String, dynamic>> directoryContacts = [];
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        final memberships = data['list_memberships'] as Map<String, dynamic>? ?? {};
+        final isAlreadyInList = memberships.containsKey(widget.listName);
+        
+        directoryContacts.add({
+          'doc_id': doc.id,
+          'contact_name': data['contact_name'] ?? '',
+          'contact_phone_number': data['contact_phone_number'] ?? '',
+          'normalized_phone': data['normalized_phone'] ?? '',
+          'is_in_list': isAlreadyInList,
+          'list_memberships': memberships,
+        });
+      }
+
+      // Sort alphabetically
+      directoryContacts.sort((a, b) =>
+        (a['contact_name'] as String).toLowerCase().compareTo(
+          (b['contact_name'] as String).toLowerCase()
+        )
+      );
+
+      if (!mounted) return;
+
+      // Show multi-select dialog for directory contacts
+      final selectedContacts = await showDialog<List<Map<String, dynamic>>>(
+        context: context,
+        builder: (context) => _DirectoryContactSelectDialog(
+          contacts: directoryContacts,
+          listName: widget.listName,
+        ),
+      );
+
+      if (selectedContacts == null || selectedContacts.isEmpty) return;
+
+      // Show progress
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(color: Color.fromRGBO(64, 105, 225, 1)),
+                  SizedBox(width: 20),
+                  Text('Adding ${selectedContacts.length} contacts to ${widget.listName}...'),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Add selected contacts to this list
+      int addedCount = 0;
+      for (var contact in selectedContacts) {
+        try {
+          await addContactToList(
+            contactName: contact['contact_name'],
+            contactPhoneNumber: contact['contact_phone_number'],
+            listName: widget.listName,
+          );
+          addedCount++;
+        } catch (e) {
+          print('Error adding contact ${contact['contact_name']} to list: $e');
+        }
+      }
+
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+
+      if (addedCount > 0 && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Added $addedCount contact${addedCount == 1 ? '' : 's'} to ${widget.listName}'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error uploading from directory: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to add contacts from directory'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -2121,5 +2434,318 @@ Widget build(BuildContext context) {
     } catch (e) {
       print('Error deleting contact: $e');
     }
+  }
+}
+
+/// Dialog to select contacts from the App's Contact Directory to add to a list
+class _DirectoryContactSelectDialog extends StatefulWidget {
+  final List<Map<String, dynamic>> contacts;
+  final String listName;
+
+  const _DirectoryContactSelectDialog({
+    Key? key,
+    required this.contacts,
+    required this.listName,
+  }) : super(key: key);
+
+  @override
+  State<_DirectoryContactSelectDialog> createState() =>
+      _DirectoryContactSelectDialogState();
+}
+
+class _DirectoryContactSelectDialogState
+    extends State<_DirectoryContactSelectDialog> {
+  final Set<int> _selectedIndices = {};
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
+  List<Map<String, dynamic>> get _filteredContacts {
+    if (_searchQuery.isEmpty) return widget.contacts;
+    final query = _searchQuery.toLowerCase();
+    return widget.contacts.where((c) {
+      final name = (c['contact_name'] as String).toLowerCase();
+      final phone = (c['contact_phone_number'] as String).toLowerCase();
+      return name.contains(query) || phone.contains(query);
+    }).toList();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      insetPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Container(
+        width: double.maxFinite,
+        height: MediaQuery.of(context).size.height * 0.8,
+        child: Column(
+          children: [
+            // Header
+            Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color.fromRGBO(64, 105, 225, 1),
+                    Color.fromRGBO(100, 140, 255, 1),
+                  ],
+                ),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Contact Directory',
+                              style: AppleTypography.withAppleFont(
+                                AppleTypography.headline5.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              'Select contacts to add to "${widget.listName}"',
+                              style: AppleTypography.withAppleFont(
+                                AppleTypography.body2.copyWith(color: Colors.white70),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '${_selectedIndices.length} selected',
+                          style: AppleTypography.withAppleFont(
+                            AppleTypography.body2.copyWith(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+                  // Search bar
+                  TextField(
+                    controller: _searchController,
+                    onChanged: (value) {
+                      setState(() => _searchQuery = value);
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Search contacts...',
+                      prefixIcon: Icon(Icons.search, color: Colors.grey),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    style: AppleTypography.withAppleFont(AppleTypography.body1),
+                  ),
+                ],
+              ),
+            ),
+            // Select All / Deselect buttons
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              color: Colors.grey.shade100,
+              child: Row(
+                children: [
+                  TextButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        for (int i = 0; i < _filteredContacts.length; i++) {
+                          final contact = _filteredContacts[i];
+                          if (!(contact['is_in_list'] as bool)) {
+                            final originalIndex = widget.contacts.indexOf(contact);
+                            _selectedIndices.add(originalIndex);
+                          }
+                        }
+                      });
+                    },
+                    icon: Icon(Icons.select_all, size: 18),
+                    label: Text('Select All', style: AppleTypography.withAppleFont(AppleTypography.body2)),
+                  ),
+                  SizedBox(width: 8),
+                  TextButton.icon(
+                    onPressed: () {
+                      setState(() => _selectedIndices.clear());
+                    },
+                    icon: Icon(Icons.deselect, size: 18),
+                    label: Text('Deselect All', style: AppleTypography.withAppleFont(AppleTypography.body2)),
+                  ),
+                ],
+              ),
+            ),
+            // Contact list
+            Expanded(
+              child: _filteredContacts.isEmpty
+                  ? Center(
+                      child: Text(
+                        'No contacts found',
+                        style: AppleTypography.withAppleFont(
+                          AppleTypography.body1.copyWith(color: Colors.grey.shade500),
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: _filteredContacts.length,
+                      itemBuilder: (context, index) {
+                        final contact = _filteredContacts[index];
+                        final originalIndex = widget.contacts.indexOf(contact);
+                        final isAlreadyInList = contact['is_in_list'] as bool;
+                        final isSelected = _selectedIndices.contains(originalIndex);
+                        final name = contact['contact_name'] as String;
+                        final phone = contact['contact_phone_number'] as String;
+                        final initials = name.isNotEmpty
+                            ? name.split(' ').map((e) => e.isNotEmpty ? e[0] : '').take(2).join().toUpperCase()
+                            : '?';
+
+                        return ListTile(
+                          enabled: !isAlreadyInList,
+                          leading: CircleAvatar(
+                            backgroundColor: isAlreadyInList 
+                                ? Colors.grey.shade300
+                                : Color.fromRGBO(64, 105, 225, 0.15),
+                            child: Text(
+                              initials,
+                              style: AppleTypography.withAppleFont(
+                                AppleTypography.body2.copyWith(
+                                  color: isAlreadyInList 
+                                      ? Colors.grey.shade500
+                                      : Color.fromRGBO(64, 105, 225, 1),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          title: Text(
+                            name,
+                            style: AppleTypography.withAppleFont(
+                              AppleTypography.subtitle1.copyWith(
+                                fontWeight: FontWeight.w500,
+                                color: isAlreadyInList ? Colors.grey.shade400 : Colors.black87,
+                              ),
+                            ),
+                          ),
+                          subtitle: Text(
+                            isAlreadyInList ? '$phone  •  Already in list' : phone,
+                            style: AppleTypography.withAppleFont(
+                              AppleTypography.body2.copyWith(
+                                color: isAlreadyInList ? Colors.grey.shade400 : Colors.grey.shade600,
+                              ),
+                            ),
+                          ),
+                          trailing: isAlreadyInList
+                              ? Icon(Icons.check_circle, color: Colors.green.shade300, size: 24)
+                              : Checkbox(
+                                  value: isSelected,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      if (value == true) {
+                                        _selectedIndices.add(originalIndex);
+                                      } else {
+                                        _selectedIndices.remove(originalIndex);
+                                      }
+                                    });
+                                  },
+                                  activeColor: Color.fromRGBO(64, 105, 225, 1),
+                                ),
+                          onTap: isAlreadyInList
+                              ? null
+                              : () {
+                                  setState(() {
+                                    if (_selectedIndices.contains(originalIndex)) {
+                                      _selectedIndices.remove(originalIndex);
+                                    } else {
+                                      _selectedIndices.add(originalIndex);
+                                    }
+                                  });
+                                },
+                        );
+                      },
+                    ),
+            ),
+            // Bottom action bar
+            Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(top: BorderSide(color: Colors.grey.shade200)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context, null),
+                      child: Text(
+                        'Cancel',
+                        style: AppleTypography.withAppleFont(
+                          AppleTypography.body1.copyWith(color: Colors.grey.shade600),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton(
+                      onPressed: _selectedIndices.isEmpty
+                          ? null
+                          : () {
+                              final selected = _selectedIndices
+                                  .map((i) => widget.contacts[i])
+                                  .toList();
+                              Navigator.pop(context, selected);
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color.fromRGBO(64, 105, 225, 1),
+                        disabledBackgroundColor: Colors.grey.shade300,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text(
+                        _selectedIndices.isEmpty
+                            ? 'Select Contacts'
+                            : 'Add ${_selectedIndices.length} Contact${_selectedIndices.length == 1 ? '' : 's'}',
+                        style: AppleTypography.withAppleFont(
+                          AppleTypography.body1.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
