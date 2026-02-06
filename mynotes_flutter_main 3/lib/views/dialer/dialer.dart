@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:flutter_application_1/services/call_cycle_service.dart';
 import 'package:flutter_application_1/services/nlp/nlp_service.dart';
+import 'package:flutter_application_1/services/priority_queue/contact_priority_queue.dart';
 import 'package:flutter_application_1/views/list/firebase_services.dart';
 import 'package:flutter_application_1/views/notes/contact_notes_view.dart';
 import 'package:flutter_application_1/utilities/dialogs/call_feedback_dialog.dart';
@@ -55,6 +56,8 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
   String? _listDescription;
   bool showFeedbackDialogEnabled = true; // Track if feedback dialogs should be shown
   bool autoCycleEnabled = false; // Track if auto-cycle to next contact is enabled
+  bool autoQueueEnabled = false; // Track if priority queue auto-ordering is enabled
+  List<Map<String, dynamic>> _originalContactOrder = []; // Store original user order
   bool _isInCall = false; // Track if user is currently in a call
   Timer? _autoCycleTimer; // Timer for delayed auto-cycle after app resume
   bool isPaused = false; // Track if auto-cycle is paused
@@ -73,6 +76,7 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
     fetchListDescription();
     loadFeedbackDialogSetting();
     loadAutoCycleSetting();
+    loadAutoQueueSetting();
     fetchContactsAsArray(widget.listName).then((contacts) async {
       setState(() {
         myTiles = contacts;
@@ -171,6 +175,26 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
       }
     } catch (e) {
       print('Error loading auto-cycle setting: $e');
+    }
+  }
+
+  Future<void> loadAutoQueueSetting() async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      QuerySnapshot snapshot = await firestore
+          .collection('lists_collection')
+          .where('list_name', isEqualTo: widget.listName)
+          .where('user_id', isEqualTo: userId)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          // Default to false if the field doesn't exist
+          autoQueueEnabled = snapshot.docs.first['auto_queue_enabled'] as bool? ?? false;
+        });
+      }
+    } catch (e) {
+      print('Error loading auto queue setting: $e');
     }
   }
 
@@ -439,6 +463,79 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
       }
     } catch (e) {
       print('Error toggling auto-cycle: $e');
+    }
+  }
+
+  Future<void> toggleAutoQueue(bool enabled) async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      QuerySnapshot snapshot = await firestore
+          .collection('lists_collection')
+          .where('list_name', isEqualTo: widget.listName)
+          .where('user_id', isEqualTo: userId)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        await snapshot.docs.first.reference.update({
+          'auto_queue_enabled': enabled,
+        });
+        setState(() {
+          autoQueueEnabled = enabled;
+        });
+        
+        // Apply priority ordering when enabled, restore original when disabled
+        if (enabled && contactsData.isNotEmpty) {
+          // Save original order before applying priority
+          _originalContactOrder = List.from(contactsData);
+          await _applyPriorityOrdering();
+        } else if (!enabled && _originalContactOrder.isNotEmpty) {
+          // Restore original user-defined order
+          setState(() {
+            contactsData = List.from(_originalContactOrder);
+            // Update myTiles to match contactsData order
+            myTiles = contactsData.map((c) => c['contact_name'] as String).toList();
+          });
+          await updateContactIndices();
+          _originalContactOrder = [];
+        }
+        
+        print('Auto queue ${enabled ? 'enabled' : 'disabled'} for list: ${widget.listName}');
+      }
+    } catch (e) {
+      print('Error toggling auto queue: $e');
+    }
+  }
+
+  Future<void> _applyPriorityOrdering() async {
+    try {
+      // Create calculator instance and build priority queue
+      ContactPriorityCalculator calculator = ContactPriorityCalculator(userId);
+      ContactPriorityQueue priorityQueue = await calculator.buildPriorityQueue(
+        contactsData,
+      );
+      
+      // Extract contacts in priority order (most urgent first)
+      List<Map<String, dynamic>> orderedContacts = [];
+      while (!priorityQueue.isEmpty) {
+        PrioritizedContact? prioritizedContact = priorityQueue.extractMin();
+        if (prioritizedContact != null) {
+          orderedContacts.add(prioritizedContact.contactData);
+        }
+      }
+      
+      // Update UI with priority-ordered contacts
+      setState(() {
+        contactsData = orderedContacts;
+        // Update myTiles to match contactsData order
+        myTiles = orderedContacts.map((c) => c['contact_name'] as String).toList();
+      });
+      
+      // Update Firestore indices to reflect new order
+      await updateContactIndices();
+      
+      print('Applied priority ordering to ${orderedContacts.length} contacts');
+    } catch (e) {
+      print('Error applying priority ordering: $e');
     }
   }
 
@@ -937,6 +1034,72 @@ Widget build(BuildContext context) {
                                 value: showFeedbackDialogEnabled,
                                 onChanged: (value) async {
                                   await toggleFeedbackDialog(value);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // Auto Queue toggle with Liquid Glass Effect (Priority Queue / Min-Heap)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Colors.white.withOpacity(0.7),
+                                Colors.white.withOpacity(0.3),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.5),
+                              width: 1.5,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 10,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Auto Queue',
+                                      style: AppleTypography.withAppleFont(
+                                        AppleTypography.subtitle1.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      'Automatically reorder contacts in queue based on priority: ${ContactPriorityCalculator.getPriorityFactorsDescription()}',
+                                      style: AppleTypography.withAppleFont(
+                                        AppleTypography.caption.copyWith(
+                                          color: Colors.grey[600],
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              CNSwitch(
+                                value: autoQueueEnabled,
+                                onChanged: (value) async {
+                                  await toggleAutoQueue(value);
                                 },
                               ),
                             ],
