@@ -6,11 +6,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:string_validator/string_validator.dart';
 import 'package:flutter_application_1/utilities/apple_typography.dart';
+import 'package:flutter_application_1/models/app_user.dart';
+import 'package:flutter_application_1/services/team_service.dart';
+import 'package:flutter_application_1/models/team.dart';
 // import 'package:email_validator/email_validator.dart';
 
 class UserProfileEditor extends StatefulWidget {
@@ -32,6 +36,9 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
   String _email = '';
   String _phone = '';
   String _about = '';
+  String? _role;
+  String? _teamId;
+  String? _teamName;
 
   @override
   void initState() {
@@ -51,7 +58,7 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
     try {
       final snapshot = await _profileDoc!.get();
       if (!snapshot.exists) {
-        // initialize
+        // initialize — role and team_id will be set later
         await _profileDoc!.set({
           'user_id': _userId,
           'name': 'Your Name',
@@ -59,18 +66,29 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
           'phone': '',
           'about': '',
           'photoUrl': '',
+          'role': null,
+          'team_id': null,
           'updatedAt': FieldValue.serverTimestamp(),
         });
         _name = 'Your Name';
         _phone = '';
         _about = '';
         _imageUrl = '';
+        _role = null;
+        _teamId = null;
       } else {
         final data = snapshot.data()!;
         _name = (data['name'] ?? '').toString();
         _phone = (data['phone'] ?? '').toString();
         _about = (data['about'] ?? '').toString();
         _imageUrl = (data['photoUrl'] ?? '').toString();
+        _role = data['role'] as String?;
+        _teamId = data['team_id'] as String?;
+      }
+      // Load team name if user is in a team
+      if (_teamId != null && _teamId!.isNotEmpty) {
+        final team = await TeamService().getTeam(_teamId!);
+        _teamName = team?.teamName;
       }
     } catch (_) {
       // ignore minimal
@@ -90,70 +108,296 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            toolbarHeight: 10,
-          ),
-          Center(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: 20),
-              child: Text(
-                'Edit Profile',
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.headline3.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromRGBO(64, 105, 225, 1),
-                  )
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              toolbarHeight: 10,
+            ),
+            Center(
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 20),
+                child: Text(
+                  'Edit Profile',
+                  style: AppleTypography.withAppleFont(
+                    AppleTypography.headline3.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromRGBO(64, 105, 225, 1),
+                    )
+                  ),
                 ),
               ),
             ),
+            if (_loading)
+              const Padding(
+                padding: EdgeInsets.all(24.0),
+                child: CircularProgressIndicator(),
+              )
+            else ...[
+              InkWell(
+                onTap: () {
+                  navigateSecondPage(context, _EditImagePage(
+                    userId: _userId,
+                    initialUrl: _imageUrl,
+                    onUploaded: (url) {
+                      setState(() => _imageUrl = url);
+                      _saveField('photoUrl', url);
+                    },
+                  ));
+                },
+                child: DisplayImage(
+                  imagePath: _imageUrl.isEmpty ?
+                    "https://ui-avatars.com/api/?name=${Uri.encodeComponent(_name.isEmpty ? 'User' : _name)}&background=DDD&color=555" :
+                    _imageUrl,
+                  onPressed: () {},
+                ),
+              ),
+              _buildEditableInfoDisplay(_name, 'Name', _EditNameFormPage(
+                initial: _name,
+                onSaved: (val) {
+                  setState(() => _name = val);
+                  _saveField('name', val);
+                },
+              )),
+              _buildEditableInfoDisplay(_phone.isEmpty ? 'Add phone' : _phone, 'Phone', _EditPhoneFormPage(
+                initial: _phone,
+                onSaved: (val) {
+                  setState(() => _phone = val);
+                  _saveField('phone', val);
+                },
+              )),
+              _buildReadOnlyInfoDisplay(_email.isEmpty ? 'No email' : _email, 'Email'),
+              // Role display
+              if (_role != null)
+                _buildReadOnlyInfoDisplay(
+                  _role == 'team_owner' ? 'Team Owner' : 'Team Member',
+                  'Role',
+                ),
+              const SizedBox(height: 10),
+              // Team section
+              _buildTeamSection(),
+              _buildAbout(_about),
+              const SizedBox(height: 30),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTeamSection() {
+    if (_role == 'team_member') {
+      // If member has a team, show team name and leave button
+      if (_teamId != null && _teamId!.isNotEmpty) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 25.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Team',
+                style: AppleTypography.withAppleFont(
+                  AppleTypography.caption.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.group, color: Colors.blue, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _teamName ?? 'Team',
+                        style: AppleTypography.withAppleFont(
+                          AppleTypography.body1.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: _showLeaveTeamDialog,
+                      child: const Text(
+                        'Leave',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          if (_loading)
-            const Padding(
-              padding: EdgeInsets.all(24.0),
-              child: CircularProgressIndicator(),
-            )
-          else ...[
-            InkWell(
-              onTap: () {
-                navigateSecondPage(context, _EditImagePage(
-                  userId: _userId,
-                  initialUrl: _imageUrl,
-                  onUploaded: (url) {
-                    setState(() => _imageUrl = url);
-                    _saveField('photoUrl', url);
-                  },
-                ));
-              },
-              child: DisplayImage(
-                imagePath: _imageUrl.isEmpty ?
-                  "https://ui-avatars.com/api/?name=${Uri.encodeComponent(_name.isEmpty ? 'User' : _name)}&background=DDD&color=555" :
-                  _imageUrl,
-                onPressed: () {},
+        );
+      }
+      // If member has no team, show join button
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 25.0),
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: _showJoinTeamDialog,
+            icon: const Icon(Icons.group_add, size: 20),
+            label: const Text('Join a Team'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
-            _buildEditableInfoDisplay(_name, 'Name', _EditNameFormPage(
-              initial: _name,
-              onSaved: (val) {
-                setState(() => _name = val);
-                _saveField('name', val);
-              },
-            )),
-            _buildEditableInfoDisplay(_phone.isEmpty ? 'Add phone' : _phone, 'Phone', _EditPhoneFormPage(
-              initial: _phone,
-              onSaved: (val) {
-                setState(() => _phone = val);
-                _saveField('phone', val);
-              },
-            )),
-            _buildReadOnlyInfoDisplay(_email.isEmpty ? 'No email' : _email, 'Email'),
+          ),
+        ),
+      );
+    }
+
+    // Team Owner — show manage team hint (actual management is in the Team tab)
+    if (_role == 'team_owner') {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 25.0),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.orange.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.orange.withOpacity(0.2)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.admin_panel_settings, color: Colors.orange, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Manage your team from the Team tab',
+                  style: AppleTypography.withAppleFont(
+                    AppleTypography.body2.copyWith(
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  void _showJoinTeamDialog() {
+    final codeController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Join a Team'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Enter the 6-character team code provided by your Team Owner:'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: codeController,
+              textCapitalization: TextCapitalization.characters,
+              maxLength: 6,
+              decoration: const InputDecoration(
+                hintText: 'e.g. ABC123',
+                border: OutlineInputBorder(),
+                counterText: '',
+              ),
+              style: const TextStyle(
+                fontSize: 24,
+                letterSpacing: 8,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ],
-          Expanded(
-            child: _buildAbout(_about),
-            flex: 4,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final code = codeController.text.trim();
+              if (code.length != 6) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please enter a 6-character code')),
+                );
+                return;
+              }
+              Navigator.pop(ctx);
+              setState(() => _loading = true);
+              final team = await TeamService().joinTeam(_userId, code);
+              if (!mounted) return;
+              if (team != null) {
+                setState(() {
+                  _teamId = team.id;
+                  _teamName = team.teamName;
+                  _loading = false;
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Joined "${team.teamName}" successfully!')),
+                );
+              } else {
+                setState(() => _loading = false);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Invalid code. Team not found.')),
+                );
+              }
+            },
+            child: const Text('Join'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLeaveTeamDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Leave Team'),
+        content: Text('Are you sure you want to leave "${_teamName ?? 'this team'}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              if (_teamId == null) return;
+              setState(() => _loading = true);
+              await TeamService().leaveTeam(_userId, _teamId!);
+              if (!mounted) return;
+              setState(() {
+                _teamId = null;
+                _teamName = null;
+                _loading = false;
+              });
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('You have left the team.')),
+              );
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Leave', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

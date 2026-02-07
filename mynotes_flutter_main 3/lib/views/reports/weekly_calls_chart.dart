@@ -11,6 +11,7 @@ class WeeklyCallsChart extends StatefulWidget {
   final String? listFilter; // Optional: list_name to filter by specific list
   final Function(String)? onTimeRangeChanged;
   final VoidCallback? onCustomRangeSelected;
+  final String? targetUserId; // If set, view this user's data instead of current user
 
   const WeeklyCallsChart({
     Key? key,
@@ -20,6 +21,7 @@ class WeeklyCallsChart extends StatefulWidget {
     this.listFilter,
     this.onTimeRangeChanged,
     this.onCustomRangeSelected,
+    this.targetUserId,
   }) : super(key: key);
 
   @override
@@ -42,7 +44,7 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
   List<FlSpot> _rollingAverageSpots = [];
   bool _useWeeklyView = true; // true = weekday aggregation, false = daily view
 
-  String? get _userId => AuthService.firebase().currentUser?.id;
+  String? get _userId => widget.targetUserId ?? AuthService.firebase().currentUser?.id;
 
   String get currentTimeRange => widget.selectedTimeRange ?? _selectedTimeRange;
   DateTime? get currentStartDate => widget.customStartDate ?? _customStartDate;

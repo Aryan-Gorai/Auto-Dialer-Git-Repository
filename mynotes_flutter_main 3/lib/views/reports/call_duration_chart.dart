@@ -12,6 +12,7 @@ class CallDurationChart extends StatefulWidget {
   final String? listFilter; // Optional: list_name to filter by specific list
   final Function(String)? onTimeRangeChanged;
   final VoidCallback? onCustomRangeSelected;
+  final String? targetUserId; // If set, view this user's data instead of current user
 
   const CallDurationChart({
     Key? key,
@@ -21,6 +22,7 @@ class CallDurationChart extends StatefulWidget {
     this.listFilter,
     this.onTimeRangeChanged,
     this.onCustomRangeSelected,
+    this.targetUserId,
   }) : super(key: key);
 
   @override
@@ -50,7 +52,7 @@ class _CallDurationChartState extends State<CallDurationChart> {
   double _percentile75 = 0;
   List<double> _allDurations = [];
 
-  String get _userId => AuthService.firebase().currentUser!.id;
+  String get _userId => widget.targetUserId ?? AuthService.firebase().currentUser!.id;
 
   String get currentTimeRange => widget.selectedTimeRange ?? _selectedTimeRange;
   DateTime? get currentStartDate => widget.customStartDate ?? _customStartDate;

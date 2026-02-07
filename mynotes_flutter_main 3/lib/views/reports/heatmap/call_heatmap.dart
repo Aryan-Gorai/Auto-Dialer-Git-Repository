@@ -11,6 +11,7 @@ class CallHeatmap extends StatefulWidget {
   final String? listFilter; // Optional: list_name to filter by specific list
   final DateTime? customStartDate; // For custom date range
   final DateTime? customEndDate; // For custom date range
+  final String? targetUserId; // If set, view this user's data instead of current user
 
   const CallHeatmap({
     Key? key,
@@ -21,6 +22,7 @@ class CallHeatmap extends StatefulWidget {
     this.listFilter,
     this.customStartDate,
     this.customEndDate,
+    this.targetUserId,
   }) : super(key: key);
 
   @override
@@ -34,7 +36,7 @@ class _CallHeatmapState extends State<CallHeatmap> {
   late DateTime endDate;
   late int daysToShow;
   
-  String get userId => AuthService.firebase().currentUser!.id;
+  String get userId => widget.targetUserId ?? AuthService.firebase().currentUser!.id;
 
   @override
   void initState() {

@@ -1,10 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_application_1/new-login-pages/my_button_register.dart';
 import 'package:flutter_application_1/new-login-pages/my_textfield.dart';
 
-import 'package:flutter_application_1/new-login-pages/verifyEmailDialog.dart';
+
 import 'package:flutter_application_1/utilities/dialogs/error_dialog.dart';
 import 'package:flutter_application_1/views/list/list_view.dart';
 
@@ -22,6 +23,9 @@ class _LoginPageState extends State<RegisterScreen1> {
   // text editing controllers
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+
+  // Role selection: 'team_member' or 'team_owner'
+  String _selectedRole = 'team_member';
 
 
 
@@ -63,23 +67,34 @@ class _LoginPageState extends State<RegisterScreen1> {
                 }
 
 
-                createDemoList();
+                // Create user profile in Firestore with role
+                final user = FirebaseAuth.instance.currentUser;
+                if (user != null) {
+                  await FirebaseFirestore.instance
+                      .collection('user_profiles')
+                      .doc(user.uid)
+                      .set({
+                    'user_id': user.uid,
+                    'email': user.email ?? '',
+                    'name': '',
+                    'phone': '',
+                    'about': '',
+                    'photoUrl': '',
+                    'role': _selectedRole,
+                    'team_id': null,
+                    'updatedAt': FieldValue.serverTimestamp(),
+                  });
+                }
 
-              final user = FirebaseAuth.instance.currentUser;
-              await user?.sendEmailVerification();
-
+                // Only create demo list for team members (owners are manager-only)
+                if (_selectedRole == 'team_member') {
+                  createDemoList();
+                }
 
           Navigator.of(context).pushNamedAndRemoveUntil(
                     '/login/', 
                   (route) => false
                   );
-
-              showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return VerifyEmailDialog();
-              },
-            );
                 
     }
 
@@ -131,17 +146,120 @@ class _LoginPageState extends State<RegisterScreen1> {
                 obscureText: true,
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
 
-              // forgot password?
+              // Role selection toggle
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Forgot Password?',
-                      style: TextStyle(color: Colors.grey[600]),
+                      'I am a:',
+                      style: TextStyle(
+                        color: Colors.grey[700],
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.all(4),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() => _selectedRole = 'team_member');
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: _selectedRole == 'team_member'
+                                      ? Colors.white
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: _selectedRole == 'team_member'
+                                      ? [
+                                          BoxShadow(
+                                            color: Colors.grey.withOpacity(0.3),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ]
+                                      : [],
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'Team Member',
+                                    style: TextStyle(
+                                      color: _selectedRole == 'team_member'
+                                          ? Colors.blue
+                                          : Colors.grey[600],
+                                      fontWeight: _selectedRole == 'team_member'
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() => _selectedRole = 'team_owner');
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: _selectedRole == 'team_owner'
+                                      ? Colors.white
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: _selectedRole == 'team_owner'
+                                      ? [
+                                          BoxShadow(
+                                            color: Colors.grey.withOpacity(0.3),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ]
+                                      : [],
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'Team Owner',
+                                    style: TextStyle(
+                                      color: _selectedRole == 'team_owner'
+                                          ? Colors.blue
+                                          : Colors.grey[600],
+                                      fontWeight: _selectedRole == 'team_owner'
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      _selectedRole == 'team_member'
+                          ? 'You can make calls and join a team.'
+                          : 'You can manage a team and view their reports.',
+                      style: TextStyle(
+                        color: Colors.grey[500],
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
                   ],
                 ),

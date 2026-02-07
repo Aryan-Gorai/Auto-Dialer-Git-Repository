@@ -6,8 +6,9 @@ import 'package:intl/intl.dart';
 
 class ListPerformanceChart extends StatefulWidget {
   final String? selectedList;
+  final String? targetUserId;
   
-  const ListPerformanceChart({Key? key, this.selectedList}) : super(key: key);
+  const ListPerformanceChart({Key? key, this.selectedList, this.targetUserId}) : super(key: key);
 
   @override
   State<ListPerformanceChart> createState() => _ListPerformanceChartState();
@@ -20,7 +21,7 @@ class _ListPerformanceChartState extends State<ListPerformanceChart> {
   List<String> _availableLists = [];
   List<CycleData> _cyclesData = [];
 
-  String get _userId => AuthService.firebase().currentUser!.id;
+  String get _userId => widget.targetUserId ?? AuthService.firebase().currentUser!.id;
 
   @override
   void initState() {

@@ -53,14 +53,7 @@ class _LoginPageState extends State<LoginScreen1> {
 
 
     if (FirebaseAuth.instance.currentUser != null) {
-      bool isEmailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
-      print("Email Verified: $isEmailVerified");
-
-      if (isEmailVerified) {
-        Navigator.of(context).pushNamedAndRemoveUntil(ListRoute, (route) => false);
-      } else {
-        showErrorDialog(context, "Verify Your Email");
-      }
+      Navigator.of(context).pushNamedAndRemoveUntil(ListRoute, (route) => false);
     }
 
 

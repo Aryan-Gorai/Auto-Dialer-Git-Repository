@@ -18,6 +18,7 @@ import 'package:flutter_application_1/views/call/contact_upload.dart';
 
 import 'package:flutter_application_1/views/notes/create_update_note_view.dart';
 import 'package:flutter_application_1/views/profile/user_profile_editor.dart';
+import 'package:flutter_application_1/views/team/team_management_view.dart';
 import 'package:flutter_application_1/utilities/apple_typography.dart';
 import 'package:flutter_application_1/firebase_options.dart';
 
@@ -79,6 +80,7 @@ Future<void> main() async {
       //'/list_view/': (context) => ListScreen(),
       '/list_view/': (context) => sliderScreen(),
       '/UserProfileEditor/': (context) => UserProfileEditor(),
+      '/team_management/': (context) => const TeamManagementView(),
 
       },
     ),

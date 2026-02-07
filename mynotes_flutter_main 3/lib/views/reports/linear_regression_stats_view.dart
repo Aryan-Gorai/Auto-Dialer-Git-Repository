@@ -6,7 +6,8 @@ import 'package:flutter_application_1/services/ml/kaplan_meier.dart';
 import 'package:flutter_application_1/utilities/apple_typography.dart';
 
 class LinearRegressionStatsView extends StatefulWidget {
-  const LinearRegressionStatsView({Key? key}) : super(key: key);
+  final String? targetUserId;
+  const LinearRegressionStatsView({Key? key, this.targetUserId}) : super(key: key);
 
   @override
   State<LinearRegressionStatsView> createState() => _LinearRegressionStatsViewState();
@@ -33,7 +34,7 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
   bool _isWilsonScoreExpanded = true;
   bool _isKaplanMeierExpanded = true;
 
-  String get _userId => AuthService.firebase().currentUser!.id;
+  String get _userId => widget.targetUserId ?? AuthService.firebase().currentUser!.id;
 
   @override
   void initState() {

@@ -33,13 +33,7 @@ class HomePage extends StatelessWidget {
       final user = FirebaseAuth.instance.currentUser;
     
       if (user != null) {
-        if (user.emailVerified) {
-          //return ListScreen();
           return sliderScreen();
-        } else {
-          return LoginScreen1();
-          
-          }
       } else {
         return const LoginScreen1();
       }

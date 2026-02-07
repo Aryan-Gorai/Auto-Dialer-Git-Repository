@@ -11,6 +11,7 @@ class CallOutcomeDonutChart extends StatefulWidget {
   final DateTime? customEndDate;
   final Function(String)? onTimeRangeChanged;
   final VoidCallback? onCustomRangeSelected;
+  final String? targetUserId;
 
   const CallOutcomeDonutChart({
     Key? key,
@@ -19,6 +20,7 @@ class CallOutcomeDonutChart extends StatefulWidget {
     this.customEndDate,
     this.onTimeRangeChanged,
     this.onCustomRangeSelected,
+    this.targetUserId,
   }) : super(key: key);
 
   @override
@@ -40,7 +42,7 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
   int _voicemailCalls = 0;
   int _totalCalls = 0;
 
-  String get _userId => AuthService.firebase().currentUser!.id;
+  String get _userId => widget.targetUserId ?? AuthService.firebase().currentUser!.id;
 
   String get currentTimeRange => widget.selectedTimeRange ?? _selectedTimeRange;
   DateTime? get currentStartDate => widget.customStartDate ?? _customStartDate;
