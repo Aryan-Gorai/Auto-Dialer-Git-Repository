@@ -1,3 +1,8 @@
+// Create or edit a CloudNote. If the route was pushed with an existing
+// note as argument, that note is loaded for editing; otherwise a brand-new
+// blank note is created in Firestore. Text changes are saved automatically
+// via a listener, and empty notes are cleaned up when the view is disposed.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
 import 'package:flutter_application_1/utilities/dialogs/cannot_share_empty_note_dialog.dart';

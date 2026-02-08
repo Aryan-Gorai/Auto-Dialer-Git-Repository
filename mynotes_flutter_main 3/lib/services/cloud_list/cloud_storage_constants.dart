@@ -1,3 +1,6 @@
+// Firestore field name constants for the lists/contacts collections.
+// Every Firestore read/write uses these so field names stay consistent.
+
 const ownerUserIdFieldName = 'user_id';
 const call_durationFieldName = 'call_duration';
 const contact_nameFieldName = 'contact_name';

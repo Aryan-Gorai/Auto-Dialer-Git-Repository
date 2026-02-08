@@ -1,3 +1,12 @@
+// Central Firestore helper file — contains all the shared functions used
+// across list views, the dialer, and onboarding. Handles:
+//   - Phone number normalisation (last 9 digits for deduplication)
+//   - Adding/removing contacts to/from the normalised Contact Directories
+//   - Creating/deleting lists in lists_collection
+//   - Building the bottom navigation bar (Gbar widget)
+//   - Global state variables (selectedList, kPickedName, etc.)
+// Basically the "service layer" that sits between the UI and Firestore.
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bloc/bloc.dart';
 
@@ -441,7 +450,8 @@ Future<bool> needsMigration() async {
 // END DATA MIGRATION HELPER
 // ============================================================================
 
-// CODE FOR DROPDOWN
+// Simple BLoC that loads list names from Firestore and emits them as state.
+// Used by dropdown widgets to keep the list picker in sync.
  class ListBloc extends Cubit<List<String>> {
   ListBloc() : super([]);
   Future<void> fetchDocuments() async {
@@ -568,6 +578,8 @@ Completer<void> indexChangedCompleter = Completer<void>();
 
 
 
+// Wrapper that takes the globally-picked contact name/number and
+// saves it into Contact Directories under the current listName.
 Future<void> addNewContactData() async {
  try {
    // Use the new normalized Contact Directories structure
@@ -585,7 +597,9 @@ Future<void> addNewContactData() async {
 
 
 
-// MULTIPLE LIST CODEE
+// Creates a brand-new list document in lists_collection.
+// Stores the list name, owner user_id, initial index/doc count,
+// and a server timestamp so we can sort lists by creation order.
 Future<void> addNewList(String listName) async {
   try {
     // Get the Firestore instance
@@ -625,6 +639,9 @@ Future<void> addNewList(String listName) async {
 
 
  PhoneContact? _phoneContact;
+// Handles the "upload a single contact" button tap in the dialer contacts view.
+// Requests contacts permission, opens the native picker, validates the result,
+// and writes the contact to the selected list in Contact Directories.
 Future<void> upload_button_on_dialer_contacts_view(BuildContext context, String selectedList) async {
   try {
     bool permission = await FlutterContactPicker.requestPermission();
@@ -681,8 +698,9 @@ class SimpleContact {
   });
 }
 
-/// Upload multiple contacts at once using a multi-select dialog
-/// This fetches all device contacts and shows a searchable multi-select UI
+// Bulk-upload flow: loads ALL device contacts in memory-friendly batches,
+// presents a searchable multi-select dialog (MultiContactSelectDialog),
+// then writes every selected contact to Contact Directories for the chosen list.
 Future<int> uploadMultipleContacts(BuildContext context, String selectedList) async {
   try {
     // Request permission using flutter_contacts
@@ -842,7 +860,8 @@ Future<int> uploadMultipleContacts(BuildContext context, String selectedList) as
   }
 }
 
-/// Multi-select dialog widget for choosing multiple contacts
+// Full-screen dialog with a search bar and select-all/deselect-all buttons.
+// Lets the user tick contacts from their phonebook before bulk-uploading.
 class MultiContactSelectDialog extends StatefulWidget {
   final List<SimpleContact> contacts;
 
@@ -1055,6 +1074,8 @@ class _MultiContactSelectDialogState extends State<MultiContactSelectDialog> {
 }
 
 
+// Shows a simple dialog that creates a new list, then jumps to page 1
+// of the intro slider. Called from the onboarding flow.
 void showListDialogForIntroScreen(BuildContext context) {
     TextEditingController listNameController = TextEditingController();
 
@@ -1405,6 +1426,8 @@ Future<void> fetchDocumentAtIndexAndShowDialog(BuildContext context, int index, 
 
 //int index = 0; // DEFINITION OF CALL CYCLE INDEX
 
+// Main call-cycle dialog — shows contact info, records a call timestamp,
+// auto-dials after 5 seconds, and offers Next / Close / View Notes actions.
 Future<void> showContactDialog(BuildContext context, String contactName, String contactPhoneNumber, String callDuration) async {
   // Record call timestamp in Firebase
   await recordCallTimestamp(contactName, contactPhoneNumber, selectedList);
@@ -1503,7 +1526,9 @@ Future<void> showContactDialog(BuildContext context, String contactName, String 
   makePhoneCall(contactPhoneNumber);
 }
 
-// Function to record call timestamp in Firebase
+// Writes a document to 'contact_notes' each time a call is initiated.
+// This acts as the call log and enables the reports/analytics views
+// to calculate daily/weekly call volumes and response rates.
 Future<void> recordCallTimestamp(String contactName, String contactPhoneNumber, String listName) async {
   try {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -1607,6 +1632,8 @@ Timer? callTimer;
 
 
 
+// Kicks off a 1-second periodic timer that increments elapsedSeconds.
+// Used by the call-finished dialog to show how long the call lasted.
 void startCallTimer(Function setState) {
  callTimer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
    setState(() {
@@ -1642,6 +1669,8 @@ void startCallTimer(Function setState) {
 // DIALOG WHEN USER RETURNS TO APP
 
 
+// Pops up when the user returns to the app after a phone call.
+// Shows elapsed time and gives the option to redial or dismiss.
 Future<void> showCallFinishedDialog(BuildContext context , String name, [documentDataAtIndex]) async {
   // Start the timer when the dialog is shown
   // _startCallTimer(setState); // Start the timer
@@ -1945,6 +1974,8 @@ Future<void> fetchDataFromFirestore() async {
 
 
 
+// Legacy bottom navigation bar using GNav — replaced by the liquid-glass
+// tab bar in sliderScreen.dart, but kept here for backwards compatibility.
 class Gbar extends StatefulWidget {
   const Gbar({super.key});
 

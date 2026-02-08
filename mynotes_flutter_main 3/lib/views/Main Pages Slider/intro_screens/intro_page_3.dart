@@ -1,3 +1,6 @@
+// Third intro page — confirms the list was created and tells the user
+// they'll be taken to the dialer page next.
+
 import 'package:flutter/material.dart';
 
 import '../../list/firebase_services.dart';

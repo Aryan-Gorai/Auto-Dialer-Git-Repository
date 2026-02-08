@@ -1,3 +1,8 @@
+// User profile editor — lets the user update their name, phone, about text,
+// and profile photo (picked from camera/gallery, cropped, uploaded to Firebase
+// Storage). Also handles role switching and team join/leave functionality.
+// Profile data lives in Firestore under user_profiles/{uid}.
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -54,6 +59,9 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
     }
   }
 
+  // Loads the user's profile from Firestore. If no document exists yet
+  // (first login), we create a default one with placeholder values.
+  // Also resolves the team name if the user belongs to a team.
   Future<void> _loadOrInitProfile() async {
     try {
       final snapshot = await _profileDoc!.get();
@@ -97,6 +105,8 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
     }
   }
 
+  // Merges a single field update into the profile doc.
+  // Uses set-with-merge so we don't overwrite other fields.
   Future<void> _saveField(String field, dynamic value) async {
     if (_profileDoc == null) return;
     await _profileDoc!.set({
@@ -187,6 +197,11 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
     );
   }
 
+  // Builds the team section of the profile page.
+  // Shows different UI depending on the user's role:
+  // - team_member without team → "Join a Team" button
+  // - team_member with team → team name + "Leave" button
+  // - team_owner → hint to manage team from the Team tab
   Widget _buildTeamSection() {
     if (_role == 'team_member') {
       // If member has a team, show team name and leave button
@@ -299,6 +314,9 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
     return const SizedBox.shrink();
   }
 
+  // Pops up a dialog with a 6-character code input.
+  // The code is validated against TeamService — if valid,
+  // the user joins the team and their profile updates.
   void _showJoinTeamDialog() {
     final codeController = TextEditingController();
     showDialog(
@@ -369,6 +387,8 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
     );
   }
 
+  // Confirmation dialog before leaving a team.
+  // Calls TeamService().leaveTeam() and clears local team state.
   void _showLeaveTeamDialog() {
     showDialog(
       context: context,
@@ -404,6 +424,8 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
     );
   }
 
+  // Reusable row: shows a label, the current value, and a right-arrow
+  // that navigates to a full-screen edit form when tapped.
   Widget _buildEditableInfoDisplay(String getValue, String title, Widget editPage) =>
       Padding(
         padding: EdgeInsets.only(bottom: 10),
@@ -458,6 +480,8 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
         ),
       );
 
+  // Same layout as _buildEditableInfoDisplay but without the tap handler.
+  // Used for fields the user can't change (email, role).
   Widget _buildReadOnlyInfoDisplay(String value, String title) => Padding(
     padding: const EdgeInsets.only(bottom: 10),
     child: Column(
@@ -498,6 +522,8 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
     ),
   );
 
+  // Multi-line text area for the user's bio. Tapping it opens
+  // a dedicated edit screen (_EditDescriptionFormPage).
   Widget _buildAbout(String about) => Padding(
     padding: EdgeInsets.only(bottom: 10),
     child: Column(
@@ -563,10 +589,13 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
     ),
   );
 
+  // Called after returning from an edit-form page to refresh the UI.
   FutureOr onGoBack(dynamic value) {
     setState(() {});
   }
 
+  // Pushes an edit-form route and hooks onGoBack as the .then() callback
+  // so the profile display updates when the user saves and pops back.
   void navigateSecondPage(BuildContext ctx, Widget editForm) {
     Route route = MaterialPageRoute(builder: (context) => editForm);
     Navigator.push(ctx, route).then(onGoBack);

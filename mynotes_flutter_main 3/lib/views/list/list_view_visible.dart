@@ -1,3 +1,9 @@
+// Main list display screen used in the slider/tab bar.
+// Shows all of the user's contact lists as expandable tiles, with contacts
+// inside each tile. Supports drag-to-reorder (updates manual_order in
+// Firestore), navigating into the dialer for a specific list, and
+// pulling contacts from the normalised Contact Directories collection.
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/views/dialer/dialer.dart';
@@ -16,6 +22,8 @@ class list_view_visible extends StatefulWidget {
 
 
     List<String> myTiles = [];
+  // Fetches all list names for this user from Firestore.
+  // Sorts by manual_order (if drag-reordered) or list_order timestamp.
   Future<List<String>> fetchTilesAsArray(userId) async {
     
     FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -66,6 +74,7 @@ class list_view_visible extends StatefulWidget {
 
 
 
+// Navigates into the DialerContactsView for whichever list the user tapped.
 void handleTilePress(String listName, context) {
   // Perform the action you want when a tile is pressed.
   // For example, navigate to a new screen, show details, or any other action.
@@ -106,6 +115,8 @@ class _list_view_visibleState extends State<list_view_visible> with SingleTicker
     _initializeAndFetch();
   }
 
+  // Bootstraps the page — loads tiles from Firestore and pre-creates
+  // a TextEditingController for each list's description field.
   Future<void> _initializeAndFetch() async {
     // Firebase is already initialized in home_page.dart, no need to re-initialize
     try {
@@ -132,6 +143,7 @@ class _list_view_visibleState extends State<list_view_visible> with SingleTicker
     }
   }
 
+  // Reads the description text for a single list from Firestore.
   Future<String?> getListDescription(String listName) async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -160,6 +172,7 @@ class _list_view_visibleState extends State<list_view_visible> with SingleTicker
     super.dispose();
   }
 
+  // Saves an edited description back to the list's Firestore doc.
   Future<void> updateListDescription(String listName, String description) async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -569,6 +582,7 @@ Widget build(BuildContext context) {
 
 
 
+  // Removes a list doc from lists_collection and refreshes the tile grid.
   void deleteSpecificContact(String listName) async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;

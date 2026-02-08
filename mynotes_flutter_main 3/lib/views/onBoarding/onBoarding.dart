@@ -1,3 +1,7 @@
+// Onboarding screen shown to brand-new users. Walks them through three
+// steps: create a list, add contacts, then navigate to the main app.
+// Uses SmoothPageIndicator for the dot indicator and a PageView for swiping.
+
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/constants/routes.dart';

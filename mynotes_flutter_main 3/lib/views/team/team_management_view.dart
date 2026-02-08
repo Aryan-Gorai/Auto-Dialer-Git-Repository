@@ -1,3 +1,7 @@
+// Team management page for team owners. Allows creating a team, viewing
+// the join code, listing members, and removing members.
+// Team members use this page to join/leave a team via a join code.
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:flutter/material.dart';
@@ -38,6 +42,7 @@ class _TeamManagementViewState extends State<TeamManagementView> {
     super.dispose();
   }
 
+  // Fetches the team owned by this user plus its member list from Firestore.
   Future<void> _loadTeam() async {
     if (_userId.isEmpty) return;
     setState(() => _loading = true);
@@ -88,6 +93,7 @@ class _TeamManagementViewState extends State<TeamManagementView> {
     }
   }
 
+  // Generates a fresh 6-character join code and updates the team doc.
   Future<void> _regenerateCode() async {
     if (_team == null) return;
     try {
@@ -116,6 +122,7 @@ class _TeamManagementViewState extends State<TeamManagementView> {
     }
   }
 
+  // Shows a confirmation dialog, then removes the member from the team.
   void _confirmRemoveMember(AppUser member) {
     showDialog(
       context: context,

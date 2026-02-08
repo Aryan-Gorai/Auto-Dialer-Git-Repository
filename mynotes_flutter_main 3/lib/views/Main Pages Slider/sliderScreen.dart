@@ -1,3 +1,9 @@
+// Main container screen after login. Uses a PageView with a bottom tab bar
+// to switch between the app's primary sections. The visible tabs depend on
+// the user's role: team_members see Lists, Reports, Contacts, History, Profile;
+// team_owners see Reports (with member selector), Team Management, Profile.
+// If no role is stored yet, a picker dialog is shown on first launch.
+
 import 'package:flutter/material.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -41,6 +47,8 @@ class _OnBoardingScreenState extends State<sliderScreen> {
     _loadUserRole();
   }
 
+  // Reads the user's role from Firestore on startup.
+  // If the profile doc doesn't exist or has no role, shows a picker dialog.
   Future<void> _loadUserRole() async {
     final user = fb_auth.FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -182,6 +190,7 @@ class _OnBoardingScreenState extends State<sliderScreen> {
     );
   }
 
+  // Writes the selected role back to Firestore and refreshes the UI
   Future<void> _saveRole(String role) async {
     setState(() => _roleLoading = true);
     try {
@@ -212,6 +221,7 @@ class _OnBoardingScreenState extends State<sliderScreen> {
   }
 
 
+  // Returns a different set of pages depending on the user's role
   List<Widget> get _pages {
     if (_userRole == 'team_owner') {
       return const [
@@ -272,6 +282,8 @@ class _OnBoardingScreenState extends State<sliderScreen> {
 
 
   // Liquid Glass Tab Bar using Cupertino Native
+  // Builds the iOS-style liquid glass tab bar at the bottom.
+  // Different tabs shown for team_owner vs team_member roles.
   Widget buildLiquidGlassTabBar() {
     if (_userRole == 'team_owner') {
       return CNTabBar(

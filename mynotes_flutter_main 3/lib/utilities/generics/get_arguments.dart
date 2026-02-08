@@ -1,3 +1,6 @@
+// Extension on BuildContext that pulls route arguments out in a type-safe way.
+// Saves us from repeating the ModalRoute.of(context) boilerplate everywhere.
+
 import 'package:flutter/material.dart' ;
 
 extension GetArgument on BuildContext {

@@ -1,3 +1,8 @@
+// Call history screen that pulls logged calls from the 'call_history'
+// Firestore collection. Displays each call with contact name, time,
+// duration, whether it was answered, and lets you tap to call back.
+// Also maps phone numbers to names from the Contact Directories collection.
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
@@ -30,6 +35,8 @@ class _CallHistoryViewState extends State<CallHistoryView> {
     _fetchCallHistory();
   }
 
+  // Loads all call records from 'call_history' for this user,
+  // sorted newest-first, then resolves phone numbers to contact names.
   Future<void> _fetchCallHistory() async {
     try {
       setState(() {
@@ -77,6 +84,8 @@ class _CallHistoryViewState extends State<CallHistoryView> {
     return digitsOnly; // Return as-is if less than 9 digits
   }
 
+  // Batch-resolves normalised phone numbers against Contact Directories
+  // so we can show contact names instead of raw numbers in the history list.
   Future<void> _resolveDirectoryNamesForCalls(List<CallRecord> records) async {
     try {
       final Set<String> normalizedPhones = records
@@ -118,6 +127,7 @@ class _CallHistoryViewState extends State<CallHistoryView> {
     }
   }
 
+  // Launches the system phone dialer for a quick callback.
   Future<void> _makeCall(String phoneNumber) async {
     final Uri launchUri = Uri(
       scheme: 'tel',
@@ -128,6 +138,8 @@ class _CallHistoryViewState extends State<CallHistoryView> {
     }
   }
 
+  // Converts raw seconds into something readable:
+  // 0 = 'Missed', <60 = '45s', >=60 = '2m 30s'.
   String _formatDuration(double duration) {
     if (duration == 0) return 'Missed';
     
@@ -141,6 +153,7 @@ class _CallHistoryViewState extends State<CallHistoryView> {
     }
   }
 
+  // Shows 'HH:mm' for today, 'Yesterday', or 'dd/MM/yy' for older dates.
   String _formatTime(DateTime timestamp) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -156,6 +169,7 @@ class _CallHistoryViewState extends State<CallHistoryView> {
     }
   }
 
+  // Returns the right coloured icon for the call type (incoming/outgoing/missed).
   Widget _buildCallIcon(String callType, bool answered) {
     IconData icon;
     Color color;

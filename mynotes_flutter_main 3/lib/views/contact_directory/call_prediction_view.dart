@@ -1,3 +1,8 @@
+// Call prediction view — displays Naive Bayes predictions for the best
+// time to call a specific contact. Shows a "call now" recommendation,
+// a ranked list of time slots by probability, and a heatmap-style grid
+// of day-of-week vs hour with colour-coded answer probabilities.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
 import 'package:flutter_application_1/services/ml/naive_bayes_classifier.dart';
@@ -33,6 +38,8 @@ class _CallPredictionViewState extends State<CallPredictionView> {
     _loadPredictions();
   }
 
+  // Runs the Naive Bayes classifier to get time-slot predictions
+  // and checks whether right now is a good time to call this contact.
   Future<void> _loadPredictions() async {
     setState(() {
       _isLoading = true;

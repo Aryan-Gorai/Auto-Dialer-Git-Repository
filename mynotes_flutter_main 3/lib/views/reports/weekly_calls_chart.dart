@@ -1,3 +1,8 @@
+// Weekly calls trend chart — groups call history into daily or weekly
+// buckets, plots them as a line/bar chart using fl_chart. Supports
+// filtering by time range and by specific list, and can show another
+// user's data via targetUserId (used by team owner reports).
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -78,6 +83,8 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
     return digitsOnly;
   }
 
+  // Safely converts any dynamic value to int — handles int, double,
+  // num, and String types so we don't crash on unexpected Firestore data.
   int _parseInt(dynamic value) {
     if (value is int) return value;
     if (value is double) return value.round();
@@ -91,6 +98,9 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
     return 0;
   }
 
+  // Main entry point for loading chart data. Determines the date range
+  // from the selected time option, then routes to either the list_cycles
+  // source (when a list filter is active) or the call_history source.
   Future<void> _fetchCallData() async {
     setState(() {
       _isLoading = true;
@@ -154,6 +164,8 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
     }
   }
 
+  // Fetches data from the 'list_cycles' collection when the user has
+  // filtered by a specific list — each cycle doc has embedded stats.
   Future<void> _fetchFromListCycles(DateTime startDate, DateTime endDate) async {
     print('📅 Fetching list_cycles for "${widget.listFilter}" from $startDate to $endDate');
 
@@ -184,6 +196,8 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
     }
   }
 
+  // Fetches raw call records from the 'call_history' collection when
+  // no list filter is set. Delegates to weekly or daily processing.
   Future<void> _fetchFromCallHistory(DateTime startDate, DateTime endDate) async {
     // Fetch call history from Firebase
     print('📞 Fetching call history from call_history collection');
@@ -206,6 +220,8 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
     }
   }
 
+  // Processes list_cycles into 7 weekday buckets (Mon–Sun),
+  // counting outgoing/cancelled/missed from each cycle's stats map.
   void _processWeeklyCycleData(QuerySnapshot cyclesSnapshot, DateTime startDate, DateTime endDate) {
       // Aggregate by weekday from cycle_events
       final Map<int, CallDayData> dataByWeekday = {
@@ -295,6 +311,8 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
       }
     }
 
+  // Same as _processWeeklyCycleData but buckets calls by individual date
+  // instead of weekday — used when the date range is longer than 7 days.
   void _processDailyCycleData(QuerySnapshot cyclesSnapshot, DateTime startDate, DateTime endDate) {
     // Create map of dates with zero counts
     final Map<String, DailyCallData> dataByDate = {};
@@ -389,6 +407,9 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
     }
   }
 
+  // Groups call_history records by weekday and categorises each call
+  // as successful, failed, or missed based on call_type/answered/duration.
+  // Produces FlSpot lists for the line chart plus a rolling average line.
   void _processWeeklyData(QuerySnapshot querySnapshot, DateTime startDate, DateTime endDate, Set<String> listPhoneNumbers) {
     // Aggregate data by day of week
     final Map<int, CallDayData> dataByWeekday = {
@@ -485,6 +506,8 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
     }
   }
 
+  // Groups call_history records by calendar date and categorises each
+  // call — produces per-day FlSpots for the chart and a rolling average.
   void _processDailyData(QuerySnapshot querySnapshot, DateTime startDate, DateTime endDate, Set<String> listPhoneNumbers) {
     // Create map of dates with zero counts
     final Map<String, DailyCallData> dataByDate = {};
@@ -574,6 +597,7 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
     }
   }
 
+  // Opens a date-range picker for custom filtering and re-fetches data.
   Future<void> _selectDateRange() async {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,

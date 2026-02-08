@@ -1,3 +1,8 @@
+// Registration screen where new users create an account.
+// After sign-up, a Firestore user_profiles document is created with the
+// chosen role (team_member or team_owner). Team members also get a demo
+// list created for them automatically.
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +40,8 @@ class _LoginPageState extends State<RegisterScreen1> {
 
 
 
-  // sign user in method
+  // Creates a Firebase account, writes a Firestore profile doc with the
+  // selected role, creates a demo list for team members, then redirects to login.
   Future<void> registerUser() async {               
     
               final email = emailController.text;

@@ -1,3 +1,7 @@
+// BLoC-based login view (the older version, used with the auth BLoC pattern).
+// Listens for AuthStateLoggedOut and shows error dialogs for specific
+// exception types. The newer login screen is in new-login-pages/.
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter_application_1/services/auth/bloc/auth_bloc.dart';

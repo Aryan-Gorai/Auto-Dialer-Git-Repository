@@ -1,3 +1,7 @@
+// Modern login screen using Firebase Auth directly (not via the BLoC).
+// Shows email + password fields, a sign-in button, and a link to the
+// register page. On success, navigates straight to the list view.
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +36,8 @@ class _LoginPageState extends State<LoginScreen1> {
 
 
 
-  // sign user in method
+  // Attempts Firebase sign-in and navigates to the list page on success.
+  // Catches specific Firebase error codes to show helpful messages.
  Future<void> signUserIn() async {               
   final email = emailController.text;
   final password = passwordController.text;

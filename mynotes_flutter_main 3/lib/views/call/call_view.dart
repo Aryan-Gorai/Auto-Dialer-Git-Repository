@@ -1,3 +1,7 @@
+// Manual call view — lets the user pick a contact from their phone
+// and place a call via the system dialer using url_launcher.
+// This is the standalone call screen, separate from the auto-dialer.
+
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
@@ -37,6 +41,7 @@ class _CallViewState extends State<CallView> {
 
 // FUNCTION
 String phoneNumber = "+44 7845967135";
+// Launches the system phone dialer with the given number via url_launcher.
   Future<void> _makePhoneCall(String phoneNumber) async {
     final Uri launchUri = Uri(
       scheme: 'tel',

@@ -1,3 +1,5 @@
+// Reusable "Send Email" button for the email verification page.
+
 import 'package:flutter/material.dart';
 
 class MyButton extends StatelessWidget {

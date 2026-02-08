@@ -1,3 +1,8 @@
+// Main reports dashboard. Uses a TabController to switch between six report
+// tabs: Call Heatmap, Weekly Calls, Call Duration, List Performance,
+// Call Outcomes (donut chart), and ML Stats (linear regression + Wilson + KM).
+// Pulls all data from the logged-in user's Firestore call_history.
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -271,6 +276,8 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
 
   String get userId => AuthService.firebase().currentUser!.id;
 
+  // Opens the native date-range picker for the heatmap tab.
+  // When the user confirms, we switch the time scale to 'custom' and persist.
   Future<void> _selectDateRange() async {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
@@ -291,6 +298,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
     }
   }
 
+  // Same date-range picker but for the weekly trends chart tab.
   Future<void> _selectWeeklyTrendsDateRange() async {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
@@ -310,6 +318,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
     }
   }
 
+  // Date-range picker for the call duration chart tab.
   Future<void> _selectCallDurationDateRange() async {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
@@ -329,6 +338,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
     }
   }
 
+  // Date-range picker for the outcomes donut chart tab.
   Future<void> _selectOutcomesDateRange() async {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
@@ -348,6 +358,8 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
     }
   }
 
+  // Reads the threshold text field and persists the new max-call value
+  // so the heatmap colour scale adjusts accordingly.
   void _updateThresholdAndSave() {
     final value = int.tryParse(_thresholdController.text);
     if (value != null && value > 0) {
@@ -358,6 +370,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
     }
   }
 
+  // Toggles whether the heatmap widget is visible and saves the pref.
   void _toggleHeatmap() {
     setState(() {
       _showHeatmap = !_showHeatmap;

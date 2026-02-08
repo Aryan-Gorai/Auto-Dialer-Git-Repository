@@ -1,3 +1,6 @@
+// First onboarding intro page — asks the user to create their first list.
+// The button calls showListDialogForIntroScreen from firebase_services.
+
 import 'package:flutter/material.dart';
 //import 'package:flutter_application_1/views/list/list_view.dart';
 

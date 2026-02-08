@@ -1,3 +1,7 @@
+// Reusable dialog builder. Takes a title, content string, and a map of
+// button labels → return values. Other dialogs (error, delete, logout)
+// are thin wrappers around this one.
+
 import 'package:flutter/material.dart';
 
 typedef DialogOptionBuilder<T> = Map<String, T?> Function();

@@ -1,3 +1,5 @@
+// Confirmation dialog for deleting a single item. Returns true/false.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/utilities/dialogs/generic_dialog.dart';
 

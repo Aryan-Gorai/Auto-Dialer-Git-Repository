@@ -1,3 +1,8 @@
+// Unified contact directory — shows every contact the user has ever added
+// across all lists, de-duplicated by normalised phone number. Supports
+// searching, importing from phone contacts or Excel, viewing which lists a
+// contact belongs to, and navigating to the Naive Bayes call prediction page.
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:cupertino_native/cupertino_native.dart';
@@ -38,6 +43,9 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
     super.dispose();
   }
 
+  // Pulls every contact doc for this user from 'Contact Directories'.
+  // Handles both the old flat 'lists' array and the new 'list_memberships'
+  // map structure, then sorts alphabetically and updates local state.
   Future<void> _fetchContacts() async {
     try {
       final snapshot = await FirebaseFirestore.instance
@@ -92,11 +100,15 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
     }
   }
 
+  // Strips everything except digits from a phone number so we can
+  // compare numbers that might have dashes, spaces, or country codes.
   String _normalizePhoneNumber(String phone) {
     // Remove all non-digit characters
     return phone.replaceAll(RegExp(r'[^\d]'), '');
   }
 
+  // Writes the edited name/phone back to Firestore and
+  // re-fetches the full list so the UI stays up to date.
   Future<void> _updateContact(String docId, String newName, String newPhone) async {
     try {
       final normalizedPhone = _normalizePhoneNumber(newPhone);
@@ -137,6 +149,8 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
     }
   }
 
+  // Shows a confirmation dialog, then permanently removes the
+  // contact document from Firestore if the user confirms.
   Future<bool> _deleteContact(String docId, String contactName) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -217,6 +231,8 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
     return false;
   }
 
+  // Opens an edit dialog with name/phone fields plus a list of
+  // every list this contact belongs to, for quick reference.
   void _showEditDialog(Map<String, dynamic> contact) {
     final nameController = TextEditingController(text: contact['contact_name']);
     final phoneController = TextEditingController(text: contact['contact_phone_number']);
@@ -596,6 +612,10 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
     );
   }
 
+  // Bulk-upload from the phone's native contacts.
+  // Loads contacts in batches of 50 to keep memory usage reasonable,
+  // checks for duplicates by normalized phone number, and lets the
+  // user choose to skip or overwrite existing entries.
   /// Upload contacts from the device's phone contacts
   Future<void> _uploadFromPhoneContacts() async {
     try {
@@ -797,6 +817,9 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
     }
   }
 
+  // Picks an Excel or CSV file via the file picker, parses it through
+  // ExcelImportService, deduplicates against existing contacts, and
+  // writes the new entries to Firestore's Contact Directories.
   /// Upload contacts from an Excel/CSV spreadsheet
   Future<void> _uploadFromExcel() async {
     try {

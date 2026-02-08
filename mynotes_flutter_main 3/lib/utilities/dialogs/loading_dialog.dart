@@ -1,3 +1,6 @@
+// Simple loading dialog with a spinner and a text message.
+// Returns a CloseDialog callback so the caller can dismiss it when done.
+
 import 'package:flutter/material.dart';
 
 typedef CloseDialog = void Function();

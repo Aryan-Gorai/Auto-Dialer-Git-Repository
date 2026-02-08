@@ -1,3 +1,6 @@
+// Reusable text field component used across all login/register pages.
+// Supports obscured text for passwords and a customisable hint.
+
 import 'package:flutter/material.dart';
 
 class MyTextField extends StatelessWidget {

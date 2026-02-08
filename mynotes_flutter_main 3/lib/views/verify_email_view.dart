@@ -1,3 +1,6 @@
+// BLoC-based email verification screen. Lets the user resend a verification
+// email or restart the auth flow. Shown when AuthStateNeedsVerification is emitted.
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter_application_1/services/auth/bloc/auth_bloc.dart';

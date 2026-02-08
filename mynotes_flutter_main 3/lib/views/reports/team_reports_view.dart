@@ -1,3 +1,8 @@
+// Team owner's reports page. Identical tab structure to the member
+// reports, but adds a dropdown at the top to pick which team member's
+// data to display. Passes the selected member's userId as targetUserId
+// to each chart widget.
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

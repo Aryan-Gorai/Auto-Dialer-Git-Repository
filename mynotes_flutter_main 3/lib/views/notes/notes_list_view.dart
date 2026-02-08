@@ -1,3 +1,7 @@
+// Reusable ListView that renders a list of CloudNote objects.
+// Each tile shows a one-line preview of the note text, with a delete
+// button that first asks for confirmation via showDeleteDialog.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/cloud/cloud_note.dart';
 import 'package:flutter_application_1/utilities/dialogs/delete_dialog.dart';

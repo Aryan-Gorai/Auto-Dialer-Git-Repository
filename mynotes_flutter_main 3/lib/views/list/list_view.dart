@@ -1,3 +1,7 @@
+// List management screen — the older version of the list UI.
+// Contains Firestore CRUD for creating/deleting contact lists, bulk
+// delete functions, and the demo-list creator used during onboarding.
+// The visible list UI has since moved to list_view_visible.dart.
 
 
 
@@ -80,6 +84,8 @@ class MyColorsSample {
 
 // Functions for the card code...
 
+// Nukes every list owned by this user from lists_collection,
+// then recreates a default 'List 1' so the user still has something.
  Future<void>  DeleteAllListsButtonFunction() async {
 
               FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -122,6 +128,8 @@ class MyColorsSample {
 
 
 
+ // Removes every contact from every list the user owns by clearing
+ // list_memberships in Contact Directories. The contact docs remain.
  Future<void>  DeleteAllContactsButtonFunction() async {
         // Use the new Contact Directories structure
         // This removes all list memberships for the current user's lists
@@ -143,6 +151,8 @@ class MyColorsSample {
  }
 
 
+// Removes contacts only from the currently-selected list,
+// leaving them in any other lists they belong to.
 Future<void> DeleteAllContactsFromListButtonFunction() async {
   // Use the new Contact Directories structure
   await deleteAllContactsFromList(selectedList);
@@ -157,6 +167,8 @@ Future<void> DeleteAllContactsFromListButtonFunction() async {
 
 
 
+// Shared string used to pass the comma-joined contact names
+// from the list view across to the dialer view for display.
  String listContactsJoinedforDialerView = ''; // This variable is used to transfer information between list_view and dialerview. This will hold the names of the contacts in the list.
 
 
@@ -166,6 +178,8 @@ Future<void> DeleteAllContactsFromListButtonFunction() async {
 
 
 
+// When the app boots we need a starter list in Firestore so the
+// dropdown isn't empty. This creates 'List 1' with a zero index.
 Future<void> createDemoList() async {
   try {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -276,6 +290,9 @@ class MyApp extends StatelessWidget {
 }
 
 
+// The older list-management screen built with Material Cards.
+// Each card exposes a different action: create list, upload contacts,
+// delete, view guide, etc. The newer UI lives in list_view_visible.dart.
 class ListScreen extends StatefulWidget {
  const ListScreen({Key? key}) : super(key: key);
 
@@ -350,7 +367,9 @@ Future<void> setStatefunction() async {
  Future<void>? _launched;
  final String _phone = '';
 
- // Helper method to fetch contacts and update display
+ // Helper method to fetch contacts and update the on-screen display string.
+ // Pulls contact names from Contact Directories for the given list,
+ // joins them into a comma-separated string, and triggers a rebuild.
  Future<void> fetchContactsAsArray(String listToFetch) async {
    final contacts = await fetchContactsForList(listToFetch);
    final names = contacts.map((c) => c['contact_name'] as String).toList();
@@ -679,6 +698,8 @@ Future<void> fetchDocumentAtIndexAndShowDialog(int index, selectedList) async {
 
 //int index = 0; // DEFINITION OF CALL CYCLE INDEX
 
+// Walks through every contact in the selected list and dials sequentially.
+// Shows a contact-info dialog, waits 5 seconds, then launches the phone app.
 Future<void> showContactDialog(String contactName, String contactPhoneNumber, String callDuration) async {
   showDialog<void>(
     context: context,

@@ -1,3 +1,7 @@
+// Per-contact notes view. Shows all notes/call feedback for a single contact,
+// with a Trie-powered search bar for fast autocomplete across note text.
+// Users can add new notes, search existing ones, and tap to call the contact.
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
@@ -128,6 +132,9 @@ class _ContactNotesViewState extends State<ContactNotesView> {
     print('📊 Trie stats: ${_noteTrie.getStats()}');
   }
 
+  // Queries 'contact_notes' for all notes belonging to this specific
+  // contact, ordered newest-first. After loading, rebuilds the Trie
+  // so the search/autocomplete stays up to date.
   Future<void> fetchCallNotes() async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -170,6 +177,8 @@ class _ContactNotesViewState extends State<ContactNotesView> {
     }
   }
 
+  // Creates a new note document in 'contact_notes' with the current
+  // user, contact, and list info, then clears the input and refreshes.
   Future<void> addNewCallNote() async {
     if (_noteController.text.trim().isEmpty) return;
 
@@ -205,6 +214,7 @@ class _ContactNotesViewState extends State<ContactNotesView> {
     }
   }
 
+  // Permanently removes a note by its Firestore document ID.
   Future<void> deleteNote(String noteId) async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -219,6 +229,7 @@ class _ContactNotesViewState extends State<ContactNotesView> {
     }
   }
 
+  // Converts a Firestore Timestamp to 'Jan 5, 2024 - 3:30 PM' format.
   String formatTimestamp(Timestamp timestamp) {
     DateTime dateTime = timestamp.toDate();
     return DateFormat('MMM d, yyyy - h:mm a').format(dateTime);
@@ -600,6 +611,8 @@ class _ContactNotesViewState extends State<ContactNotesView> {
     );
   }
 
+  // Renders a single note card. Call-feedback notes get a blue highlight
+  // and show star ratings; regular notes are plain text with edit/delete.
   Widget _buildNoteContent(Map<String, dynamic> note) {
     // Check if this is a call feedback note or if it has feedback
     bool isCallFeedback = note['note_text']?.contains('Call Feedback:') ?? false;

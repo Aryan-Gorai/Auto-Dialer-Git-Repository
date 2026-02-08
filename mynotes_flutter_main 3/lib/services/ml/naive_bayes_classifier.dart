@@ -1,5 +1,11 @@
+// Naive Bayes classifier that predicts the best time to call a contact.
+// Analyses historical call data from Firestore, groups it by day-of-week
+// and hour, then applies Bayes' theorem with Laplace smoothing to estimate
+// the probability that a call will be answered in each time slot.
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+// Simple data class holding the prediction result for one day+hour slot
 class CallPrediction {
   final int dayOfWeek; // 1 = Monday, 7 = Sunday
   final int hour; // 0-23
@@ -20,6 +26,7 @@ class CallPrediction {
     return days[dayOfWeek - 1];
   }
 
+  // Formats the hour as a readable range like "09:00 - 10:00"
   String get timeRange {
     final endHour = (hour + 1) % 24;
     return '${hour.toString().padLeft(2, '0')}:00 - ${endHour.toString().padLeft(2, '0')}:00';
@@ -31,7 +38,8 @@ class CallPrediction {
 class NaiveBayesCallPredictor {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// Fetches call history for a specific contact
+  /// Fetches call history for a specific contact and extracts the
+  /// day, hour, and answered status of each call for analysis
   Future<List<Map<String, dynamic>>> _fetchCallHistory(String userId, String phoneNumber) async {
     try {
       // Normalize phone number for matching
@@ -74,8 +82,9 @@ class NaiveBayesCallPredictor {
     }
   }
 
-  /// Determines if a call was answered based on call_history data
-  /// Uses the same logic as Call History page
+  /// Determines if a call was answered based on call_history data.
+  /// Missed calls always count as unanswered; for outgoing/incoming calls
+  /// we check the boolean 'answered' field.
   bool _wasCallAnswered(Map<String, dynamic> callData) {
     // Get the answered field
     bool answered;
@@ -101,6 +110,7 @@ class NaiveBayesCallPredictor {
     return answered;
   }
 
+  // Strips a phone number down to its last 9 digits for consistent matching
   String _normalizePhone(String phone) {
     final digitsOnly = phone.replaceAll(RegExp(r'[^0-9]'), '');
     if (digitsOnly.length >= 9) {
@@ -109,8 +119,9 @@ class NaiveBayesCallPredictor {
     return digitsOnly;
   }
 
-  /// Calculate probability using Naive Bayes
-  /// P(answered | day, hour) = P(day, hour | answered) × P(answered) / P(day, hour)
+  /// Core prediction method — applies Naive Bayes with Laplace smoothing.
+  /// Formula: P(answered | day, hour) ≈ (answered + 1) / (total + 2)
+  /// The +1/+2 stops us getting extreme 0% or 100% from small sample sizes.
   Future<List<CallPrediction>> predictBestTimes(String userId, String phoneNumber) async {
     final callHistory = await _fetchCallHistory(userId, phoneNumber);
     
@@ -118,7 +129,7 @@ class NaiveBayesCallPredictor {
       return [];
     }
 
-    // Count occurrences for each day-hour combination
+    // Build a frequency table: for each day-hour combo, count total calls and answered calls
     Map<String, Map<String, int>> stats = {};
     
     for (var call in callHistory) {
@@ -137,7 +148,7 @@ class NaiveBayesCallPredictor {
       }
     }
 
-    // Calculate probabilities for each time slot
+    // Convert the frequency table into CallPrediction objects with probabilities
     List<CallPrediction> predictions = [];
     
     stats.forEach((key, counts) {
@@ -166,7 +177,8 @@ class NaiveBayesCallPredictor {
     return predictions;
   }
 
-  /// Get current time recommendation
+  /// Checks if right now is a good time to call this contact.
+  /// Compares the current time slot's probability against the overall average.
   Future<Map<String, dynamic>> getCurrentTimeRecommendation(String userId, String phoneNumber) async {
     final predictions = await predictBestTimes(userId, phoneNumber);
     
@@ -214,12 +226,12 @@ class NaiveBayesCallPredictor {
     };
   }
 
-  /// Get top N best times to call
+  /// Returns the top N time slots ranked by answer probability
   List<CallPrediction> getTopPredictions(List<CallPrediction> predictions, {int topN = 5}) {
     return predictions.take(topN).toList();
   }
 
-  /// Get predictions grouped by day
+  /// Groups predictions by day of week so the UI can show a per-day breakdown
   Map<int, List<CallPrediction>> getPredictionsByDay(List<CallPrediction> predictions) {
     Map<int, List<CallPrediction>> byDay = {};
     

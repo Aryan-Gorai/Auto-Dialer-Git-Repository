@@ -1,3 +1,6 @@
+// Donut chart showing the proportion of call outcomes (answered, missed,
+// voicemail, etc.) within a given time range. Uses fl_chart's PieChart.
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -66,6 +69,8 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
     }
   }
 
+  // Fetches call records for the date range and tallies them into
+  // connected/no-answer/rejected/missed buckets for the donut chart.
   Future<void> _fetchCallOutcomes() async {
     setState(() {
       _isLoading = true;
@@ -498,6 +503,8 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
     );
   }
 
+  // Converts the four outcome counts into PieChartSectionData objects.
+  // The touched section expands slightly to give a visual highlight.
   List<PieChartSectionData> _buildPieChartSections() {
     return [
       PieChartSectionData(

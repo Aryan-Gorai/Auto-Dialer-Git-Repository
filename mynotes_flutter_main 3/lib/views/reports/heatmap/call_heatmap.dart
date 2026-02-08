@@ -1,3 +1,8 @@
+// GitHub-style call activity heatmap. Each cell represents a day, coloured
+// from white (no calls) to dark green (many calls) based on how many calls
+// were made. Supports multiple time scales (week, month, last 7 days, custom)
+// and can filter by contact or list. The max threshold controls the colour scale.
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
@@ -60,6 +65,8 @@ class _CallHeatmapState extends State<CallHeatmap> {
     fetchCallData();
   }
 
+  // Configures the start/end dates and daysToShow based on the
+  // selected time scale (custom, last7days, last30days, allTime).
   void _setupDateRange() {
     final now = DateTime.now();
     
@@ -141,6 +148,8 @@ class _CallHeatmapState extends State<CallHeatmap> {
     return phone.replaceAll(RegExp(r'[^\d]'), '');
   }
 
+  // Main fetch entry point — routes to the appropriate data source
+  // depending on whether a list filter or contact filter is active.
   Future<void> fetchCallData() async {
     setState(() {
       isLoading = true;
@@ -179,6 +188,8 @@ class _CallHeatmapState extends State<CallHeatmap> {
     }
   }
 
+  // Queries list_cycles for a specific list, then reads each cycle's
+  // embedded cycle_events to build the heatmap day-by-day call counts.
   Future<void> _fetchFromCycleEvents(FirebaseFirestore firestore) async {
     print('📊 Fetching from list_cycles for list: ${widget.listFilter}');
     print('📅 Date range: $startDate to $endDate');
@@ -388,6 +399,8 @@ class _CallHeatmapState extends State<CallHeatmap> {
     });
   }
 
+  // Falls back to the raw call_history collection when no list is
+  // filtered. Aggregates timestamps into per-day counts for the heatmap.
   Future<void> _fetchFromCallHistory(FirebaseFirestore firestore) async {
     // Build set of normalized phones to filter by (for contact filter)
     Set<String>? allowedPhones;

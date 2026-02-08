@@ -1,3 +1,7 @@
+// Dialog offering three bulk-delete options: all lists, all contacts,
+// or all contacts from a selected list. Each option calls the corresponding
+// delete function defined in list_view.dart.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/utilities/dialogs/generic_dialog.dart';
 import 'package:flutter_application_1/views/list/list_view.dart';

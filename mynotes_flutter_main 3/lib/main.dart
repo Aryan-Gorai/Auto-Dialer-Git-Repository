@@ -1,3 +1,5 @@
+// Entry point of the Auto-Dialer Flutter application.
+// Sets up Firebase, theming, BLoC authentication, and named routes.
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -26,15 +28,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 
 
+// App entry point - initialises Flutter bindings and Firebase before running the widget tree
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized(); // needed before any async work in main()
   await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+    options: DefaultFirebaseOptions.currentPlatform, // platform-specific Firebase config
   );
 
   runApp(
     MaterialApp(
       title: 'Flutter Demo',
+      // Global theme using Apple-style typography for a consistent look across the app
       theme: ThemeData(
         primarySwatch: Colors.blue,
         fontFamily: AppleTypography.fontFamily,
@@ -56,15 +60,17 @@ Future<void> main() async {
           labelSmall: AppleTypography.withAppleFont(AppleTypography.caption),
         ),
       ),
+      // Wraps the root widget with BlocProvider so all children can access auth state
       home: BlocProvider<AuthBloc>(
         create: (context) => AuthBloc(FirebaseAuthProvider()),
-        child:  HomePage(),
+        child:  HomePage(), // decides login vs main screen based on auth state
 
         // list_view_visible(),
 
         //child: RegisterScreen1(),
         //child: LoginScreen1(),
       ),
+      // Named routes used for navigation throughout the app
       routes: {
         //registerRoute: (context) => const RegisterView(),
         createOrUpdateNoteRoute: (context) => const CreateUpdateNoteView(),

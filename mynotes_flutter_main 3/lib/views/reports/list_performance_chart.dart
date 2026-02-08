@@ -1,3 +1,7 @@
+// List performance chart — visualises how each call cycle performed
+// for a specific list. Shows contacts called, answered, and completion
+// rate per cycle, using data from the call_cycles Firestore collection.
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
@@ -41,6 +45,8 @@ class _ListPerformanceChartState extends State<ListPerformanceChart> {
     }
   }
 
+  // Loads the user's available lists from Firestore and auto-selects
+  // the first one (or the list passed in via widget.selectedList).
   Future<void> _loadLists() async {
     try {
       final snapshot = await _firestore
@@ -82,6 +88,8 @@ class _ListPerformanceChartState extends State<ListPerformanceChart> {
     }
   }
 
+  // Fetches all call cycles for the selected list, then computes
+  // per-cycle stats (calls made, duration, answer rate) for display.
   Future<void> _fetchCycleData() async {
     if (_selectedList == null || _selectedList!.isEmpty) {
       setState(() {
@@ -247,6 +255,7 @@ class _ListPerformanceChartState extends State<ListPerformanceChart> {
       }
     }
   }
+  // Strips non-digits and keeps the last 9 for phone number matching.
   String _normalizePhone(String input) {
     final digitsOnly = input.replaceAll(RegExp(r'[^0-9]'), '');
     if (digitsOnly.length >= 9) {
@@ -254,6 +263,7 @@ class _ListPerformanceChartState extends State<ListPerformanceChart> {
     }
     return digitsOnly;
   }
+  // Turns a Duration into a human-readable string (e.g. '2h 15m 30s').
   String _formatDuration(Duration? duration) {
     if (duration == null) return 'N/A';
     

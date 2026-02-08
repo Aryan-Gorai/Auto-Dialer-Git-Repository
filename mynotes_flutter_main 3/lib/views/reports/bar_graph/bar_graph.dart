@@ -1,3 +1,7 @@
+// Simple bar chart widget powered by fl_chart.
+// Takes a list of percentage values and renders them as vertical bars.
+// Used in the reports section to visualise list performance.
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 

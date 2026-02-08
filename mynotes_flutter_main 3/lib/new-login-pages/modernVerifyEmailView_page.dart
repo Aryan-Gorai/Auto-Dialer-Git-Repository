@@ -1,3 +1,7 @@
+// Email verification view — prompts the user to verify their email
+// after registration. Largely the same layout as the register page
+// but navigates to the verify-email route instead.
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 

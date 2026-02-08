@@ -1,4 +1,8 @@
 
+// BLoC-based registration view. Shows email + password fields and dispatches
+// AuthEventRegister to the BLoC. Displays error dialogs for weak passwords,
+// duplicate emails, etc. Paired with the older LoginView.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_exceptions.dart';
 import 'package:flutter_application_1/services/auth/bloc/auth_bloc.dart';

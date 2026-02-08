@@ -1,3 +1,6 @@
+// Simple dialog telling the user a verification link has been sent.
+// Shown after registration to remind them to check their inbox.
+
 import 'package:flutter/material.dart';
 
 class VerifyEmailDialog extends StatelessWidget {

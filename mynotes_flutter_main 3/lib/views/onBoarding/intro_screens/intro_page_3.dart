@@ -1,3 +1,5 @@
+// Onboarding step 3 — congratulates the user and points them to the dialer.
+
 import 'package:flutter/material.dart';
 
 import '../../list/firebase_services.dart';

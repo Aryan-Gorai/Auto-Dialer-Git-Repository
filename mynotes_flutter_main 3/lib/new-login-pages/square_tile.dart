@@ -1,3 +1,6 @@
+// Square image tile originally intended for social sign-in buttons
+// (Google, Apple). Currently not used but kept for future integration.
+
 import 'package:flutter/material.dart';
 
 class SquareTile extends StatelessWidget {

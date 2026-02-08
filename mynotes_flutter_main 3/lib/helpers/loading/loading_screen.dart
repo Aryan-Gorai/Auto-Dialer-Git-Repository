@@ -1,3 +1,9 @@
+// Full-screen loading overlay that dims the background and shows a spinner
+// with a text message. Uses a singleton pattern so any part of the app can
+// call LoadingScreen().show() or .hide() without creating a new instance.
+// The overlay is built with Flutter's Overlay API and updates its text
+// via a StreamController so we don't have to tear it down and rebuild.
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/helpers/loading/loading_screen_controller.dart';
@@ -9,6 +15,7 @@ class LoadingScreen {
 
   LoadingScreenController? controller;
 
+  // If the overlay is already showing, just update the text; otherwise create it
   void show({
     required BuildContext context,
     required String text,
@@ -23,6 +30,7 @@ class LoadingScreen {
     }
   }
 
+  // Tears down the overlay and resets the controller
   void hide() {
     controller?.close();
     controller = null;

@@ -1,3 +1,7 @@
+// Exception hierarchy for Firestore CRUD operations on notes.
+// Mirrors the four standard database operations so each failure
+// type can be handled separately in the UI.
+
 class CloudStorageException implements Exception{
     const CloudStorageException();
 }

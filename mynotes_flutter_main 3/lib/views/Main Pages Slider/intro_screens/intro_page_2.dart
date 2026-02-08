@@ -1,3 +1,6 @@
+// Second intro page — prompts the user to pick at least 3 contacts
+// from their phone's address book and add them to the newly-created list.
+
 import 'package:flutter/material.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 //import 'package:flutter_application_1/views/list/list_view.dart';

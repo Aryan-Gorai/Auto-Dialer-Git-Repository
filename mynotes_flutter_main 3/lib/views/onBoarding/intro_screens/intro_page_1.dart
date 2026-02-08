@@ -1,3 +1,5 @@
+// Onboarding step 1 — prompts the user to create a new calling list.
+
 import 'package:flutter/material.dart';
 //import 'package:flutter_application_1/views/list/list_view.dart';
 

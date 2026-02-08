@@ -1,3 +1,9 @@
+// ML statistics view combining three statistical models:
+//   1. Linear Regression — predicts future call success from historical trends
+//   2. Wilson Score — ranks contacts by answer reliability with confidence intervals
+//   3. Kaplan-Meier — survival analysis estimating how long until a contact answers
+// Each section fetches data from call_history and renders charts + tables.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
 import 'package:flutter_application_1/services/ml/linear_regression.dart';
@@ -42,6 +48,9 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
     _loadAndTrainModel();
   }
 
+  // Fetches all lead data from Firestore, trains the linear regression
+  // model using the Least Squares method, then runs predictions.
+  // Also loads Kaplan-Meier survival data and Wilson Score rankings.
   Future<void> _loadAndTrainModel() async {
     setState(() {
       _isLoading = true;
@@ -802,6 +811,8 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
     );
   }
 
+  // Maps confidence scores to traffic-light colours:
+  // green (>=75), orange (>=50), red (<50).
   Color _getConfidenceColor(double confidenceScore) {
     if (confidenceScore >= 75) {
       return Colors.green;

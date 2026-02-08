@@ -1,3 +1,7 @@
+// Reusable "Sign In" button used on the login page.
+// Just a styled container with a GestureDetector — the actual
+// sign-in logic is passed in via the onTap callback.
+
 import 'package:flutter/material.dart';
 
 class MyButton extends StatelessWidget {

@@ -1,3 +1,6 @@
+// Home page widget that checks Firebase auth state and routes accordingly.
+// If the user is logged in, they see the main slider screen; otherwise the login page.
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +23,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // FutureBuilder waits for Firebase to initialise before rendering anything
     return  FutureBuilder(
       
       future:Firebase.initializeApp(
@@ -29,13 +33,14 @@ class HomePage extends StatelessWidget {
     builder: (context, snapshot) {
       switch (snapshot.connectionState) {
 
+      // Once Firebase is ready, check if a user is currently signed in
       case ConnectionState.done:
       final user = FirebaseAuth.instance.currentUser;
     
       if (user != null) {
-          return sliderScreen();
+          return sliderScreen(); // user is logged in — show the main app
       } else {
-        return const LoginScreen1();
+        return const LoginScreen1(); // no user — show the login page
       }
 
        // return ListScreen();

@@ -1,3 +1,6 @@
+// Welcome dialog shown on first visit — prompts the user to pick a list
+// from the dropdown before doing anything else.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/utilities/dialogs/generic_dialog.dart';
 

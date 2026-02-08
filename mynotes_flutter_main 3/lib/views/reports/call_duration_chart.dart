@@ -1,3 +1,7 @@
+// Call duration distribution chart. Buckets calls by duration (0-30s,
+// 30s-1min, 1-5min, 5-15min, 15min+) and renders them as a bar chart.
+// Shows average duration stats and supports time range filtering.
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -77,6 +81,8 @@ class _CallDurationChartState extends State<CallDurationChart> {
     }
   }
 
+  // Decides which date range to fetch, then routes to the list-filtered
+  // or all-calls fetch path. Result populates duration bins for the bar chart.
   Future<void> _fetchCallData() async {
     setState(() {
       _isLoading = true;
@@ -289,6 +295,8 @@ class _CallDurationChartState extends State<CallDurationChart> {
     }
   }
 
+  // Pulls from call_history for the date range and sorts calls
+  // into duration bins (0-15s, 15-30s, 30-60s, 1-2m, etc.).
   Future<void> _fetchFromCallHistory(DateTime startDate, DateTime endDate) async {
     // Fetch call history from Firebase
     final QuerySnapshot querySnapshot = await _firestore
@@ -394,6 +402,8 @@ class _CallDurationChartState extends State<CallDurationChart> {
     }
   }
 
+  // Interpolation-based percentile calculation on sorted data.
+  // Used to show p25/p50/p75 in the duration stats summary.
   double _calculatePercentile(List<double> sortedData, int percentile) {
     if (sortedData.isEmpty) return 0;
     
@@ -429,6 +439,7 @@ class _CallDurationChartState extends State<CallDurationChart> {
     }
   }
 
+  // Converts raw seconds into a human-readable string like '2m 30s'.
   String _formatDuration(double seconds) {
     if (seconds < 60) {
       return '${seconds.toInt()}s';
@@ -913,6 +924,8 @@ class _CallDurationChartState extends State<CallDurationChart> {
     );
   }
 
+  // Generates the BarChartGroupData list from the duration bins.
+  // Each bin becomes a stacked bar with green (successful) + red (failed).
   List<BarChartGroupData> _buildBarGroups() {
     List<BarChartGroupData> groups = [];
     int index = 0;

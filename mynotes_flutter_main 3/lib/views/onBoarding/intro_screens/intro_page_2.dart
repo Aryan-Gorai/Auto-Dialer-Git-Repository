@@ -1,3 +1,6 @@
+// Onboarding step 2 — lets the user pick contacts from their phone
+// and add them to the list they just created.
+
 import 'package:flutter/material.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 //import 'package:flutter_application_1/views/list/list_view.dart';

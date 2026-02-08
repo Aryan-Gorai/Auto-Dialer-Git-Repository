@@ -1,3 +1,7 @@
+// Notes management screen — displays a real-time list of the user's
+// CloudNotes from Firestore. Supports creating, deleting, and tapping
+// to edit notes via the create_update_note_view route.
+
 // import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/constants/routes.dart';

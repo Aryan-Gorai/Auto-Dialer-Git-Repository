@@ -1,3 +1,7 @@
+// Post-call feedback dialog shown after each dialer call.
+// Lets the user rate the call with stars, write notes, and view an
+// NLP-generated summary of previous notes for this contact.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_application_1/utilities/apple_typography.dart';

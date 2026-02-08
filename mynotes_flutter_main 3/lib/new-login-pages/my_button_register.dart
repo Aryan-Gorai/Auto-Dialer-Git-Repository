@@ -1,3 +1,6 @@
+// Reusable "Register" button for the registration page.
+// Identical structure to my_button_login but with different label text.
+
 import 'package:flutter/material.dart';
 
 class MyButton extends StatelessWidget {

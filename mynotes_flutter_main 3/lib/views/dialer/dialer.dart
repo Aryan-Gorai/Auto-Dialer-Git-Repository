@@ -1,3 +1,11 @@
+// Auto-dialer — the core feature of the app.
+// Loads contacts from a chosen list, builds a priority queue to order them
+// by call urgency, then steps through each contact: place the call via
+// url_launcher, wait for the user to return, show a feedback dialog with
+// star rating + notes (including NLP summary of past notes), log the result
+// to Firestore, and move on to the next contact. Also handles call cycles,
+// Excel import, and call-outcome tracking.
+
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -49,21 +57,21 @@ class DialerContactsView extends StatefulWidget {
 class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBindingObserver {
   List<String> myTiles = [];
   bool isLoading = true;
-  int currentCallIndex = -1; // Track the currently called contact
-  List<Map<String, dynamic>> contactsData = []; // Store full contact data
+  int currentCallIndex = -1; // Which contact in the list we're currently calling
+  List<Map<String, dynamic>> contactsData = []; // Full Firestore data for each contact
   DateTime? callStartTime;
   Duration callDuration = Duration.zero;
   Timer? callTimer;
   late TextEditingController _descriptionController;
   String? _listDescription;
-  bool showFeedbackDialogEnabled = true; // Track if feedback dialogs should be shown
-  bool autoCycleEnabled = false; // Track if auto-cycle to next contact is enabled
-  bool autoQueueEnabled = false; // Track if priority queue auto-ordering is enabled
-  List<Map<String, dynamic>> _originalContactOrder = []; // Store original user order
-  bool _isInCall = false; // Track if user is currently in a call
-  Timer? _autoCycleTimer; // Timer for delayed auto-cycle after app resume
-  bool isPaused = false; // Track if auto-cycle is paused
-  bool isSettingsExpanded = false; // Track if settings section is expanded
+  bool showFeedbackDialogEnabled = true; // Whether to show star-rating dialog after each call
+  bool autoCycleEnabled = false; // Auto-advance to the next contact after a call
+  bool autoQueueEnabled = false; // Use the priority queue to reorder contacts by urgency
+  List<Map<String, dynamic>> _originalContactOrder = []; // Backup of user's manual ordering
+  bool _isInCall = false; // Tracks if user is on a phone call (app is paused)
+  Timer? _autoCycleTimer; // Short delay before auto-advancing after returning from call
+  bool isPaused = false; // Whether the user has paused the call cycle
+  bool isSettingsExpanded = false; // Accordion state for settings panel
 
   // Call Cycle Tracking
   String? _activeCycleId; // Current cycle document ID
@@ -94,6 +102,8 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
     });
   }
 
+  // Lifecycle observer — when the app is paused (user is on a phone call)
+  // and then resumed, we auto-cycle to the next contact after a 2-second delay.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
@@ -120,6 +130,7 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
     }
   }
 
+  // Reads the list's description text from Firestore for display.
   Future<void> fetchListDescription() async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -140,6 +151,7 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
     }
   }
 
+  // Checks Firestore for the 'show_feedback_dialog' toggle on this list.
   Future<void> loadFeedbackDialogSetting() async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -160,6 +172,7 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
     }
   }
 
+  // Checks Firestore for the 'auto_cycle_enabled' toggle on this list.
   Future<void> loadAutoCycleSetting() async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -180,6 +193,7 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
     }
   }
 
+  // Checks Firestore for the 'auto_queue_enabled' toggle on this list.
   Future<void> loadAutoQueueSetting() async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -200,6 +214,8 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
     }
   }
 
+  // Saves which contact index we're on so the user can resume later
+  // (even on a different device, since it's stored in Firestore)
   Future<void> saveProgressToFirestore(int index) async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -222,6 +238,8 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
     }
   }
 
+  // Reads the saved call-cycle index from Firestore so we can offer
+  // to resume from where the user left off last time.
   Future<Map<String, dynamic>?> loadSavedProgress() async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -248,6 +266,7 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
     return null;
   }
 
+  // Resets the saved index to -1 so next time the user starts fresh.
   Future<void> clearSavedProgress() async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -268,6 +287,8 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
     }
   }
 
+  // Looks for a valid saved position and asks "Resume from contact X?".
+  // If the user declines, clears the saved progress.
   Future<void> checkAndOfferResume() async {
     print('🔍 Checking for saved progress...');
     print('📊 Contacts data length: ${contactsData.length}');
@@ -508,6 +529,8 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
     }
   }
 
+  // Builds a priority queue from the contacts using ContactPriorityCalculator,
+  // then reorders the contact list so the most urgent contacts come first.
   Future<void> _applyPriorityOrdering() async {
     try {
       // Create calculator instance and build priority queue
@@ -563,7 +586,7 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
     }
   }
   
-  // Fetch full contact data including phone numbers (using new Contact Directories structure)
+  // Pulls contact data from the normalised Contact Directories collection
   Future<void> fetchContactsData() async {
     // Use the new normalized Contact Directories
     final contacts = await fetchContactsForList(widget.listName);
@@ -576,7 +599,9 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
     print('📇 Loaded ${contacts.length} contacts from Contact Directories');
   }
   
-  // Method to call the current contact
+  // Places the phone call via url_launcher, starts a timer to track
+  // duration, records a call cycle event, and (optionally) shows the
+  // feedback dialog when the user returns to the app.
   Future<void> callCurrentContact() async {
     if (currentCallIndex >= 0 && currentCallIndex < contactsData.length) {
       String phoneNumber = contactsData[currentCallIndex]['contact_phone_number'];
@@ -736,7 +761,9 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
     );
   }
   
-  // Method to move to the next contact
+  // Advances the call cycle to the next contact in the list.
+  // First shows a feedback dialog for the contact we just called,
+  // then increments the index and calls the next one.
   Future<void> moveToNextContact() async {
     // If we haven't started calling yet, start with the first contact
     if (currentCallIndex < 0 || currentCallIndex >= contactsData.length) {
@@ -1981,6 +2008,8 @@ Widget build(BuildContext context) {
 
 
 
+  // Writes or updates the post-call feedback (star rating, notes, duration)
+  // into 'contact_notes' for the most recent call to this contact.
   Future<void> updateCallFeedback(
     String contactName,
     String phoneNumber,
