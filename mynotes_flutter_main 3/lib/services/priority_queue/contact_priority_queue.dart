@@ -270,18 +270,83 @@ class ContactPriorityQueue {
 class ContactPriorityCalculator {
   final String userId;
   
-  // Weight factors for priority calculation
-  static const double DAYS_SINCE_CALL_WEIGHT = 0.3;
-  static const double SUCCESS_RATE_WEIGHT = 0.25;
-  static const double AVG_RATING_WEIGHT = 0.2;
-  static const double TOTAL_ATTEMPTS_WEIGHT = 0.15;
-  static const double DAYS_SINCE_SUCCESS_WEIGHT = 0.1;
+  // Default weight factors for priority calculation
+  static const double DEFAULT_DAYS_SINCE_CALL_WEIGHT = 0.3;
+  static const double DEFAULT_SUCCESS_RATE_WEIGHT = 0.25;
+  static const double DEFAULT_AVG_RATING_WEIGHT = 0.2;
+  static const double DEFAULT_TOTAL_ATTEMPTS_WEIGHT = 0.15;
+  static const double DEFAULT_DAYS_SINCE_SUCCESS_WEIGHT = 0.1;
+  
+  // Instance weight factors (configurable per user)
+  late final double daysSinceCallWeight;
+  late final double successRateWeight;
+  late final double avgRatingWeight;
+  late final double totalAttemptsWeight;
+  late final double daysSinceSuccessWeight;
   
   // Maximum values for normalization
   static const int MAX_DAYS = 90;
   static const int MAX_ATTEMPTS = 20;
   
-  ContactPriorityCalculator(this.userId);
+  ContactPriorityCalculator(this.userId, {Map<String, double>? weights}) {
+    daysSinceCallWeight = weights?['days_since_call'] ?? DEFAULT_DAYS_SINCE_CALL_WEIGHT;
+    successRateWeight = weights?['success_rate'] ?? DEFAULT_SUCCESS_RATE_WEIGHT;
+    avgRatingWeight = weights?['avg_rating'] ?? DEFAULT_AVG_RATING_WEIGHT;
+    totalAttemptsWeight = weights?['total_attempts'] ?? DEFAULT_TOTAL_ATTEMPTS_WEIGHT;
+    daysSinceSuccessWeight = weights?['days_since_success'] ?? DEFAULT_DAYS_SINCE_SUCCESS_WEIGHT;
+  }
+  
+  /// Load user-configured weights from Firebase
+  static Future<Map<String, double>?> loadWeightsFromFirebase(String userId) async {
+    try {
+      DocumentSnapshot snapshot = await FirebaseFirestore.instance
+          .collection('user_settings')
+          .doc(userId)
+          .get();
+      
+      if (snapshot.exists) {
+        final data = snapshot.data() as Map<String, dynamic>;
+        if (data.containsKey('auto_queue_weights')) {
+          final weightsData = data['auto_queue_weights'] as Map<String, dynamic>;
+          return {
+            'days_since_call': (weightsData['days_since_call'] as num?)?.toDouble() ?? DEFAULT_DAYS_SINCE_CALL_WEIGHT,
+            'success_rate': (weightsData['success_rate'] as num?)?.toDouble() ?? DEFAULT_SUCCESS_RATE_WEIGHT,
+            'avg_rating': (weightsData['avg_rating'] as num?)?.toDouble() ?? DEFAULT_AVG_RATING_WEIGHT,
+            'total_attempts': (weightsData['total_attempts'] as num?)?.toDouble() ?? DEFAULT_TOTAL_ATTEMPTS_WEIGHT,
+            'days_since_success': (weightsData['days_since_success'] as num?)?.toDouble() ?? DEFAULT_DAYS_SINCE_SUCCESS_WEIGHT,
+          };
+        }
+      }
+      return null;
+    } catch (e) {
+      print('Error loading auto-queue weights: $e');
+      return null;
+    }
+  }
+  
+  /// Save user-configured weights to Firebase
+  static Future<void> saveWeightsToFirebase(String userId, Map<String, double> weights) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('user_settings')
+          .doc(userId)
+          .set({
+        'auto_queue_weights': weights,
+        'auto_queue_weights_updated': Timestamp.now(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      print('Error saving auto-queue weights: $e');
+    }
+  }
+  
+  /// Get the default weights map
+  static Map<String, double> get defaultWeights => {
+    'days_since_call': DEFAULT_DAYS_SINCE_CALL_WEIGHT,
+    'success_rate': DEFAULT_SUCCESS_RATE_WEIGHT,
+    'avg_rating': DEFAULT_AVG_RATING_WEIGHT,
+    'total_attempts': DEFAULT_TOTAL_ATTEMPTS_WEIGHT,
+    'days_since_success': DEFAULT_DAYS_SINCE_SUCCESS_WEIGHT,
+  };
   
   /// Calculate priority score for a contact
   /// 
@@ -372,11 +437,11 @@ class ContactPriorityCalculator {
     
     // Calculate weighted priority score (0-100 scale)
     double score = (
-      (DAYS_SINCE_CALL_WEIGHT * normalizedDays) +
-      (SUCCESS_RATE_WEIGHT * inverseSuccessRate) +
-      (AVG_RATING_WEIGHT * normalizedRating) +
-      (TOTAL_ATTEMPTS_WEIGHT * normalizedAttempts) +
-      (DAYS_SINCE_SUCCESS_WEIGHT * normalizedSuccessDays)
+      (daysSinceCallWeight * normalizedDays) +
+      (successRateWeight * inverseSuccessRate) +
+      (avgRatingWeight * normalizedRating) +
+      (totalAttemptsWeight * normalizedAttempts) +
+      (daysSinceSuccessWeight * normalizedSuccessDays)
     ) * 100;
     
     // Invert score so lower = higher priority
@@ -440,7 +505,8 @@ class ContactPriorityCalculator {
   }
   
   /// Get description of priority factors for UI display
-  static String getPriorityFactorsDescription() {
-    return '''Time since last call (${(DAYS_SINCE_CALL_WEIGHT * 100).toInt()}%), Success rate (${(SUCCESS_RATE_WEIGHT * 100).toInt()}%), Call ratings (${(AVG_RATING_WEIGHT * 100).toInt()}%), Relationship depth (${(TOTAL_ATTEMPTS_WEIGHT * 100).toInt()}%), Follow-up urgency (${(DAYS_SINCE_SUCCESS_WEIGHT * 100).toInt()}%)''';
+  static String getPriorityFactorsDescription({Map<String, double>? weights}) {
+    final w = weights ?? defaultWeights;
+    return '''Time since last call (${((w['days_since_call'] ?? DEFAULT_DAYS_SINCE_CALL_WEIGHT) * 100).toInt()}%), Success rate (${((w['success_rate'] ?? DEFAULT_SUCCESS_RATE_WEIGHT) * 100).toInt()}%), Call ratings (${((w['avg_rating'] ?? DEFAULT_AVG_RATING_WEIGHT) * 100).toInt()}%), Relationship depth (${((w['total_attempts'] ?? DEFAULT_TOTAL_ATTEMPTS_WEIGHT) * 100).toInt()}%), Follow-up urgency (${((w['days_since_success'] ?? DEFAULT_DAYS_SINCE_SUCCESS_WEIGHT) * 100).toInt()}%)''';
   }
 }

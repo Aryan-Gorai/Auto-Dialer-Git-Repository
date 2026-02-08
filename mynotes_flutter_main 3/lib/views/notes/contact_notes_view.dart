@@ -503,6 +503,7 @@ class _ContactNotesViewState extends State<ContactNotesView> {
                           final note = filteredNotes[index];
                           bool isCallFeedback = note['note_text']?.contains('Call Feedback:') ?? false;
                           bool hasFeedback = note['has_feedback'] == true;
+                          // ignore: unused_local_variable
                           bool hasRating = note['rating'] != null && (note['rating'] is int ? note['rating'] : int.tryParse(note['rating'].toString()) ?? 0) > 0;
                           
                           return Card(
@@ -511,7 +512,7 @@ class _ContactNotesViewState extends State<ContactNotesView> {
                               vertical: 4.0,
                             ),
                             // Add color highlight for call feedback notes
-                            color: (isCallFeedback || hasFeedback) ? Colors.blue[50] : Colors.white,
+                            color: (isCallFeedback || hasFeedback) ? Theme.of(context).colorScheme.primary.withOpacity(0.1) : Colors.white,
                             elevation: (isCallFeedback || hasFeedback) ? 3 : 1,
                             child: Padding(
                               padding: const EdgeInsets.all(12.0),
@@ -671,7 +672,7 @@ class _ContactNotesViewState extends State<ContactNotesView> {
             note['note_text'] ?? 'Call initiated',
             style: TextStyle(
               fontSize: 16,
-              color: isCallFeedback ? Colors.blue[800] : Colors.black87,
+              color: isCallFeedback ? Theme.of(context).colorScheme.primary : Colors.black87,
               fontWeight: isCallFeedback ? FontWeight.w500 : FontWeight.normal,
             ),
           ),
@@ -723,9 +724,9 @@ class _ContactNotesViewState extends State<ContactNotesView> {
     return [
       TextSpan(
         text: text.substring(0, query.length),
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: Colors.blue,
+          color: Theme.of(context).colorScheme.primary,
         ),
       ),
       TextSpan(

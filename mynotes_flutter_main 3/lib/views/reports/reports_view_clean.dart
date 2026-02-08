@@ -381,7 +381,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(248, 225, 209, 1),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'Reports View',
@@ -749,7 +749,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                                 onPressed: _toggleHeatmap,
                                 child: Text(
                                   _showHeatmap ? 'Hide Heatmap' : 'Show Heatmap',
-                                  style: const TextStyle(color: Colors.blue),
+                                  style: TextStyle(color: Theme.of(context).colorScheme.primary),
                                 ),
                               ),
                             ],

@@ -906,7 +906,7 @@ class _MultiContactSelectDialogState extends State<MultiContactSelectDialog> {
             Container(
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.blue.shade600,
+                color: Theme.of(context).colorScheme.primary,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(12),
                   topRight: Radius.circular(12),
@@ -1014,18 +1014,18 @@ class _MultiContactSelectDialogState extends State<MultiContactSelectDialog> {
                       style: TextStyle(color: Colors.grey.shade600),
                     ),
                     secondary: CircleAvatar(
-                      backgroundColor: Colors.blue.shade100,
+                      backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                       child: Text(
                         contact.displayName.isNotEmpty 
                             ? contact.displayName[0].toUpperCase() 
                             : '?',
                         style: TextStyle(
-                          color: Colors.blue.shade700,
+                          color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                    activeColor: Colors.blue,
+                    activeColor: Theme.of(context).colorScheme.primary,
                     checkColor: Colors.white,
                   );
                 },
@@ -1056,7 +1056,7 @@ class _MultiContactSelectDialogState extends State<MultiContactSelectDialog> {
                           ? null
                           : () => Navigator.of(context).pop(_selectedContacts.toList()),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor: Colors.white,
                         padding: EdgeInsets.symmetric(vertical: 12),
                       ),

@@ -211,7 +211,7 @@ class _CallHistoryViewState extends State<CallHistoryView> {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.blue),
+            icon: Icon(Icons.refresh, color: Theme.of(context).colorScheme.primary),
             onPressed: _fetchCallHistory,
           ),
         ],

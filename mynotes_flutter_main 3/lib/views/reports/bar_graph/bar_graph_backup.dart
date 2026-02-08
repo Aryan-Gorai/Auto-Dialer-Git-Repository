@@ -1,6 +1,5 @@
 import "package:fl_chart/fl_chart.dart";
 import "package:flutter/material.dart";
-import "package:flutter_application_1/views/reports/bar_graph/bar_data.dart";
 
 
 

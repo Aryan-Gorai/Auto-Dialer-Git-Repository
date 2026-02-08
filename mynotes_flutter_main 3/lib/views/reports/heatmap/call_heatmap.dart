@@ -5,6 +5,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/theme/app_colors.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
 import 'package:intl/intl.dart';
 
@@ -617,7 +618,7 @@ class _CallHeatmapState extends State<CallHeatmap> {
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue,
+                  color: AppColors.coral,
                 ),
               ),
             ),

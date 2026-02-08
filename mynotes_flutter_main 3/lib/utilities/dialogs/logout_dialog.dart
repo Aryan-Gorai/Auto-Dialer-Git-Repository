@@ -2,7 +2,6 @@
 // "Log Out", false if they cancel.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/utilities/dialogs/generic_dialog.dart';
 
 
 // Future<bool> showLogOutDialog(BuildContext context) {

@@ -1,14 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
-import 'package:flutter_application_1/services/cloud/firebase_cloud_storage.dart';
-import 'package:flutter_application_1/views/notes/create_update_note_view.dart';
-import 'package:flutter_application_1/views/notes/notes_view.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/link.dart';
 import 'dart:async';
-import 'package:flutter_contacts/flutter_contacts.dart';
 
 
 class CallView extends StatefulWidget {

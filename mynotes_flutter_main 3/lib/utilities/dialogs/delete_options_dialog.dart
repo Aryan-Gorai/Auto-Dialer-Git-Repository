@@ -3,7 +3,6 @@
 // delete function defined in list_view.dart.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/utilities/dialogs/generic_dialog.dart';
 import 'package:flutter_application_1/views/list/list_view.dart';
 
 bool clicked = false;

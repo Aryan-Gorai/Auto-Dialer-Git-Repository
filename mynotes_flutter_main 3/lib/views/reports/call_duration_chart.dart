@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
+import 'package:flutter_application_1/theme/app_colors.dart';
 import 'package:flutter_application_1/utilities/apple_typography.dart';
 import 'package:intl/intl.dart';
 
@@ -569,7 +570,7 @@ class _CallDurationChartState extends State<CallDurationChart> {
             children: [
               _buildLegendItem('Successful', Colors.green),
               _buildLegendItem('Unsuccessful', Colors.red),
-              _buildLegendItem('Median', Colors.blue),
+              _buildLegendItem('Median', AppColors.coral),
               _buildLegendItem('Percentiles', Colors.orange),
             ],
           ),
@@ -715,7 +716,7 @@ class _CallDurationChartState extends State<CallDurationChart> {
                       // Median line
                       HorizontalLine(
                         y: _convertDurationToBarPosition(_medianDuration),
-                        color: Colors.blue,
+                        color: AppColors.coral,
                         strokeWidth: 2,
                         dashArray: [5, 5],
                         label: HorizontalLineLabel(
@@ -723,7 +724,7 @@ class _CallDurationChartState extends State<CallDurationChart> {
                           alignment: Alignment.topRight,
                           padding: const EdgeInsets.only(right: 5, bottom: 5),
                           style: const TextStyle(
-                            color: Colors.blue,
+                            color: AppColors.coral,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),

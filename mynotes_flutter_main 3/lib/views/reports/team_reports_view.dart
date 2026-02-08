@@ -49,6 +49,7 @@ class _TeamReportsViewState extends State<TeamReportsView> with SingleTickerProv
   String _selectedTimeScale = 'last7days';
   int _maxCallThreshold = 10;
   final TextEditingController _thresholdController = TextEditingController(text: '10');
+  // ignore: unused_field
   bool _showHeatmap = true;
   int _timeOffset = 0;
   DateTime? _customStartDate;
@@ -199,7 +200,7 @@ class _TeamReportsViewState extends State<TeamReportsView> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(248, 225, 209, 1),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'Team Reports',
@@ -304,7 +305,7 @@ class _TeamReportsViewState extends State<TeamReportsView> with SingleTickerProv
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
           children: [
-            const Icon(Icons.person, color: Colors.blue),
+            Icon(Icons.person, color: Theme.of(context).colorScheme.primary),
             const SizedBox(width: 12),
             Text(
               'Viewing:',

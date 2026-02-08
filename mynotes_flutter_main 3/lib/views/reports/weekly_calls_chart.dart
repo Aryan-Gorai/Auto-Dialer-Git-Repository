@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
+import 'package:flutter_application_1/theme/app_colors.dart';
 import 'package:intl/intl.dart';
 
 class WeeklyCallsChart extends StatefulWidget {
@@ -736,7 +737,7 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
               _buildLegendItem('Successful', Colors.green),
               _buildLegendItem('Failed', Colors.red),
               _buildLegendItem('Missed Callbacks', Colors.orange),
-              _buildLegendItem('7-Day Avg', Colors.blue.shade300),
+              _buildLegendItem('7-Day Avg', AppColors.coral.withOpacity(0.4)),
             ],
           ),
           
@@ -995,7 +996,7 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
                             getDotPainter: (spot, percent, barData, index) {
                               return FlDotCirclePainter(
                                 radius: 6,
-                                color: barData.color ?? Colors.blue,
+                                color: barData.color ?? AppColors.coral,
                                 strokeWidth: 2,
                                 strokeColor: Colors.white,
                               );
@@ -1049,7 +1050,7 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
                     LineChartBarData(
                       spots: _rollingAverageSpots,
                       isCurved: false,
-                      color: Colors.blue.shade300,
+                      color: AppColors.coral.withOpacity(0.4),
                       barWidth: 2,
                       isStrokeCapRound: true,
                       dotData: const FlDotData(show: false),

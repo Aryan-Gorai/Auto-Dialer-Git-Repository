@@ -16,13 +16,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter_application_1/services/auth/auth_service.dart';
 import 'package:flutter_application_1/utilities/dialogs/delete_options_dialog.dart';
-import 'package:flutter_application_1/utilities/dialogs/error_dialog.dart';
 import 'package:flutter_application_1/utilities/dialogs/logout_dialog.dart';
-import 'package:flutter_application_1/utilities/dialogs/welcome_dialog.dart';
 import 'package:flutter_application_1/views/list/firebase_services.dart';
 import 'package:flutter_application_1/views/list/list_view_visible.dart';
 import 'package:flutter_application_1/views/onBoarding/onBoarding.dart';
-import 'package:flutter_application_1/views/reports/reports_view.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
@@ -188,7 +185,7 @@ Future<void> createDemoList() async {
     String listName = 'List 1';
     int index = 0;
     int totalDocuments = 0;
-    String selectedList = listName;
+    String selectedList = listName; // ignore: unused_local_variable
 
     Map<String, dynamic> newListData = {
       'list_name': listName,
@@ -363,8 +360,11 @@ Future<void> setStatefunction() async {
  //WHOLE FUNCTIONS PASTED FROM EXAMPLE OF URL LAUNCHER
 
 
+ // ignore: unused_field
  bool _hasCallSupport = false;
+ // ignore: unused_field
  Future<void>? _launched;
+ // ignore: unused_field
  final String _phone = '';
 
  // Helper method to fetch contacts and update the on-screen display string.
@@ -402,6 +402,7 @@ Future<void> setStatefunction() async {
 
 
 
+ // ignore: unused_element
  Future<void> _launchInBrowser(Uri url) async {
    if (!await launchUrl(
      url,
@@ -412,6 +413,7 @@ Future<void> setStatefunction() async {
  }
 
 
+ // ignore: unused_element
  Future<void> _launchInWebViewOrVC(Uri url) async {
    if (!await launchUrl(
      url,
@@ -425,6 +427,7 @@ Future<void> setStatefunction() async {
  }
 
 
+ // ignore: unused_element
  Future<void> _launchInWebViewWithoutJavaScript(Uri url) async {
    if (!await launchUrl(
      url,
@@ -436,6 +439,7 @@ Future<void> setStatefunction() async {
  }
 
 
+ // ignore: unused_element
  Future<void> _launchInWebViewWithoutDomStorage(Uri url) async {
    if (!await launchUrl(
      url,
@@ -447,6 +451,7 @@ Future<void> setStatefunction() async {
  }
 
 
+ // ignore: unused_element
  Future<void> _launchUniversalLinkIos(Uri url) async {
    final bool nativeAppLaunchSucceeded = await launchUrl(
      url,
@@ -461,6 +466,7 @@ Future<void> setStatefunction() async {
  }
 
 
+ // ignore: unused_element
  Widget _launchStatus(BuildContext context, AsyncSnapshot<void> snapshot) {
    if (snapshot.hasError) {
      return Text('Error: ${snapshot.error}');
@@ -825,7 +831,7 @@ String listContactsJoined = "";
 
 
 
-     backgroundColor: const Color.fromRGBO(248, 225, 209, 1), 
+     backgroundColor: Theme.of(context).scaffoldBackgroundColor, 
 
 
 
@@ -996,9 +1002,9 @@ Row(
                               style: TextButton.styleFrom(
                                 foregroundColor: Colors.transparent,
                               ),
-                              child: const Text(
+                              child: Text(
                                 "Add a new list",
-                                style: TextStyle(color: MyColorsSample.accent),
+                                style: TextStyle(color: Theme.of(context).colorScheme.primary),
                               ),
                               onPressed: () {
 
@@ -1057,9 +1063,9 @@ Row(
                               style: TextButton.styleFrom(
                                 foregroundColor: Colors.transparent,
                               ),
-                              child: const Text(
+                              child: Text(
                                 "Upload Single",
-                                style: TextStyle(color: MyColorsSample.accent),
+                                style: TextStyle(color: Theme.of(context).colorScheme.primary),
                               ),
                               onPressed: () async {
 
@@ -1191,9 +1197,9 @@ Row(
                               style: TextButton.styleFrom(
                                 foregroundColor: Colors.transparent,
                               ),
-                              child: const Text(
+                              child: Text(
                                 "Delete...",
-                                style: TextStyle(color: MyColorsSample.accent),
+                                style: TextStyle(color: Theme.of(context).colorScheme.primary),
                               ),
                               onPressed: () async{
 
@@ -1259,9 +1265,9 @@ Row(
                               style: TextButton.styleFrom(
                                 foregroundColor: Colors.transparent,
                               ),
-                              child: const Text(
+                              child: Text(
                                 "Guide",
-                                style: TextStyle(color: MyColorsSample.accent),
+                                style: TextStyle(color: Theme.of(context).colorScheme.primary),
                               ),
                               onPressed: () async {
                                     Navigator.of(context).push(

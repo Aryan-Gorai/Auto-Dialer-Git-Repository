@@ -4,6 +4,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_application_1/constants/routes.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_application_1/theme/theme_provider.dart';
 
 import 'package:flutter_application_1/home_page.dart';
 import 'package:flutter_application_1/new-login-pages/modernLogin_page.dart';
@@ -36,7 +38,9 @@ Future<void> main() async {
   );
 
   runApp(
-    MaterialApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeProvider(),
+      child: MaterialApp(
       title: 'Flutter Demo',
       // Global theme using Apple-style typography for a consistent look across the app
       theme: ThemeData(
@@ -89,6 +93,7 @@ Future<void> main() async {
       '/team_management/': (context) => const TeamManagementView(),
 
       },
+    ),
     ),
   );
 }

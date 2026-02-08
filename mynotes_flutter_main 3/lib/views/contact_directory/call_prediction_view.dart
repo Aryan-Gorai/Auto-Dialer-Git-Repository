@@ -71,7 +71,7 @@ class _CallPredictionViewState extends State<CallPredictionView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(248, 225, 209, 1),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'Call Predictions',
@@ -81,7 +81,7 @@ class _CallPredictionViewState extends State<CallPredictionView> {
             ),
           ),
         ),
-        backgroundColor: const Color.fromRGBO(64, 105, 225, 1),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -207,10 +207,10 @@ class _CallPredictionViewState extends State<CallPredictionView> {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
+              gradient: LinearGradient(
                 colors: [
-                  Color.fromRGBO(64, 105, 225, 1),
-                  Color.fromRGBO(100, 140, 255, 1),
+                  Theme.of(context).colorScheme.primary,
+                  const Color.fromRGBO(100, 140, 255, 1),
                 ],
               ),
               borderRadius: BorderRadius.circular(12),
@@ -255,7 +255,7 @@ class _CallPredictionViewState extends State<CallPredictionView> {
               ],
             ),
           ),
-          Icon(Icons.phone, color: const Color.fromRGBO(64, 105, 225, 1)),
+          Icon(Icons.phone, color: Theme.of(context).colorScheme.primary),
         ],
       ),
     );
@@ -442,7 +442,7 @@ class _CallPredictionViewState extends State<CallPredictionView> {
             height: 32,
             decoration: BoxDecoration(
               color: rank <= 3
-                  ? const Color.fromRGBO(64, 105, 225, 1)
+                  ? Theme.of(context).colorScheme.primary
                   : Colors.grey.shade400,
               shape: BoxShape.circle,
             ),
@@ -492,7 +492,7 @@ class _CallPredictionViewState extends State<CallPredictionView> {
                 style: AppleTypography.withAppleFont(
                   AppleTypography.subtitle2.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: const Color.fromRGBO(64, 105, 225, 1),
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ),
@@ -518,7 +518,7 @@ class _CallPredictionViewState extends State<CallPredictionView> {
         widthFactor: probability,
         child: Container(
           decoration: BoxDecoration(
-            color: const Color.fromRGBO(64, 105, 225, 1),
+            color: Theme.of(context).colorScheme.primary,
             borderRadius: BorderRadius.circular(3),
           ),
         ),
@@ -582,7 +582,7 @@ class _CallPredictionViewState extends State<CallPredictionView> {
                         style: AppleTypography.withAppleFont(
                           AppleTypography.body2.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: const Color.fromRGBO(64, 105, 225, 1),
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                       ),
@@ -618,7 +618,7 @@ class _CallPredictionViewState extends State<CallPredictionView> {
                     style: AppleTypography.withAppleFont(
                       AppleTypography.body1.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: const Color.fromRGBO(64, 105, 225, 1),
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ),

@@ -67,6 +67,8 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
   bool showFeedbackDialogEnabled = true; // Whether to show star-rating dialog after each call
   bool autoCycleEnabled = false; // Auto-advance to the next contact after a call
   bool autoQueueEnabled = false; // Use the priority queue to reorder contacts by urgency
+  Map<String, double> _autoQueueWeights = ContactPriorityCalculator.defaultWeights; // User-configurable weights
+  bool _weightsExpanded = false; // Whether the weight sliders are visible
   List<Map<String, dynamic>> _originalContactOrder = []; // Backup of user's manual ordering
   bool _isInCall = false; // Tracks if user is on a phone call (app is paused)
   Timer? _autoCycleTimer; // Short delay before auto-advancing after returning from call
@@ -207,6 +209,14 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
         setState(() {
           // Default to false if the field doesn't exist
           autoQueueEnabled = snapshot.docs.first['auto_queue_enabled'] as bool? ?? false;
+        });
+      }
+      
+      // Load user's custom weights from Firebase
+      Map<String, double>? savedWeights = await ContactPriorityCalculator.loadWeightsFromFirebase(userId);
+      if (savedWeights != null && mounted) {
+        setState(() {
+          _autoQueueWeights = savedWeights;
         });
       }
     } catch (e) {
@@ -529,12 +539,111 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
     }
   }
 
+  /// Update a single weight value and normalize all weights to sum to 1.0
+  void _updateWeight(String key, double newValue) {
+    setState(() {
+      _autoQueueWeights[key] = newValue;
+      // Normalize so all weights sum to 1.0
+      double total = _autoQueueWeights.values.fold(0.0, (a, b) => a + b);
+      if (total > 0) {
+        _autoQueueWeights = _autoQueueWeights.map((k, v) => MapEntry(k, v / total));
+      }
+    });
+  }
+
+  /// Save weights to Firebase and re-apply priority ordering if auto-queue is active
+  Future<void> _saveAndApplyWeights() async {
+    await ContactPriorityCalculator.saveWeightsToFirebase(userId, _autoQueueWeights);
+    if (autoQueueEnabled && contactsData.isNotEmpty) {
+      await _applyPriorityOrdering();
+    }
+  }
+
+  /// Reset weights to defaults
+  Future<void> _resetWeightsToDefault() async {
+    setState(() {
+      _autoQueueWeights = Map.from(ContactPriorityCalculator.defaultWeights);
+    });
+    await _saveAndApplyWeights();
+  }
+
+  /// Build a single weight slider row with label, percentage, and CNSlider
+  Widget _buildWeightSlider({
+    required String label,
+    required String key,
+    required IconData icon,
+    required Color color,
+  }) {
+    double value = _autoQueueWeights[key] ?? 0.0;
+    int percentage = (value * 100).round();
+    
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16, color: color),
+              SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  label,
+                  style: AppleTypography.withAppleFont(
+                    AppleTypography.caption.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black87,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '$percentage%',
+                  style: AppleTypography.withAppleFont(
+                    AppleTypography.caption.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: color,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 6),
+          SizedBox(
+            height: 36,
+            child: CNSlider(
+              value: value,
+              min: 0.0,
+              max: 1.0,
+              color: color,
+              onChanged: (newVal) {
+                _updateWeight(key, newVal);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // Builds a priority queue from the contacts using ContactPriorityCalculator,
   // then reorders the contact list so the most urgent contacts come first.
   Future<void> _applyPriorityOrdering() async {
     try {
-      // Create calculator instance and build priority queue
-      ContactPriorityCalculator calculator = ContactPriorityCalculator(userId);
+      // Create calculator instance with user's custom weights
+      ContactPriorityCalculator calculator = ContactPriorityCalculator(
+        userId,
+        weights: _autoQueueWeights,
+      );
       ContactPriorityQueue priorityQueue = await calculator.buildPriorityQueue(
         contactsData,
       );
@@ -976,6 +1085,9 @@ Widget build(BuildContext context) {
           child: isSettingsExpanded
               ? Container(
                   width: double.infinity,
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.55,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade50,
                     border: Border(
@@ -985,7 +1097,9 @@ Widget build(BuildContext context) {
                       ),
                     ),
                   ),
-                  child: Column(
+                  child: SingleChildScrollView(
+                    physics: BouncingScrollPhysics(),
+                    child: Column(
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -1114,7 +1228,7 @@ Widget build(BuildContext context) {
                                     ),
                                     SizedBox(height: 4),
                                     Text(
-                                      'Automatically reorder contacts in queue based on priority: ${ContactPriorityCalculator.getPriorityFactorsDescription()}',
+                                      'Automatically reorder contacts in queue based on priority: ${ContactPriorityCalculator.getPriorityFactorsDescription(weights: _autoQueueWeights)}',
                                       style: AppleTypography.withAppleFont(
                                         AppleTypography.caption.copyWith(
                                           color: Colors.grey[600],
@@ -1135,6 +1249,210 @@ Widget build(BuildContext context) {
                           ),
                         ),
                       ),
+                      // Auto Queue Weight Sliders — collapsible panel
+                      if (autoQueueEnabled)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Colors.white.withOpacity(0.7),
+                                  Colors.white.withOpacity(0.3),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.5),
+                                width: 1.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.08),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                // Header tap to expand/collapse
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _weightsExpanded = !_weightsExpanded;
+                                    });
+                                  },
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Priority Weights',
+                                                style: AppleTypography.withAppleFont(
+                                                  AppleTypography.subtitle1.copyWith(
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.black87,
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(height: 4),
+                                              Text(
+                                                'Adjust how contacts are prioritised',
+                                                style: AppleTypography.withAppleFont(
+                                                  AppleTypography.caption.copyWith(
+                                                    color: Colors.grey[600],
+                                                    fontSize: 11,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Icon(
+                                          _weightsExpanded
+                                              ? Icons.keyboard_arrow_up_rounded
+                                              : Icons.keyboard_arrow_down_rounded,
+                                          color: Colors.grey[600],
+                                          size: 24,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                // Expandable slider content
+                                if (_weightsExpanded) ...[
+                                  Divider(height: 1, color: Colors.grey.withOpacity(0.2)),
+                                  Padding(
+                                    padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
+                                    child: Column(
+                                      children: [
+                                        _buildWeightSlider(
+                                          label: 'Time Since Last Call',
+                                          key: 'days_since_call',
+                                          icon: Icons.access_time_rounded,
+                                          color: Colors.blue,
+                                        ),
+                                        _buildWeightSlider(
+                                          label: 'Success Rate',
+                                          key: 'success_rate',
+                                          icon: Icons.check_circle_outline_rounded,
+                                          color: Colors.green,
+                                        ),
+                                        _buildWeightSlider(
+                                          label: 'Call Ratings',
+                                          key: 'avg_rating',
+                                          icon: Icons.star_outline_rounded,
+                                          color: Colors.orange,
+                                        ),
+                                        _buildWeightSlider(
+                                          label: 'Relationship Depth',
+                                          key: 'total_attempts',
+                                          icon: Icons.people_outline_rounded,
+                                          color: Colors.purple,
+                                        ),
+                                        _buildWeightSlider(
+                                          label: 'Follow-up Urgency',
+                                          key: 'days_since_success',
+                                          icon: Icons.priority_high_rounded,
+                                          color: Colors.red,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  // Action buttons: Reset + Apply
+                                  Padding(
+                                    padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: GestureDetector(
+                                            onTap: () async {
+                                              await _resetWeightsToDefault();
+                                            },
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(vertical: 10),
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey.withOpacity(0.15),
+                                                borderRadius: BorderRadius.circular(10),
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  'Reset',
+                                                  style: AppleTypography.withAppleFont(
+                                                    AppleTypography.body2.copyWith(
+                                                      fontWeight: FontWeight.w500,
+                                                      color: Colors.grey[700],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 12),
+                                        Expanded(
+                                          flex: 2,
+                                          child: GestureDetector(
+                                            onTap: () async {
+                                              await _saveAndApplyWeights();
+                                              if (mounted) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text('Priority weights saved & applied'),
+                                                    duration: Duration(seconds: 2),
+                                                    behavior: SnackBarBehavior.floating,
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(10),
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(vertical: 10),
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  colors: [Colors.blue, Colors.blue.shade700],
+                                                ),
+                                                borderRadius: BorderRadius.circular(10),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.blue.withOpacity(0.3),
+                                                    blurRadius: 6,
+                                                    offset: Offset(0, 2),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  'Save & Apply',
+                                                  style: AppleTypography.withAppleFont(
+                                                    AppleTypography.body2.copyWith(
+                                                      fontWeight: FontWeight.w600,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
                       // Auto-cycle toggle with Liquid Glass Effect
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -1271,6 +1589,7 @@ Widget build(BuildContext context) {
                       ),
                       SizedBox(height: 8),
                     ],
+                  ),
                   ),
                 )
               : SizedBox.shrink(),

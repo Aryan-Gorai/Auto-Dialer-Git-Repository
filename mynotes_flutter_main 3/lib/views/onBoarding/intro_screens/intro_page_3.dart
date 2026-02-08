@@ -7,14 +7,6 @@ import '../../list/firebase_services.dart';
 
 
 class IntroPage3 extends StatefulWidget {
-  
- @override
- void initState() {
-  print(list);
- }
-
-
-
   @override
   State<IntroPage3> createState() => _IntroPage3State();
 }

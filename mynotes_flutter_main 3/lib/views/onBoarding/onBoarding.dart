@@ -2,10 +2,8 @@
 // steps: create a list, add contacts, then navigate to the main app.
 // Uses SmoothPageIndicator for the dot indicator and a PageView for swiping.
 
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/constants/routes.dart';
-import 'package:flutter_application_1/views/dialer/dialer.dart';
 
 import 'package:flutter_application_1/views/onBoarding/intro_screens/intro_page_1.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';

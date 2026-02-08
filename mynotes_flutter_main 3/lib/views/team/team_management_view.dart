@@ -2,7 +2,6 @@
 // the join code, listing members, and removing members.
 // Team members use this page to join/leave a team via a join code.
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -157,7 +156,7 @@ class _TeamManagementViewState extends State<TeamManagementView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(248, 225, 209, 1),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           AppBar(
@@ -173,7 +172,7 @@ class _TeamManagementViewState extends State<TeamManagementView> {
                 style: AppleTypography.withAppleFont(
                   AppleTypography.headline3.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: const Color.fromRGBO(64, 105, 225, 1),
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ),
@@ -235,7 +234,7 @@ class _TeamManagementViewState extends State<TeamManagementView> {
               child: ElevatedButton(
                 onPressed: _createTeam,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -268,7 +267,7 @@ class _TeamManagementViewState extends State<TeamManagementView> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.group, color: Colors.blue, size: 24),
+                      Icon(Icons.group, color: Theme.of(context).colorScheme.primary, size: 24),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -297,20 +296,20 @@ class _TeamManagementViewState extends State<TeamManagementView> {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.08),
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                      border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.3)),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
                           _team!.joinCode,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 8,
-                            color: Colors.blue,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -321,7 +320,7 @@ class _TeamManagementViewState extends State<TeamManagementView> {
                               const SnackBar(content: Text('Code copied to clipboard')),
                             );
                           },
-                          icon: const Icon(Icons.copy, color: Colors.blue),
+                          icon: Icon(Icons.copy, color: Theme.of(context).colorScheme.primary),
                           tooltip: 'Copy code',
                         ),
                       ],
@@ -383,14 +382,14 @@ class _TeamManagementViewState extends State<TeamManagementView> {
                 margin: const EdgeInsets.only(bottom: 8),
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: Colors.blue.withOpacity(0.2),
+                    backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
                     backgroundImage: member.photoUrl.isNotEmpty
                         ? NetworkImage(member.photoUrl)
                         : null,
                     child: member.photoUrl.isEmpty
                         ? Text(
                             (member.name.isNotEmpty ? member.name[0] : member.email[0]).toUpperCase(),
-                            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+                            style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
                           )
                         : null,
                   ),

@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
+import 'package:flutter_application_1/theme/app_colors.dart';
 import 'package:flutter_application_1/utilities/apple_typography.dart';
 import 'package:intl/intl.dart';
 
@@ -468,7 +469,7 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
                     'Voicemail',
                     _voicemailCalls,
                     _getPercentage(_voicemailCalls),
-                    Colors.blue,
+                    AppColors.coral,
                   ),
                   const SizedBox(height: 16),
                   const Divider(),
@@ -541,7 +542,7 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
         ),
       ),
       PieChartSectionData(
-        color: Colors.blue,
+        color: AppColors.coral,
         value: _voicemailCalls.toDouble(),
         title: _touchedIndex == 3 ? '${_getPercentage(_voicemailCalls).toStringAsFixed(1)}%' : '',
         radius: _touchedIndex == 3 ? 70 : 60,
@@ -580,7 +581,7 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
         ),
         _buildLegendItem(
           'Voicemail',
-          Colors.blue,
+          AppColors.coral,
           _voicemailCalls,
           _getPercentage(_voicemailCalls),
         ),

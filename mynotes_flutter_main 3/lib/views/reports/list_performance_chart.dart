@@ -5,6 +5,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
+import 'package:flutter_application_1/theme/app_colors.dart';
 import 'package:flutter_application_1/utilities/apple_typography.dart';
 import 'package:intl/intl.dart';
 
@@ -398,7 +399,7 @@ class _ListPerformanceChartState extends State<ListPerformanceChart> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.blue[50],
+              color: AppColors.coral.withOpacity(0.1),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(8),
                 topRight: Radius.circular(8),
@@ -411,7 +412,7 @@ class _ListPerformanceChartState extends State<ListPerformanceChart> {
                   style: AppleTypography.withAppleFont(
                     AppleTypography.subtitle1.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue[900],
+                      color: AppColors.coral,
                     ),
                   ),
                 ),

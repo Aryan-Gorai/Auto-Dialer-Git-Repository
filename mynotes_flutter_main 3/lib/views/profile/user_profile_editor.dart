@@ -17,9 +17,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:string_validator/string_validator.dart';
 import 'package:flutter_application_1/utilities/apple_typography.dart';
-import 'package:flutter_application_1/models/app_user.dart';
 import 'package:flutter_application_1/services/team_service.dart';
-import 'package:flutter_application_1/models/team.dart';
+import 'package:flutter_application_1/theme/app_colors.dart';
+import 'package:flutter_application_1/theme/theme_provider.dart';
+
+import 'package:provider/provider.dart';
 // import 'package:email_validator/email_validator.dart';
 
 class UserProfileEditor extends StatefulWidget {
@@ -134,7 +136,7 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
                   style: AppleTypography.withAppleFont(
                     AppleTypography.headline3.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: Color.fromRGBO(64, 105, 225, 1),
+                      color: Theme.of(context).colorScheme.primary,
                     )
                   ),
                 ),
@@ -189,9 +191,85 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
               // Team section
               _buildTeamSection(),
               _buildAbout(_about),
+              const SizedBox(height: 24),
+              _buildThemeToggle(),
               const SizedBox(height: 30),
             ],
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThemeToggle() {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Appearance',
+            style: AppleTypography.withAppleFont(
+              AppleTypography.caption.copyWith(
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                _themeOption(ThemeMode.system, Icons.brightness_auto, 'System', themeProvider),
+                _themeOption(ThemeMode.light, Icons.light_mode, 'Light', themeProvider),
+                _themeOption(ThemeMode.dark, Icons.dark_mode, 'Dark', themeProvider),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _themeOption(ThemeMode mode, IconData icon, String label, ThemeProvider themeProvider) {
+    final isSelected = themeProvider.themeMode == mode;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => themeProvider.setThemeMode(mode),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            gradient: isSelected ? AppColors.primaryGradient : null,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: AppleTypography.withAppleFont(
+                  AppleTypography.caption.copyWith(
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                    color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -225,13 +303,13 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.08),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                  border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.2)),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.group, color: Colors.blue, size: 20),
+                    Icon(Icons.group, color: Theme.of(context).colorScheme.primary, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -267,7 +345,7 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
             icon: const Icon(Icons.group_add, size: 20),
             label: const Text('Join a Team'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
+              backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(
@@ -689,7 +767,7 @@ class DisplayImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Color.fromRGBO(64, 105, 225, 1);
+    final color = Theme.of(context).colorScheme.primary;
 
     return Center(
       child: Stack(children: [

@@ -62,23 +62,23 @@ class _CallFeedbackDialogState extends State<CallFeedbackDialog> {
               Container(
                 padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue.shade200),
+                  border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.2)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.summarize, size: 18, color: Colors.blue.shade700),
+                        Icon(Icons.summarize, size: 18, color: Theme.of(context).colorScheme.primary),
                         SizedBox(width: 6),
                         Text(
                           'Summary of Previous Notes',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
-                            color: Colors.blue.shade900,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                       ],
@@ -94,7 +94,7 @@ class _CallFeedbackDialogState extends State<CallFeedbackDialog> {
                             .map((keyword) => Container(
                                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: Colors.blue.shade100,
+                                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
@@ -102,7 +102,7 @@ class _CallFeedbackDialogState extends State<CallFeedbackDialog> {
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.blue.shade800,
+                                      color: Theme.of(context).colorScheme.primary,
                                     ),
                                   ),
                                 ))
@@ -118,7 +118,7 @@ class _CallFeedbackDialogState extends State<CallFeedbackDialog> {
                         style: TextStyle(
                           fontSize: 11,
                           fontStyle: FontStyle.italic,
-                          color: Colors.grey.shade700,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       SizedBox(height: 4),
@@ -129,7 +129,7 @@ class _CallFeedbackDialogState extends State<CallFeedbackDialog> {
                       '${widget.noteSummary!['total_notes']} note${widget.noteSummary!['total_notes'] == 1 ? '' : 's'}, ${widget.noteSummary!['total_words']} words',
                       style: TextStyle(
                         fontSize: 10,
-                        color: Colors.grey.shade600,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],

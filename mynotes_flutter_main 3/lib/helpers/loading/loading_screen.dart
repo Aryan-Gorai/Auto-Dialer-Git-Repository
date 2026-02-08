@@ -50,7 +50,7 @@ class LoadingScreen {
     final overlay = OverlayEntry(
       builder: (context) {
         return Material(
-          color: Colors.black.withAlpha(150),
+          color: Colors.black.withOpacity(0.6),
           child: Center(
             child: Container(
                 constraints: BoxConstraints(
@@ -59,8 +59,8 @@ class LoadingScreen {
                   minWidth: size.width * 0.5,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10.0),
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(16.0),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),

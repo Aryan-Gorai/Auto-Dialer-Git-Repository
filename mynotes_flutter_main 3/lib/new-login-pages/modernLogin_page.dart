@@ -3,7 +3,6 @@
 // register page. On success, navigates straight to the list view.
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/constants/routes.dart';
 import 'package:flutter_application_1/new-login-pages/my_button_login.dart';

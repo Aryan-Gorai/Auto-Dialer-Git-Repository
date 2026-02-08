@@ -252,7 +252,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
               ),
               child: Icon(
                 Icons.edit,
-                color: Color.fromRGBO(64, 105, 225, 1),
+                color: Theme.of(context).colorScheme.primary,
                 size: 24,
               ),
             ),
@@ -281,7 +281,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
               },
               icon: Icon(
                 Icons.analytics_outlined,
-                color: Color.fromRGBO(64, 105, 225, 1),
+                color: Theme.of(context).colorScheme.primary,
               ),
               tooltip: 'View Call Predictions',
             ),
@@ -308,7 +308,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Color.fromRGBO(64, 105, 225, 1), width: 2),
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
                   ),
                   filled: true,
                   fillColor: Colors.grey.shade50,
@@ -332,7 +332,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Color.fromRGBO(64, 105, 225, 1), width: 2),
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
                   ),
                   filled: true,
                   fillColor: Colors.grey.shade50,
@@ -380,14 +380,14 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                             Icon(
                               Icons.list,
                               size: 14,
-                              color: Color.fromRGBO(64, 105, 225, 1),
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                             SizedBox(width: 6),
                             Text(
                               list.toString(),
                               style: AppleTypography.withAppleFont(
                                 AppleTypography.body2.copyWith(
-                                  color: Color.fromRGBO(64, 105, 225, 1),
+                                  color: Theme.of(context).colorScheme.primary,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -422,7 +422,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Color.fromRGBO(64, 105, 225, 1),
+              backgroundColor: Theme.of(context).colorScheme.primary,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
@@ -647,7 +647,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(color: Color.fromRGBO(64, 105, 225, 1)),
+                  CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
                   SizedBox(width: 20),
                   Text('Loading contacts...', style: AppleTypography.withAppleFont(AppleTypography.body1)),
                 ],
@@ -768,7 +768,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(color: Color.fromRGBO(64, 105, 225, 1)),
+                  CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
                   SizedBox(width: 20),
                   Text('Uploading ${contactsToUpload.length} contacts...', style: AppleTypography.withAppleFont(AppleTypography.body1)),
                 ],
@@ -839,7 +839,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(color: Color.fromRGBO(64, 105, 225, 1)),
+                  CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
                   SizedBox(width: 20),
                   Text('Checking ${contacts.length} contacts...', style: AppleTypography.withAppleFont(AppleTypography.body1)),
                 ],
@@ -900,7 +900,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(color: Color.fromRGBO(64, 105, 225, 1)),
+                  CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
                   SizedBox(width: 20),
                   Text('Uploading ${contactsToUpload.length} contacts...', style: AppleTypography.withAppleFont(AppleTypography.body1)),
                 ],
@@ -950,7 +950,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromRGBO(248, 248, 250, 1),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       // Floating Action Button with Apple Liquid Glass style
       floatingActionButton: Container(
         decoration: BoxDecoration(
@@ -959,7 +959,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color.fromRGBO(64, 105, 225, 1),
+              Theme.of(context).colorScheme.primary,
               Color.fromRGBO(100, 140, 255, 1),
             ],
           ),
@@ -994,7 +994,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                     style: AppleTypography.withAppleFont(
                       AppleTypography.headline3.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Color.fromRGBO(64, 105, 225, 1),
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ),
@@ -1050,7 +1050,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           CircularProgressIndicator(
-                            color: Color.fromRGBO(64, 105, 225, 1),
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                           SizedBox(height: 16),
                           Text(
@@ -1098,7 +1098,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                         )
                       : RefreshIndicator(
                           onRefresh: _fetchContacts,
-                          color: Color.fromRGBO(64, 105, 225, 1),
+                          color: Theme.of(context).colorScheme.primary,
                           child: ListView.builder(
                             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             itemCount: filteredContacts.length,
@@ -1163,7 +1163,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                                                 begin: Alignment.topLeft,
                                                 end: Alignment.bottomRight,
                                                 colors: [
-                                                  Color.fromRGBO(64, 105, 225, 1),
+                                                  Theme.of(context).colorScheme.primary,
                                                   Color.fromRGBO(100, 140, 255, 1),
                                                 ],
                                               ),
@@ -1241,7 +1241,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                                                                   list.toString(),
                                                                   style: AppleTypography.withAppleFont(
                                                                     AppleTypography.caption.copyWith(
-                                                                      color: Color.fromRGBO(64, 105, 225, 1),
+                                                                      color: Theme.of(context).colorScheme.primary,
                                                                       fontWeight: FontWeight.w500,
                                                                     ),
                                                                   ),
