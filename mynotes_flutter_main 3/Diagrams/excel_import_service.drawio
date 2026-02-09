@@ -1,0 +1,162 @@
+<mxfile host="app.diagrams.net" agent="NEA Analysis" version="24.0.0">
+  <diagram name="Excel Import Service DFD" id="excel-dfd">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="t1" value="Data Flow Diagram: Excel Import Service" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#000000;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="450" y="20" width="400" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- External Entity: User -->
+        <mxCell id="e1" value="User" style="shape=rectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="250" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- External Entity: Device File System -->
+        <mxCell id="e2" value="Device&#xa;File System" style="shape=rectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Process 1.0: Pick and Parse -->
+        <mxCell id="p1" value="1.0&#xa;pickAndParseExcel()&#xa;(File Selection &amp;&#xa;Spreadsheet Parsing)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="280" y="80" width="220" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- Process 2.0: Parse CSV -->
+        <mxCell id="p2" value="2.0&#xa;_parseCsv()&#xa;(CSV Parsing)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="280" y="250" width="180" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Process 3.0: Check Duplicates -->
+        <mxCell id="p3" value="3.0&#xa;checkForDuplicates()&#xa;(Normalise &amp; Compare)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="600" y="80" width="200" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- Process 4.0: Show Duplicate Dialog -->
+        <mxCell id="p4" value="4.0&#xa;showDuplicateDialog()&#xa;(User Decision)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="600" y="250" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 5.0: Upload to Directory -->
+        <mxCell id="p5" value="5.0&#xa;uploadContactsToDirectory()&#xa;(Create/Overwrite Contacts)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="900" y="80" width="240" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- Process 6.0: Upload to List -->
+        <mxCell id="p6" value="6.0&#xa;uploadContactsToList()&#xa;(Add to Specific List)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="900" y="250" width="220" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 7.0: Format Phone -->
+        <mxCell id="p7" value="7.0&#xa;_formatPhoneNumber()&#xa;normalizePhone()" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="600" y="420" width="200" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: Contact Directories -->
+        <mxCell id="d1" value="D1 | Firestore 'Contact Directories' Collection" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="900" y="420" width="320" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: ExcelContact Model -->
+        <mxCell id="d2" value="D2 | ExcelContact Objects (name, phoneNumber)" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="280" y="380" width="280" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: DuplicateCheckResult -->
+        <mxCell id="d3" value="D3 | DuplicateCheckResult (new, duplicate, existing)" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="870" y="540" width="310" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Flows -->
+        <!-- User selects file -->
+        <mxCell id="f1" value="Selects spreadsheet&#xa;(.xlsx, .xls, .csv)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e1" target="p1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- File System -> Pick and Parse -->
+        <mxCell id="f2" value="File bytes&#xa;(FilePicker)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e2" target="p1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Pick and Parse -> CSV if csv -->
+        <mxCell id="f3" value="If .csv extension" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p1" target="p2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Parse results -> ExcelContact store -->
+        <mxCell id="f4" value="Parsed contacts&#xa;(name, phone)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p1" target="d2" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="260" y="140" />
+              <mxPoint x="260" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ExcelContact -> Check Duplicates -->
+        <mxCell id="f5" value="List&lt;ExcelContact&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="d2" target="p3" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="560" y="400" />
+              <mxPoint x="560" y="135" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Check Duplicates -> Contact Directories (read) -->
+        <mxCell id="f6" value="Query existing contacts&#xa;by normalised_phone" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p3" target="d1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Check Duplicates -> Duplicate Dialog -->
+        <mxCell id="f7" value="DuplicateCheckResult&#xa;(new + duplicate lists)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p3" target="p4" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Duplicate Dialog -> User -->
+        <mxCell id="f8" value="'skip' / 'overwrite'&#xa;decision" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;dashed=1;" edge="1" source="p4" target="e1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="700" y="350" />
+              <mxPoint x="200" y="350" />
+              <mxPoint x="200" y="280" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Upload to Directory -> Contact Directories -->
+        <mxCell id="f9" value="docRef.set() / docRef.update()&#xa;{contact_name, phone,&#xa;normalised_phone, user_id}" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p5" target="d1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Upload to List -> Contact Directories -->
+        <mxCell id="f10" value="addContactToList()&#xa;with listName" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p6" target="d1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Format Phone used by processes -->
+        <mxCell id="f11" value="Raw phone string" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p3" target="p7" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f12" value="Normalised phone&#xa;(last 9 digits)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;dashed=1;" edge="1" source="p7" target="p5" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Duplicate Dialog -> Upload -->
+        <mxCell id="f13" value="Approved contacts" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p4" target="p5" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="850" y="300" />
+              <mxPoint x="850" y="135" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -368,6 +368,12 @@
       "languageVersion": "3.3"
     },
     {
+      "name": "google_fonts",
+      "rootUri": "file:///Users/aryangorai/.pub-cache/hosted/pub.dev/google_fonts-6.3.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
       "name": "google_nav_bar",
       "rootUri": "file:///Users/aryangorai/.pub-cache/hosted/pub.dev/google_nav_bar-5.0.7",
       "packageUri": "lib/",

@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_application_1/models/app_user.dart';
 import 'package:flutter_application_1/models/team.dart';
 import 'package:flutter_application_1/services/team_service.dart';
-import 'package:flutter_application_1/utilities/apple_typography.dart';
+import 'package:flutter_application_1/theme/components/app_components.dart';
 
 /// Team management page for Team Owners.
 /// Shows: create team, join code, member list with remove action.
@@ -145,7 +145,7 @@ class _TeamManagementViewState extends State<TeamManagementView> {
                 );
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: AppDesignTokens.danger),
             child: const Text('Remove', style: TextStyle(color: Colors.white)),
           ),
         ],
@@ -169,11 +169,10 @@ class _TeamManagementViewState extends State<TeamManagementView> {
               padding: const EdgeInsets.only(bottom: 20),
               child: Text(
                 'Team Management',
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.headline3.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: AppDesignTokens.primary,
                 ),
               ),
             ),
@@ -198,21 +197,21 @@ class _TeamManagementViewState extends State<TeamManagementView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.group_add, size: 80, color: Colors.grey[400]),
+            Icon(Icons.group_add, size: 80, color: AppDesignTokens.neutral400),
             const SizedBox(height: 16),
             Text(
               'Create Your Team',
-              style: AppleTypography.withAppleFont(
-                AppleTypography.headline4.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppDesignTokens.neutral900,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Create a team and invite members using a unique join code.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+              style: TextStyle(color: AppDesignTokens.neutral600, fontSize: 14),
             ),
             const SizedBox(height: 32),
             TextField(
@@ -221,10 +220,10 @@ class _TeamManagementViewState extends State<TeamManagementView> {
                 labelText: 'Team Name',
                 hintText: 'e.g. Sales Team Alpha',
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
                 ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: AppDesignTokens.surface,
               ),
             ),
             const SizedBox(height: 20),
@@ -234,9 +233,9 @@ class _TeamManagementViewState extends State<TeamManagementView> {
               child: ElevatedButton(
                 onPressed: _createTeam,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  backgroundColor: AppDesignTokens.primary,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
                   ),
                 ),
                 child: const Text(
@@ -259,23 +258,31 @@ class _TeamManagementViewState extends State<TeamManagementView> {
         children: [
           // Team info card
           Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: Padding(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd)),
+            elevation: 0,
+            color: AppDesignTokens.surface,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+                boxShadow: AppDesignTokens.cardShadow,
+                color: AppDesignTokens.surface,
+              ),
+              child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.group, color: Theme.of(context).colorScheme.primary, size: 24),
+                      Icon(Icons.group, color: AppDesignTokens.primary, size: 24),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           _team!.teamName,
-                          style: AppleTypography.withAppleFont(
-                            AppleTypography.headline5.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppDesignTokens.neutral900,
                           ),
                         ),
                       ),
@@ -286,7 +293,7 @@ class _TeamManagementViewState extends State<TeamManagementView> {
                   Text(
                     'Join Code',
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: AppDesignTokens.neutral500,
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),
@@ -296,9 +303,9 @@ class _TeamManagementViewState extends State<TeamManagementView> {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.3)),
+                      color: AppDesignTokens.primarySoft,
+                      borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
+                      border: Border.all(color: AppDesignTokens.primary.withOpacity(0.3)),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -309,7 +316,8 @@ class _TeamManagementViewState extends State<TeamManagementView> {
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 8,
-                            color: Theme.of(context).colorScheme.primary,
+                            fontFamily: 'monospace',
+                            color: AppDesignTokens.primary,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -320,7 +328,7 @@ class _TeamManagementViewState extends State<TeamManagementView> {
                               const SnackBar(content: Text('Code copied to clipboard')),
                             );
                           },
-                          icon: Icon(Icons.copy, color: Theme.of(context).colorScheme.primary),
+                          icon: Icon(Icons.copy, color: AppDesignTokens.primary),
                           tooltip: 'Copy code',
                         ),
                       ],
@@ -337,36 +345,39 @@ class _TeamManagementViewState extends State<TeamManagementView> {
                 ],
               ),
             ),
+            ),
           ),
           const SizedBox(height: 16),
           // Members section
           Text(
             'Members (${_members.length})',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.headline6.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppDesignTokens.neutral900,
             ),
           ),
           const SizedBox(height: 8),
           if (_members.isEmpty)
             Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd)),
+              elevation: 0,
+              color: AppDesignTokens.surface,
               child: Padding(
                 padding: const EdgeInsets.all(32),
                 child: Center(
                   child: Column(
                     children: [
-                      Icon(Icons.person_add, size: 48, color: Colors.grey[400]),
+                      Icon(Icons.person_add, size: 48, color: AppDesignTokens.neutral400),
                       const SizedBox(height: 8),
                       Text(
                         'No members yet',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                        style: TextStyle(color: AppDesignTokens.neutral600, fontSize: 16),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Share the join code above to invite team members.',
-                        style: TextStyle(color: Colors.grey[500], fontSize: 13),
+                        style: TextStyle(color: AppDesignTokens.neutral500, fontSize: 13),
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -378,32 +389,34 @@ class _TeamManagementViewState extends State<TeamManagementView> {
             ...List.generate(_members.length, (i) {
               final member = _members[i];
               return Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm)),
                 margin: const EdgeInsets.only(bottom: 8),
+                elevation: 0,
+                color: AppDesignTokens.surface,
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                    backgroundColor: AppDesignTokens.primarySoft,
                     backgroundImage: member.photoUrl.isNotEmpty
                         ? NetworkImage(member.photoUrl)
                         : null,
                     child: member.photoUrl.isEmpty
                         ? Text(
                             (member.name.isNotEmpty ? member.name[0] : member.email[0]).toUpperCase(),
-                            style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+                            style: TextStyle(fontWeight: FontWeight.bold, color: AppDesignTokens.primary),
                           )
                         : null,
                   ),
                   title: Text(
                     member.name.isNotEmpty ? member.name : 'Unnamed',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    style: TextStyle(fontWeight: FontWeight.w600, color: AppDesignTokens.neutral900),
                   ),
                   subtitle: Text(
                     member.email,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                    style: TextStyle(color: AppDesignTokens.neutral500, fontSize: 13),
                   ),
                   trailing: IconButton(
                     onPressed: () => _confirmRemoveMember(member),
-                    icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+                    icon: Icon(Icons.remove_circle_outline, color: AppDesignTokens.danger),
                     tooltip: 'Remove member',
                   ),
                 ),

@@ -1,0 +1,168 @@
+<mxfile host="app.diagrams.net" agent="NEA Analysis" version="24.0.0">
+  <diagram name="Contact Priority Queue DFD" id="priority-queue-dfd">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="t1" value="Data Flow Diagram: Contact Priority Queue (Min-Heap)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#000000;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="550" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- External Entity: User -->
+        <mxCell id="e1" value="User" style="shape=rectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="250" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- External Entity: List View UI -->
+        <mxCell id="e2" value="List View&#xa;(Auto-Queue UI)" style="shape=rectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="100" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Process 1.0: Calculate Priority -->
+        <mxCell id="p1" value="1.0&#xa;calculatePriority()&#xa;(Weighted Scoring&#xa;per Contact)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="300" y="80" width="200" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- Process 2.0: Build Priority Queue -->
+        <mxCell id="p2" value="2.0&#xa;buildPriorityQueue()&#xa;(Iterate All Contacts,&#xa;Insert into Heap)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="300" y="260" width="220" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- Process 3.0: Insert (Bubble Up) -->
+        <mxCell id="p3" value="3.0&#xa;insert()&#xa;+ _bubbleUp()&#xa;O(log n)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="640" y="80" width="160" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 4.0: Extract Min (Bubble Down) -->
+        <mxCell id="p4" value="4.0&#xa;extractMin()&#xa;+ _bubbleDown()&#xa;O(log n)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="640" y="240" width="160" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 5.0: To Sorted List -->
+        <mxCell id="p5" value="5.0&#xa;toSortedList()&#xa;(Extract All in&#xa;Priority Order)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="640" y="400" width="180" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 6.0: Weight Factors -->
+        <mxCell id="p6" value="6.0&#xa;Priority Factors&#xa;(daysSinceCall: 30%,&#xa;successRate: 25%,&#xa;avgRating: 20%,&#xa;attempts: 15%,&#xa;daysSinceSuccess: 10%)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="950" y="80" width="220" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: call_history -->
+        <mxCell id="d1" value="D1 | Firestore 'call_history' Collection" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="280" y="440" width="260" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: user_settings -->
+        <mxCell id="d2" value="D2 | Firestore 'user_settings' (auto_queue_weights)" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="920" y="280" width="300" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: Heap Array -->
+        <mxCell id="d3" value="D3 | Binary Min-Heap Array (PrioritizedContact objects)" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="600" y="540" width="340" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Flows -->
+        <mxCell id="f1" value="Enable auto-queue,&#xa;configure weights" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e1" target="e2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f2" value="List of contacts,&#xa;userId" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e2" target="p2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Build Queue -> Calculate Priority -->
+        <mxCell id="f3" value="Each contact&#xa;+ call history" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p2" target="p1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Calculate Priority -> Weight Factors -->
+        <mxCell id="f4" value="Raw metrics&#xa;(days, rate,&#xa;rating, attempts)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p1" target="p6" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Weight Factors -> Calculate Priority -->
+        <mxCell id="f5" value="Weighted priority&#xa;score (0-100)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;dashed=1;" edge="1" source="p6" target="p1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1060" y="230" />
+              <mxPoint x="400" y="230" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Calculate Priority -> call_history -->
+        <mxCell id="f6" value="Query by phone&#xa;number" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p1" target="d1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="260" y="135" />
+              <mxPoint x="260" y="460" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Weight Factors -> user_settings -->
+        <mxCell id="f7" value="Load/save custom&#xa;weights" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p6" target="d2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Build Queue -> Insert -->
+        <mxCell id="f8" value="PrioritizedContact&#xa;(contactData, score)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p2" target="p3" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="600" y="315" />
+              <mxPoint x="600" y="130" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Insert -> Heap -->
+        <mxCell id="f9" value="Add to end,&#xa;bubble up" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p3" target="d3" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Heap -> Extract Min -->
+        <mxCell id="f10" value="Remove root,&#xa;swap last,&#xa;bubble down" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="d3" target="p4" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="770" y="540" />
+              <mxPoint x="850" y="540" />
+              <mxPoint x="850" y="290" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Extract Min -> UI -->
+        <mxCell id="f11" value="Next most urgent&#xa;contact to call" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;dashed=1;" edge="1" source="p4" target="e2" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="350" />
+              <mxPoint x="200" y="350" />
+              <mxPoint x="200" y="130" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- To Sorted List -> UI -->
+        <mxCell id="f12" value="Full ordered list&#xa;of contacts" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;dashed=1;" edge="1" source="p5" target="e2" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="730" y="510" />
+              <mxPoint x="190" y="510" />
+              <mxPoint x="190" y="160" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Heap -> To Sorted -->
+        <mxCell id="f13" value="Copy heap,&#xa;extract all" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="d3" target="p5" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

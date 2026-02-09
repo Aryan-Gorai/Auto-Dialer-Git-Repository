@@ -1,0 +1,177 @@
+<mxfile host="app.diagrams.net" agent="NEA Analysis" version="24.0.0">
+  <diagram name="Call Cycle Service DFD" id="call-cycle-dfd">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="t1" value="Data Flow Diagram: Call Cycle Service" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#000000;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="20" width="400" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- External Entity: User -->
+        <mxCell id="e1" value="User" style="shape=rectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="300" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- External Entity: List View UI -->
+        <mxCell id="e2" value="List View&#xa;(UI Layer)" style="shape=rectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Process 1.0: Start Cycle -->
+        <mxCell id="p1" value="1.0&#xa;startCycle()&#xa;(Initiate List Cycle)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="300" y="80" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 2.0: Record Call Dialog -->
+        <mxCell id="p2" value="2.0&#xa;recordCallDialogShown()&#xa;(Log Intent)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="300" y="220" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 3.0: Record Dial/Cancel -->
+        <mxCell id="p3" value="3.0&#xa;recordDialPressed() /&#xa;recordDialCancelled()&#xa;(Update Intent)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="300" y="370" width="200" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- Process 4.0: End Cycle -->
+        <mxCell id="p4" value="4.0&#xa;endCycle()&#xa;(Complete Cycle)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="300" y="530" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 5.0: Reconcile Cycle -->
+        <mxCell id="p5" value="5.0&#xa;reconcileCycle()&#xa;(Match Intents to Calls)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="700" y="300" width="220" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- Process 6.0: Scoring -->
+        <mxCell id="p6" value="6.0&#xa;Match Scoring&#xa;(_timeScore, _orderScore,&#xa;_directionScore)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="300" width="220" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- Process 7.0: Recompute Aggregates -->
+        <mxCell id="p7" value="7.0&#xa;_recomputeCycleAggregates()&#xa;(Update Statistics)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="700" y="500" width="220" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: list_cycles -->
+        <mxCell id="d1" value="D1 | Firestore 'list_cycles' Collection" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="620" y="80" width="280" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: cycle_events -->
+        <mxCell id="d2" value="D2 | Firestore 'cycle_events' Subcollection" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="620" y="170" width="300" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: call_history -->
+        <mxCell id="d3" value="D3 | Firestore 'call_history' Collection" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="170" width="280" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: lists_collection -->
+        <mxCell id="d4" value="D4 | Firestore 'lists_collection'" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="620" y="680" width="280" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Flows -->
+        <mxCell id="f1" value="Start/stop cycle,&#xa;dial/cancel contact" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e1" target="e2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f2" value="listName,&#xa;totalContacts" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e2" target="p1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f3" value="contactDocId,&#xa;contactName, phone" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e2" target="p2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f4" value="cycleId, eventId,&#xa;user action" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e2" target="p3" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f5" value="Cycle document&#xa;(status, stats)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p1" target="d1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f6" value="Event document&#xa;(action: shown)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p2" target="d2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f7" value="Update action:&#xa;dialed/cancelled" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p3" target="d2" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="570" y="425" />
+              <mxPoint x="570" y="190" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="f8" value="completedContacts,&#xa;completion_pct" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p4" target="d1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="570" y="580" />
+              <mxPoint x="570" y="100" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Reconcile reads intents and call history -->
+        <mxCell id="f9" value="Unmatched intents&#xa;(action=dialed)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="d2" target="p5" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f10" value="Unlinked call&#xa;history records" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="d3" target="p5" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Reconcile -> Scoring -->
+        <mxCell id="f11" value="Phone, time,&#xa;order, direction" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p5" target="p6" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Scoring -> Reconcile (match score) -->
+        <mxCell id="f12" value="match_score&#xa;(weighted composite)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;dashed=1;" edge="1" source="p6" target="p5" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1160" y="440" />
+              <mxPoint x="810" y="440" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Reconcile -> Recompute -->
+        <mxCell id="f13" value="Linked intent-call&#xa;pairs" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p5" target="p7" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Recompute -> list_cycles -->
+        <mxCell id="f14" value="Updated stats&#xa;(duration, outgoing,&#xa;missed, cancelled)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p7" target="d4" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Start Cycle -> lists_collection -->
+        <mxCell id="f15" value="Increment&#xa;cycle_initiated_count" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;dashed=1;" edge="1" source="p1" target="d4" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="80" />
+              <mxPoint x="400" y="700" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- End Cycle from UI -->
+        <mxCell id="f16" value="End cycle" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e2" target="p4" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="100" y="580" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

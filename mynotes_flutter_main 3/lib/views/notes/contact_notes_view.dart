@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
 import 'package:flutter_application_1/services/trie/trie.dart';
+import 'package:flutter_application_1/theme/components/app_components.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -300,7 +301,18 @@ class _ContactNotesViewState extends State<ContactNotesView> {
           // Contact info card
           Card(
             margin: const EdgeInsets.all(8.0),
-            child: Padding(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+            ),
+            color: AppDesignTokens.surface,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+                boxShadow: AppDesignTokens.cardShadow,
+                color: AppDesignTokens.surface,
+              ),
+              child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -315,21 +327,22 @@ class _ContactNotesViewState extends State<ContactNotesView> {
                   const SizedBox(height: 8),
                   Text(
                     'Phone: ${widget.contactPhoneNumber}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
-                      color: Colors.grey[700],
+                      color: AppDesignTokens.neutral600,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'List: ${widget.listName}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
-                      color: Colors.grey[700],
+                      color: AppDesignTokens.neutral600,
                     ),
                   ),
                 ],
               ),
+            ),
             ),
           ),
           
@@ -354,10 +367,19 @@ class _ContactNotesViewState extends State<ContactNotesView> {
                           )
                         : null,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
+                      borderSide: BorderSide(color: AppDesignTokens.neutral300),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
+                      borderSide: BorderSide(color: AppDesignTokens.neutral300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
+                      borderSide: const BorderSide(color: AppDesignTokens.primary, width: 2),
                     ),
                     filled: true,
-                    fillColor: Colors.grey[50],
+                    fillColor: AppDesignTokens.neutral50,
                   ),
                 ),
                 
@@ -366,16 +388,10 @@ class _ContactNotesViewState extends State<ContactNotesView> {
                   Container(
                     margin: const EdgeInsets.only(top: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+                      color: AppDesignTokens.surface,
+                      border: Border.all(color: AppDesignTokens.neutral300),
+                      borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
+                      boxShadow: AppDesignTokens.softShadow,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -386,7 +402,7 @@ class _ContactNotesViewState extends State<ContactNotesView> {
                             'Suggestions:',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[600],
+                              color: AppDesignTokens.neutral500,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -407,7 +423,7 @@ class _ContactNotesViewState extends State<ContactNotesView> {
                               ),
                               decoration: BoxDecoration(
                                 border: Border(
-                                  top: BorderSide(color: Colors.grey.shade200),
+                                  top: BorderSide(color: AppDesignTokens.neutral200),
                                 ),
                               ),
                               child: Row(
@@ -415,7 +431,7 @@ class _ContactNotesViewState extends State<ContactNotesView> {
                                   Icon(
                                     Icons.search,
                                     size: 16,
-                                    color: Colors.grey[600],
+                                    color: AppDesignTokens.neutral500,
                                   ),
                                   const SizedBox(width: 8),
                                   Expanded(
@@ -423,7 +439,7 @@ class _ContactNotesViewState extends State<ContactNotesView> {
                                       text: TextSpan(
                                         style: const TextStyle(
                                           fontSize: 14,
-                                          color: Colors.black87,
+                                          color: AppDesignTokens.neutral900,
                                         ),
                                         children: _highlightMatch(
                                           suggestion,
@@ -449,7 +465,7 @@ class _ContactNotesViewState extends State<ContactNotesView> {
                       'Found ${filteredNotes.length} note${filteredNotes.length == 1 ? '' : 's'}',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey[600],
+                        color: AppDesignTokens.neutral500,
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -487,14 +503,14 @@ class _ContactNotesViewState extends State<ContactNotesView> {
           // Notes list (filtered by search query)
           Expanded(
             child: isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator(color: AppDesignTokens.primary))
                 : filteredNotes.isEmpty
                     ? Center(
                         child: Text(
                           _searchQuery.isEmpty
                               ? 'No notes yet. Add your first note!'
                               : 'No notes match your search.',
-                          style: TextStyle(color: Colors.grey[600]),
+                          style: const TextStyle(color: AppDesignTokens.neutral500),
                         ),
                       )
                     : ListView.builder(
@@ -512,8 +528,11 @@ class _ContactNotesViewState extends State<ContactNotesView> {
                               vertical: 4.0,
                             ),
                             // Add color highlight for call feedback notes
-                            color: (isCallFeedback || hasFeedback) ? Theme.of(context).colorScheme.primary.withOpacity(0.1) : Colors.white,
-                            elevation: (isCallFeedback || hasFeedback) ? 3 : 1,
+                            color: (isCallFeedback || hasFeedback) ? AppDesignTokens.primarySoft : AppDesignTokens.surface,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+                            ),
                             child: Padding(
                               padding: const EdgeInsets.all(12.0),
                               child: Column(
@@ -529,9 +548,9 @@ class _ContactNotesViewState extends State<ContactNotesView> {
                                           children: [
                                             Text(
                                               formatTimestamp(note['timestamp']),
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                 fontSize: 14,
-                                                color: Colors.grey[600],
+                                                color: AppDesignTokens.neutral500,
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
@@ -567,7 +586,7 @@ class _ContactNotesViewState extends State<ContactNotesView> {
                                       IconButton(
                                         icon: const Icon(Icons.delete, size: 20),
                                         onPressed: () => deleteNote(note['id']),
-                                        color: Colors.red[300],
+                                        color: AppDesignTokens.danger,
                                         padding: EdgeInsets.zero,
                                         constraints: const BoxConstraints(),
                                       ),
@@ -582,8 +601,8 @@ class _ContactNotesViewState extends State<ContactNotesView> {
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
                                       decoration: BoxDecoration(
-                                        border: Border.all(color: Colors.grey.shade300),
-                                        borderRadius: BorderRadius.circular(4.0),
+                                        border: Border.all(color: AppDesignTokens.neutral300),
+                                        borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
                                       ),
                                   child: _buildNoteContent(note),
                                     ),
@@ -606,6 +625,8 @@ class _ContactNotesViewState extends State<ContactNotesView> {
           );
           launchUrl(launchUri);
         },
+        backgroundColor: AppDesignTokens.primary,
+        foregroundColor: Colors.white,
         child: const Icon(Icons.call),
         tooltip: 'Call Contact',
       ),
@@ -672,7 +693,7 @@ class _ContactNotesViewState extends State<ContactNotesView> {
             note['note_text'] ?? 'Call initiated',
             style: TextStyle(
               fontSize: 16,
-              color: isCallFeedback ? Theme.of(context).colorScheme.primary : Colors.black87,
+              color: isCallFeedback ? AppDesignTokens.primary : AppDesignTokens.neutral900,
               fontWeight: isCallFeedback ? FontWeight.w500 : FontWeight.normal,
             ),
           ),
@@ -699,7 +720,7 @@ class _ContactNotesViewState extends State<ContactNotesView> {
           const Icon(
             Icons.edit,
             size: 16,
-            color: Colors.grey,
+            color: AppDesignTokens.neutral400,
           ),
         ],
       );
@@ -726,7 +747,7 @@ class _ContactNotesViewState extends State<ContactNotesView> {
         text: text.substring(0, query.length),
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: Theme.of(context).colorScheme.primary,
+          color: AppDesignTokens.primary,
         ),
       ),
       TextSpan(

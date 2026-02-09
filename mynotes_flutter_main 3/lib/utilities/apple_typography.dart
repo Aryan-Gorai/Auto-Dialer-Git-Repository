@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 
-/// Utility class for consistent Apple-style typography throughout the app
+/// Utility class for consistent typography throughout the app.
+/// Uses Inter font for a clean, professional, cross-platform look.
 class AppleTypography {
   static String get fontFamily {
-    // Use San Francisco font family for Apple platforms
-    if (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS) {
-      return '.SF UI Text'; // San Francisco system font
-    }
-    return '.SF UI Text'; // Use Apple font for all platforms for consistency
+    return 'Inter';
   }
   
   /// Standard text styles with Apple font

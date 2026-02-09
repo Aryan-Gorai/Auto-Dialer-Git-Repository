@@ -8,7 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
-import 'package:flutter_application_1/utilities/apple_typography.dart';
+import 'package:flutter_application_1/theme/components/app_components.dart';
 
 class CallHistoryView extends StatefulWidget {
   const CallHistoryView({Key? key}) : super(key: key);
@@ -177,19 +177,19 @@ class _CallHistoryViewState extends State<CallHistoryView> {
     switch (callType) {
       case 'Incoming':
         icon = answered ? Icons.call_received : Icons.call_missed;
-        color = answered ? Colors.green : Colors.red;
+        color = answered ? AppDesignTokens.success : AppDesignTokens.danger;
         break;
       case 'Outgoing':
         icon = Icons.call_made;
-        color = Colors.green;
+        color = AppDesignTokens.success;
         break;
       case 'Missed':
         icon = Icons.call_missed;
-        color = Colors.red;
+        color = AppDesignTokens.danger;
         break;
       default:
         icon = Icons.call;
-        color = Colors.grey;
+        color = AppDesignTokens.neutral400;
     }
 
     return Icon(icon, color: color, size: 16);
@@ -199,19 +199,19 @@ class _CallHistoryViewState extends State<CallHistoryView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Call History',
-          style: AppleTypography.withAppleFont(
-            AppleTypography.headline5.copyWith(
-              fontWeight: FontWeight.normal,
-            )
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.normal,
+            color: AppDesignTokens.neutral900,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppDesignTokens.surface,
         elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh, color: Theme.of(context).colorScheme.primary),
+            icon: const Icon(Icons.refresh, color: AppDesignTokens.primary),
             onPressed: _fetchCallHistory,
           ),
         ],
@@ -219,13 +219,12 @@ class _CallHistoryViewState extends State<CallHistoryView> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _callRecords.isEmpty
-              ? Center(
+              ? const Center(
                   child: Text(
                     'No call history found',
-                    style: AppleTypography.withAppleFont(
-                      AppleTypography.body1.copyWith(
-                        color: Colors.grey,
-                      )
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppDesignTokens.neutral500,
                     ),
                   ),
                 )
@@ -243,22 +242,22 @@ class _CallHistoryViewState extends State<CallHistoryView> {
     final normalized = _normalizePhone(call.address);
     final display = _directoryNameByPhone[normalized] ?? call.address;
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: Colors.grey.shade200, width: 1),
+          bottom: BorderSide(color: AppDesignTokens.neutral200, width: 1),
         ),
       ),
       child: ListTile(
         leading: Container(
           width: 50,
           height: 50,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.grey.shade300,
+            color: AppDesignTokens.neutral200,
           ),
           child: const Icon(
             Icons.person,
-            color: Colors.grey,
+            color: AppDesignTokens.neutral500,
             size: 24,
           ),
         ),
@@ -267,10 +266,10 @@ class _CallHistoryViewState extends State<CallHistoryView> {
             Expanded(
               child: Text(
                 display,
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.body1.copyWith(
-                    fontWeight: FontWeight.w600,
-                  )
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppDesignTokens.neutral900,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -279,8 +278,8 @@ class _CallHistoryViewState extends State<CallHistoryView> {
             const SizedBox(width: 8),
             Text(
               _formatTime(call.timestamp),
-              style: TextStyle(
-                color: Colors.grey.shade600,
+              style: const TextStyle(
+                color: AppDesignTokens.neutral600,
                 fontSize: 14,
               ),
             ),
@@ -292,8 +291,8 @@ class _CallHistoryViewState extends State<CallHistoryView> {
             const SizedBox(width: 6),
             Text(
               _formatDuration(call.duration),
-              style: TextStyle(
-                color: Colors.grey.shade600,
+              style: const TextStyle(
+                color: AppDesignTokens.neutral600,
                 fontSize: 14,
               ),
             ),
@@ -303,13 +302,13 @@ class _CallHistoryViewState extends State<CallHistoryView> {
           icon: Container(
             width: 36,
             height: 36,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.green.shade100,
+              color: AppDesignTokens.successSoft,
             ),
             child: const Icon(
               Icons.call,
-              color: Colors.green,
+              color: AppDesignTokens.success,
               size: 20,
             ),
           ),

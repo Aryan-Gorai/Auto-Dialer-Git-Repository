@@ -7,6 +7,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/helpers/loading/loading_screen_controller.dart';
+import 'package:flutter_application_1/theme/components/app_components.dart';
 
 class LoadingScreen {
   factory LoadingScreen() => _shared;
@@ -59,8 +60,9 @@ class LoadingScreen {
                   minWidth: size.width * 0.5,
                 ),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(16.0),
+                  color: AppDesignTokens.surface,
+                  borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg),
+                  boxShadow: AppDesignTokens.elevatedShadow,
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -70,7 +72,7 @@ class LoadingScreen {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const SizedBox(height: 10),
-                        const CircularProgressIndicator(),
+                        const CircularProgressIndicator(color: AppDesignTokens.primary),
                         const SizedBox(height: 20),
                         StreamBuilder(
                           stream: _text.stream,
@@ -79,6 +81,7 @@ class LoadingScreen {
                               return Text(
                                 snapshot.data as String,
                                 textAlign: TextAlign.center,
+                                style: const TextStyle(color: AppDesignTokens.neutral900),
                               );
                             } else {
                               return Container();

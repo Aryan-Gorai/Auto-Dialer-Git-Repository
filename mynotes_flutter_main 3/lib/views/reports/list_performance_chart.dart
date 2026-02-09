@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
 import 'package:flutter_application_1/theme/app_colors.dart';
-import 'package:flutter_application_1/utilities/apple_typography.dart';
+import 'package:flutter_application_1/theme/components/app_components.dart';
 import 'package:intl/intl.dart';
 
 class ListPerformanceChart extends StatefulWidget {
@@ -291,20 +291,18 @@ class _ListPerformanceChartState extends State<ListPerformanceChart> {
           // Title
           Text(
             'List Performance',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.headline5.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: AppDesignTokens.neutral800,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'View detailed cycle statistics for each list',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.body2.copyWith(
-                color: Colors.grey[600],
-              ),
+            style: TextStyle(
+              fontSize: 14,
+              color: AppDesignTokens.neutral600,
             ),
           ),
           const SizedBox(height: 24),
@@ -314,11 +312,10 @@ class _ListPerformanceChartState extends State<ListPerformanceChart> {
             children: [
               Text(
                 'Choose List:',
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.body1.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey[700],
-                  ),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppDesignTokens.neutral700,
                 ),
               ),
               const SizedBox(width: 16),
@@ -361,7 +358,7 @@ class _ListPerformanceChartState extends State<ListPerformanceChart> {
                 padding: const EdgeInsets.all(40.0),
                 child: Text(
                   'Please select a list to view cycle data',
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: TextStyle(color: AppDesignTokens.neutral600),
                 ),
               ),
             )
@@ -371,7 +368,7 @@ class _ListPerformanceChartState extends State<ListPerformanceChart> {
                 padding: const EdgeInsets.all(40.0),
                 child: Text(
                   'No cycles found for "$_selectedList"',
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: TextStyle(color: AppDesignTokens.neutral600),
                 ),
               ),
             )
@@ -389,8 +386,8 @@ class _ListPerformanceChartState extends State<ListPerformanceChart> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppDesignTokens.neutral300),
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -409,11 +406,10 @@ class _ListPerformanceChartState extends State<ListPerformanceChart> {
               children: [
                 Text(
                   'Cycle ${cycle.cycleNumber}',
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.subtitle1.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.coral,
-                    ),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.coral,
                   ),
                 ),
               ],
@@ -446,11 +442,10 @@ class _ListPerformanceChartState extends State<ListPerformanceChart> {
                 // Total Call Statistics
                 Text(
                   'Total Call Statistics:',
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.subtitle2.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
-                    ),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppDesignTokens.neutral800,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -461,7 +456,7 @@ class _ListPerformanceChartState extends State<ListPerformanceChart> {
                     padding: const EdgeInsets.only(left: 16),
                     child: Text(
                       'No calls in this cycle',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                      style: TextStyle(color: AppDesignTokens.neutral600, fontSize: 14),
                     ),
                   )
                 else
@@ -482,21 +477,19 @@ class _ListPerformanceChartState extends State<ListPerformanceChart> {
           width: 140,
           child: Text(
             label,
-            style: AppleTypography.withAppleFont(
-              AppleTypography.body2.copyWith(
-                color: Colors.grey[700],
-                fontWeight: FontWeight.w600,
-              ),
+            style: TextStyle(
+              fontSize: 14,
+              color: AppDesignTokens.neutral700,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: AppleTypography.withAppleFont(
-              AppleTypography.body2.copyWith(
-                color: Colors.grey[900],
-              ),
+            style: TextStyle(
+              fontSize: 14,
+              color: AppDesignTokens.neutral900,
             ),
           ),
         ),
@@ -520,38 +513,35 @@ class _ListPerformanceChartState extends State<ListPerformanceChart> {
           Icon(
             event.wasAnswered ? Icons.arrow_forward : Icons.arrow_forward_outlined,
             size: 16,
-            color: event.wasAnswered ? Colors.green : Colors.red,
+            color: event.wasAnswered ? AppDesignTokens.success : AppDesignTokens.danger,
           ),
           const SizedBox(width: 8),
           // Contact name only (no phone number)
           Expanded(
             child: Text(
               event.contactName,
-              style: AppleTypography.withAppleFont(
-                AppleTypography.body2.copyWith(
-                  color: event.wasAnswered ? Colors.green[700] : Colors.red[700],
-                ),
+              style: TextStyle(
+                fontSize: 14,
+                color: event.wasAnswered ? AppDesignTokens.successDark : AppDesignTokens.dangerLight,
               ),
             ),
           ),
           // Duration
           Text(
             durationText,
-            style: AppleTypography.withAppleFont(
-              AppleTypography.caption.copyWith(
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w600,
-              ),
+            style: TextStyle(
+              fontSize: 12,
+              color: AppDesignTokens.neutral600,
+              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(width: 12),
           // Time
           Text(
             DateFormat('h:mm a').format(event.timestamp),
-            style: AppleTypography.withAppleFont(
-              AppleTypography.caption.copyWith(
-                color: Colors.grey[600],
-              ),
+            style: TextStyle(
+              fontSize: 12,
+              color: AppDesignTokens.neutral600,
             ),
           ),
         ],

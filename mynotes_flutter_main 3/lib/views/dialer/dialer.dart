@@ -18,7 +18,7 @@ import 'package:flutter_application_1/services/priority_queue/contact_priority_q
 import 'package:flutter_application_1/views/list/firebase_services.dart';
 import 'package:flutter_application_1/views/notes/contact_notes_view.dart';
 import 'package:flutter_application_1/utilities/dialogs/call_feedback_dialog.dart';
-import 'package:flutter_application_1/utilities/apple_typography.dart';
+import 'package:flutter_application_1/theme/components/app_components.dart';
 
 
 class ImgSample {
@@ -36,7 +36,7 @@ class MyStringsSample {
 }
 
 class MyColorsSample {
-  static const Color accent = Colors.blue; // Replace with your desired color
+  static const Color accent = AppDesignTokens.primary; // Replace with your desired color
 }
 
 
@@ -325,7 +325,7 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
             builder: (context) => AlertDialog(
               title: Row(
                 children: [
-                  Icon(Icons.restore, color: Colors.blue),
+                  Icon(Icons.restore, color: AppDesignTokens.primary),
                   SizedBox(width: 8),
                   Text('Resume Call Cycle?'),
                 ],
@@ -344,9 +344,9 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
                   Container(
                     padding: EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: (wasPaused ? Colors.orange : Colors.blue).shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: (wasPaused ? Colors.orange : Colors.blue).shade200),
+                      color: wasPaused ? AppDesignTokens.warningSoft : AppDesignTokens.primarySoft,
+                      borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
+                      border: Border.all(color: wasPaused ? AppDesignTokens.warning.withOpacity(0.3) : AppDesignTokens.primary.withOpacity(0.3)),
                     ),
                     child: Column(
                       children: [
@@ -355,13 +355,13 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
                             padding: const EdgeInsets.only(bottom: 8.0),
                             child: Row(
                               children: [
-                                Icon(Icons.pause_circle, color: Colors.orange, size: 20),
+                                Icon(Icons.pause_circle, color: AppDesignTokens.warning, size: 20),
                                 SizedBox(width: 6),
                                 Text(
                                   'Paused',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.orange.shade900,
+                                    color: Color(0xFF7c2d12),
                                   ),
                                 ),
                               ],
@@ -374,14 +374,14 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
                               'Last position:',
                               style: TextStyle(
                                 fontWeight: FontWeight.w500,
-                                color: Colors.grey.shade700,
+                                color: AppDesignTokens.neutral700,
                               ),
                             ),
                             Text(
                               'Contact ${savedIndex + 1} of ${contactsData.length}',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: (wasPaused ? Colors.orange : Colors.blue).shade900,
+                                color: wasPaused ? Color(0xFF7c2d12) : AppDesignTokens.primaryDark,
                                 fontSize: 16,
                               ),
                             ),
@@ -393,7 +393,7 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
                             contactsData[savedIndex]['contact_name'],
                             style: TextStyle(
                               fontSize: 15,
-                              color: Colors.grey.shade800,
+                              color: AppDesignTokens.neutral800,
                             ),
                           ),
                         ],
@@ -403,7 +403,7 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
                   SizedBox(height: 12),
                   Text(
                     'Would you like to continue from where you left off?',
-                    style: TextStyle(color: Colors.grey.shade600),
+                    style: TextStyle(color: AppDesignTokens.neutral600),
                   ),
                 ],
               ),
@@ -414,7 +414,7 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
                   },
                   child: Text(
                     'Start Fresh',
-                    style: TextStyle(color: Colors.grey.shade600),
+                    style: TextStyle(color: AppDesignTokens.neutral600),
                   ),
                 ),
                 ElevatedButton(
@@ -422,7 +422,7 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
                     Navigator.of(context).pop(true);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: wasPaused ? Colors.orange : Colors.blue,
+                    backgroundColor: wasPaused ? AppDesignTokens.warning : AppDesignTokens.primary,
                   ),
                   child: Text('Resume'),
                 ),
@@ -589,12 +589,10 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
               Expanded(
                 child: Text(
                   label,
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.caption.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87,
-                      fontSize: 13,
-                    ),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: AppDesignTokens.neutral900,
+                    fontSize: 13,
                   ),
                 ),
               ),
@@ -606,12 +604,10 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
                 ),
                 child: Text(
                   '$percentage%',
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.caption.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: color,
-                      fontSize: 12,
-                    ),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: color,
+                    fontSize: 12,
                   ),
                 ),
               ),
@@ -961,7 +957,7 @@ class _DialerContactsViewState extends State<DialerContactsView> with WidgetsBin
 @override
 Widget build(BuildContext context) {
   return Scaffold(
-    backgroundColor: const Color.fromRGBO(248, 248, 250, 1),
+    backgroundColor: AppDesignTokens.scaffoldBg,
     body: SafeArea(
       child: Column(
         children: [
@@ -969,14 +965,8 @@ Widget build(BuildContext context) {
           Container(
             padding: const EdgeInsets.fromLTRB(16, 16, 20, 16),
             decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+              color: AppDesignTokens.surface,
+              boxShadow: AppDesignTokens.cardShadow,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -985,7 +975,7 @@ Widget build(BuildContext context) {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.arrow_back_ios),
-                      color: const Color.fromRGBO(64, 105, 225, 1),
+                      color: AppDesignTokens.primary,
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                     Expanded(
@@ -994,11 +984,10 @@ Widget build(BuildContext context) {
                         children: [
                           Text(
                             widget.listName,
-                            style: AppleTypography.withAppleFont(
-                              AppleTypography.headline4.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: const Color.fromRGBO(64, 105, 225, 1),
-                              ),
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: AppDesignTokens.primary,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -1006,8 +995,9 @@ Widget build(BuildContext context) {
                           const SizedBox(height: 2),
                           Text(
                             '${myTiles.length} contacts • Drag to reorder',
-                            style: AppleTypography.withAppleFont(
-                              AppleTypography.body2.copyWith(color: Colors.grey.shade600),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: AppDesignTokens.neutral600,
                             ),
                           ),
                         ],
@@ -1029,10 +1019,10 @@ Widget build(BuildContext context) {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppDesignTokens.surface,
                 border: Border(
                   bottom: BorderSide(
-                    color: Colors.grey.shade200,
+                    color: AppDesignTokens.neutral200,
                     width: 1,
                   ),
                 ),
@@ -1045,23 +1035,22 @@ Widget build(BuildContext context) {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color.fromRGBO(64, 105, 225, 0.1),
-                          borderRadius: BorderRadius.circular(10),
+                          color: AppDesignTokens.primarySoft,
+                          borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
                         ),
                         child: Icon(
                           Icons.settings,
-                          color: const Color.fromRGBO(64, 105, 225, 1),
+                          color: AppDesignTokens.primary,
                           size: 20,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Text(
                         'List Settings',
-                        style: AppleTypography.withAppleFont(
-                          AppleTypography.subtitle1.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade800,
-                          ),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppDesignTokens.neutral800,
                         ),
                       ),
                     ],
@@ -1071,7 +1060,7 @@ Widget build(BuildContext context) {
                     duration: const Duration(milliseconds: 300),
                     child: Icon(
                       Icons.keyboard_arrow_down,
-                      color: Colors.grey.shade600,
+                      color: AppDesignTokens.neutral600,
                     ),
                   ),
                 ],
@@ -1089,10 +1078,10 @@ Widget build(BuildContext context) {
                     maxHeight: MediaQuery.of(context).size.height * 0.55,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
+                    color: AppDesignTokens.neutral50,
                     border: Border(
                       bottom: BorderSide(
-                        color: Colors.grey.shade300,
+                        color: AppDesignTokens.neutral300,
                         width: 1,
                       ),
                     ),
@@ -1124,26 +1113,10 @@ Widget build(BuildContext context) {
                         child: Container(
                           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Colors.white.withOpacity(0.7),
-                                Colors.white.withOpacity(0.3),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.5),
-                              width: 1.5,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 10,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
+                            color: AppDesignTokens.surface,
+                            borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg),
+                            border: Border.all(color: AppDesignTokens.neutral200, width: 1),
+                            boxShadow: AppDesignTokens.cardShadow,
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1154,20 +1127,18 @@ Widget build(BuildContext context) {
                                   children: [
                                     Text(
                                       'Show feedback dialog',
-                                      style: AppleTypography.withAppleFont(
-                                        AppleTypography.subtitle1.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
-                                        ),
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppDesignTokens.neutral900,
                                       ),
                                     ),
                                     SizedBox(height: 4),
                                     Text(
                                       'Ask for feedback after each call',
-                                      style: AppleTypography.withAppleFont(
-                                        AppleTypography.body2.copyWith(
-                                          color: Colors.grey[600],
-                                        ),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: AppDesignTokens.neutral600,
                                       ),
                                     ),
                                   ],
@@ -1189,26 +1160,10 @@ Widget build(BuildContext context) {
                         child: Container(
                           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Colors.white.withOpacity(0.7),
-                                Colors.white.withOpacity(0.3),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.5),
-                              width: 1.5,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 10,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
+                            color: AppDesignTokens.surface,
+                            borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg),
+                            border: Border.all(color: AppDesignTokens.neutral200, width: 1),
+                            boxShadow: AppDesignTokens.cardShadow,
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1219,21 +1174,18 @@ Widget build(BuildContext context) {
                                   children: [
                                     Text(
                                       'Auto Queue',
-                                      style: AppleTypography.withAppleFont(
-                                        AppleTypography.subtitle1.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
-                                        ),
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppDesignTokens.neutral900,
                                       ),
                                     ),
                                     SizedBox(height: 4),
                                     Text(
                                       'Automatically reorder contacts in queue based on priority: ${ContactPriorityCalculator.getPriorityFactorsDescription(weights: _autoQueueWeights)}',
-                                      style: AppleTypography.withAppleFont(
-                                        AppleTypography.caption.copyWith(
-                                          color: Colors.grey[600],
-                                          fontSize: 11,
-                                        ),
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: AppDesignTokens.neutral600,
                                       ),
                                     ),
                                   ],
@@ -1255,26 +1207,10 @@ Widget build(BuildContext context) {
                           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
                           child: Container(
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  Colors.white.withOpacity(0.7),
-                                  Colors.white.withOpacity(0.3),
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.5),
-                                width: 1.5,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.08),
-                                  blurRadius: 8,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
+                              color: AppDesignTokens.surface,
+                              borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg),
+                              border: Border.all(color: AppDesignTokens.neutral200, width: 1),
+                              boxShadow: AppDesignTokens.softShadow,
                             ),
                             child: Column(
                               children: [
@@ -1296,21 +1232,18 @@ Widget build(BuildContext context) {
                                             children: [
                                               Text(
                                                 'Priority Weights',
-                                                style: AppleTypography.withAppleFont(
-                                                  AppleTypography.subtitle1.copyWith(
-                                                    fontWeight: FontWeight.w600,
-                                                    color: Colors.black87,
-                                                  ),
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: AppDesignTokens.neutral900,
                                                 ),
                                               ),
                                               SizedBox(height: 4),
                                               Text(
                                                 'Adjust how contacts are prioritised',
-                                                style: AppleTypography.withAppleFont(
-                                                  AppleTypography.caption.copyWith(
-                                                    color: Colors.grey[600],
-                                                    fontSize: 11,
-                                                  ),
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: AppDesignTokens.neutral600,
                                                 ),
                                               ),
                                             ],
@@ -1320,7 +1253,7 @@ Widget build(BuildContext context) {
                                           _weightsExpanded
                                               ? Icons.keyboard_arrow_up_rounded
                                               : Icons.keyboard_arrow_down_rounded,
-                                          color: Colors.grey[600],
+                                          color: AppDesignTokens.neutral600,
                                           size: 24,
                                         ),
                                       ],
@@ -1329,7 +1262,7 @@ Widget build(BuildContext context) {
                                 ),
                                 // Expandable slider content
                                 if (_weightsExpanded) ...[
-                                  Divider(height: 1, color: Colors.grey.withOpacity(0.2)),
+                                  Divider(height: 1, color: AppDesignTokens.neutral300.withOpacity(0.5)),
                                   Padding(
                                     padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
                                     child: Column(
@@ -1338,31 +1271,31 @@ Widget build(BuildContext context) {
                                           label: 'Time Since Last Call',
                                           key: 'days_since_call',
                                           icon: Icons.access_time_rounded,
-                                          color: Colors.blue,
+                                          color: AppDesignTokens.primary,
                                         ),
                                         _buildWeightSlider(
                                           label: 'Success Rate',
                                           key: 'success_rate',
                                           icon: Icons.check_circle_outline_rounded,
-                                          color: Colors.green,
+                                          color: AppDesignTokens.success,
                                         ),
                                         _buildWeightSlider(
                                           label: 'Call Ratings',
                                           key: 'avg_rating',
                                           icon: Icons.star_outline_rounded,
-                                          color: Colors.orange,
+                                          color: AppDesignTokens.warning,
                                         ),
                                         _buildWeightSlider(
                                           label: 'Relationship Depth',
                                           key: 'total_attempts',
                                           icon: Icons.people_outline_rounded,
-                                          color: Colors.purple,
+                                          color: AppDesignTokens.primary,
                                         ),
                                         _buildWeightSlider(
                                           label: 'Follow-up Urgency',
                                           key: 'days_since_success',
                                           icon: Icons.priority_high_rounded,
-                                          color: Colors.red,
+                                          color: AppDesignTokens.danger,
                                         ),
                                       ],
                                     ),
@@ -1380,17 +1313,16 @@ Widget build(BuildContext context) {
                                             child: Container(
                                               padding: EdgeInsets.symmetric(vertical: 10),
                                               decoration: BoxDecoration(
-                                                color: Colors.grey.withOpacity(0.15),
-                                                borderRadius: BorderRadius.circular(10),
+                                                color: AppDesignTokens.neutral300.withOpacity(0.4),
+                                                borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
                                               ),
                                               child: Center(
                                                 child: Text(
                                                   'Reset',
-                                                  style: AppleTypography.withAppleFont(
-                                                    AppleTypography.body2.copyWith(
-                                                      fontWeight: FontWeight.w500,
-                                                      color: Colors.grey[700],
-                                                    ),
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: AppDesignTokens.neutral700,
                                                   ),
                                                 ),
                                               ),
@@ -1420,25 +1352,18 @@ Widget build(BuildContext context) {
                                               padding: EdgeInsets.symmetric(vertical: 10),
                                               decoration: BoxDecoration(
                                                 gradient: LinearGradient(
-                                                  colors: [Colors.blue, Colors.blue.shade700],
+                                                  colors: [AppDesignTokens.primary, AppDesignTokens.primaryDark],
                                                 ),
-                                                borderRadius: BorderRadius.circular(10),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: Colors.blue.withOpacity(0.3),
-                                                    blurRadius: 6,
-                                                    offset: Offset(0, 2),
-                                                  ),
-                                                ],
+                                                borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
+                                                boxShadow: AppDesignTokens.softShadow,
                                               ),
                                               child: Center(
                                                 child: Text(
                                                   'Save & Apply',
-                                                  style: AppleTypography.withAppleFont(
-                                                    AppleTypography.body2.copyWith(
-                                                      fontWeight: FontWeight.w600,
-                                                      color: Colors.white,
-                                                    ),
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.white,
                                                   ),
                                                 ),
                                               ),
@@ -1459,26 +1384,10 @@ Widget build(BuildContext context) {
                         child: Container(
                           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Colors.white.withOpacity(0.7),
-                                Colors.white.withOpacity(0.3),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.5),
-                              width: 1.5,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 10,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
+                            color: AppDesignTokens.surface,
+                            borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg),
+                            border: Border.all(color: AppDesignTokens.neutral200, width: 1),
+                            boxShadow: AppDesignTokens.cardShadow,
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1489,20 +1398,18 @@ Widget build(BuildContext context) {
                                   children: [
                                     Text(
                                       'Auto-cycle to next contact',
-                                      style: AppleTypography.withAppleFont(
-                                        AppleTypography.subtitle1.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
-                                        ),
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppDesignTokens.neutral900,
                                       ),
                                     ),
                                     SizedBox(height: 4),
                                     Text(
                                       'Automatically dial next contact when you return',
-                                      style: AppleTypography.withAppleFont(
-                                        AppleTypography.body2.copyWith(
-                                          color: Colors.grey[600],
-                                        ),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: AppDesignTokens.neutral600,
                                       ),
                                     ),
                                   ],
@@ -1524,26 +1431,10 @@ Widget build(BuildContext context) {
                         child: Container(
                           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Colors.white.withOpacity(0.7),
-                                Colors.white.withOpacity(0.3),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.5),
-                              width: 1.5,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 10,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
+                            color: AppDesignTokens.surface,
+                            borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg),
+                            border: Border.all(color: AppDesignTokens.neutral200, width: 1),
+                            boxShadow: AppDesignTokens.cardShadow,
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1554,20 +1445,18 @@ Widget build(BuildContext context) {
                                   children: [
                                     Text(
                                       'Refresh Call Stats',
-                                      style: AppleTypography.withAppleFont(
-                                        AppleTypography.subtitle1.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
-                                        ),
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppDesignTokens.neutral900,
                                       ),
                                     ),
                                     SizedBox(height: 4),
                                     Text(
                                       'Sync with Mac call history',
-                                      style: AppleTypography.withAppleFont(
-                                        AppleTypography.body2.copyWith(
-                                          color: Colors.grey[600],
-                                        ),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: AppDesignTokens.neutral600,
                                       ),
                                     ),
                                   ],
@@ -1580,7 +1469,7 @@ Widget build(BuildContext context) {
                                       child: CircularProgressIndicator(strokeWidth: 2),
                                     )
                                   : IconButton(
-                                      icon: Icon(Icons.refresh, color: Color.fromRGBO(64, 105, 225, 1)),
+                                      icon: Icon(Icons.refresh, color: AppDesignTokens.primary),
                                       onPressed: _runReconciliation,
                                     ),
                             ],
@@ -1605,22 +1494,16 @@ Widget build(BuildContext context) {
                 end: Alignment.bottomRight,
                 colors: isPaused
                     ? [
-                        Colors.orange.shade400,
-                        Colors.orange.shade600,
+                        AppDesignTokens.warning.withOpacity(0.8),
+                        AppDesignTokens.warning,
                       ]
                     : [
-                        Colors.blue.shade400,
-                        Colors.blue.shade600,
+                        AppDesignTokens.primary.withOpacity(0.8),
+                        AppDesignTokens.primary,
                       ],
               ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: (isPaused ? Colors.orange : Colors.blue).withOpacity(0.3),
-                  blurRadius: 12,
-                  offset: Offset(0, 4),
-                ),
-              ],
+              borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg),
+              boxShadow: AppDesignTokens.softShadow,
             ),
             child: Column(
               children: [
@@ -1630,7 +1513,7 @@ Widget build(BuildContext context) {
                       padding: EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
                       ),
                       child: Icon(
                         isPaused ? Icons.pause_circle_filled : Icons.autorenew,
@@ -1691,12 +1574,12 @@ Widget build(BuildContext context) {
                     ),
                     SizedBox(height: 6),
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
                       child: LinearProgressIndicator(
                         value: contactsData.isEmpty ? 0 : (currentCallIndex + 1) / contactsData.length,
                         backgroundColor: Colors.white.withOpacity(0.3),
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          isPaused ? Colors.amber.shade300 : Colors.lightGreen.shade300,
+                          isPaused ? AppDesignTokens.warning.withOpacity(0.6) : AppDesignTokens.success.withOpacity(0.6),
                         ),
                         minHeight: 8,
                       ),
@@ -1733,11 +1616,11 @@ Widget build(BuildContext context) {
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green.shade500,
+                          backgroundColor: AppDesignTokens.success,
                           foregroundColor: Colors.white,
                           padding: EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
                           ),
                           elevation: 4,
                         ),
@@ -1755,18 +1638,17 @@ Widget build(BuildContext context) {
                         ),
                         label: Text(
                           'End Loop',
-                          style: AppleTypography.withAppleFont(
-                            AppleTypography.body1.copyWith(
-                              fontWeight: FontWeight.w600,
-                            )
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red.shade500,
+                          backgroundColor: AppDesignTokens.danger,
                           foregroundColor: Colors.white,
                           padding: EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
                           ),
                           elevation: 4,
                         ),
@@ -1786,13 +1668,14 @@ Widget build(BuildContext context) {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const CircularProgressIndicator(
-                            color: Color.fromRGBO(64, 105, 225, 1),
+                            color: AppDesignTokens.primary,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             'Loading contacts...',
-                            style: AppleTypography.withAppleFont(
-                              AppleTypography.body1.copyWith(color: Colors.grey.shade600),
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: AppDesignTokens.neutral600,
                             ),
                           ),
                         ],
@@ -1807,21 +1690,15 @@ Widget build(BuildContext context) {
                                 key: ValueKey(myTiles[i]),
                                 margin: const EdgeInsets.only(bottom: 10),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.04),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
+                                  color: AppDesignTokens.surface,
+                                  borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg),
+                                  boxShadow: AppDesignTokens.cardShadow,
                                 ),
                                 child: Material(
                                   color: Colors.transparent,
-                                  borderRadius: BorderRadius.circular(16),
+                                  borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg),
                                   child: InkWell(
-                                    borderRadius: BorderRadius.circular(16),
+                                    borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg),
                                     onTap: () {
                                       if (i < contactsData.length) {
                                         Navigator.of(context).push(
@@ -1845,10 +1722,10 @@ Widget build(BuildContext context) {
                                             child: Container(
                                               padding: const EdgeInsets.all(8),
                                               decoration: BoxDecoration(
-                                                color: Colors.grey.shade100,
-                                                borderRadius: BorderRadius.circular(8),
+                                                color: AppDesignTokens.neutral100,
+                                                borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
                                               ),
-                                              child: Icon(Icons.drag_handle, color: Colors.grey.shade600, size: 20),
+                                              child: Icon(Icons.drag_handle, color: AppDesignTokens.neutral600, size: 20),
                                             ),
                                           ),
                                           const SizedBox(width: 12),
@@ -1859,11 +1736,10 @@ Widget build(BuildContext context) {
                                               children: [
                                                 Text(
                                                   myTiles[i],
-                                                  style: AppleTypography.withAppleFont(
-                                                    AppleTypography.subtitle1.copyWith(
-                                                      fontWeight: FontWeight.w600,
-                                                      color: Colors.grey.shade800,
-                                                    ),
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: AppDesignTokens.neutral800,
                                                   ),
                                                   maxLines: 1,
                                                   overflow: TextOverflow.ellipsis,
@@ -1875,16 +1751,15 @@ Widget build(BuildContext context) {
                                                       Icon(
                                                         Icons.phone_outlined,
                                                         size: 14,
-                                                        color: Colors.grey.shade500,
+                                                        color: AppDesignTokens.neutral500,
                                                       ),
                                                       const SizedBox(width: 4),
                                                       Expanded(
                                                         child: Text(
                                                           contactsData[i]['contact_phone_number'] ?? '',
-                                                          style: AppleTypography.withAppleFont(
-                                                            AppleTypography.body2.copyWith(
-                                                              color: Colors.grey.shade600,
-                                                            ),
+                                                          style: TextStyle(
+                                                            fontSize: 14,
+                                                            color: AppDesignTokens.neutral600,
                                                           ),
                                                           maxLines: 1,
                                                           overflow: TextOverflow.ellipsis,
@@ -1899,12 +1774,12 @@ Widget build(BuildContext context) {
                                           // Action buttons
                                           Container(
                                             decoration: BoxDecoration(
-                                              color: const Color.fromRGBO(64, 105, 225, 0.1),
-                                              borderRadius: BorderRadius.circular(10),
+                                              color: AppDesignTokens.primarySoft,
+                                              borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
                                             ),
                                             child: IconButton(
                                               icon: const Icon(Icons.note_add),
-                                              color: const Color.fromRGBO(64, 105, 225, 1),
+                                              color: AppDesignTokens.primary,
                                               iconSize: 22,
                                               onPressed: () {
                                                 if (i < contactsData.length) {
@@ -1925,12 +1800,12 @@ Widget build(BuildContext context) {
                                           const SizedBox(width: 8),
                                           Container(
                                             decoration: BoxDecoration(
-                                              color: Colors.red.shade50,
-                                              borderRadius: BorderRadius.circular(10),
+                                              color: AppDesignTokens.dangerSoft,
+                                              borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
                                             ),
                                             child: IconButton(
                                               icon: const Icon(Icons.delete_outline),
-                                              color: Colors.red.shade400,
+                                              color: AppDesignTokens.danger,
                                               iconSize: 22,
                                               onPressed: () {
                                                 deleteSpecificContact(myTiles[i]);
@@ -1957,26 +1832,20 @@ Widget build(BuildContext context) {
                                 key: ValueKey(myTiles[i]),
                                 margin: const EdgeInsets.only(bottom: 10),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
+                                  color: AppDesignTokens.surface,
+                                  borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg),
                                   border: i == currentCallIndex 
-                                      ? Border.all(color: const Color.fromRGBO(64, 105, 225, 1), width: 3.0)
+                                      ? Border.all(color: AppDesignTokens.primary, width: 3.0)
                                       : null,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: i == currentCallIndex 
-                                          ? const Color.fromRGBO(64, 105, 225, 0.2)
-                                          : Colors.black.withOpacity(0.04),
-                                      blurRadius: i == currentCallIndex ? 12 : 8,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
+                                  boxShadow: i == currentCallIndex 
+                                      ? AppDesignTokens.coloredShadow
+                                      : AppDesignTokens.cardShadow,
                                 ),
                                 child: Material(
                                   color: Colors.transparent,
-                                  borderRadius: BorderRadius.circular(16),
+                                  borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg),
                                   child: InkWell(
-                                    borderRadius: BorderRadius.circular(16),
+                                    borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg),
                                     onTap: () {
                                       if (i < contactsData.length) {
                                         Navigator.of(context).push(
@@ -1999,25 +1868,24 @@ Widget build(BuildContext context) {
                                             Container(
                                               padding: const EdgeInsets.all(8),
                                               decoration: BoxDecoration(
-                                                color: const Color.fromRGBO(64, 105, 225, 0.15),
-                                                borderRadius: BorderRadius.circular(8),
+                                                color: AppDesignTokens.primarySoft,
+                                                borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
                                               ),
-                                              child: const Icon(Icons.call, color: Color.fromRGBO(64, 105, 225, 1), size: 20),
+                                              child: Icon(Icons.call, color: AppDesignTokens.primary, size: 20),
                                             )
                                           else
                                             Container(
                                               padding: const EdgeInsets.all(8),
                                               decoration: BoxDecoration(
-                                                color: Colors.grey.shade100,
-                                                borderRadius: BorderRadius.circular(8),
+                                                color: AppDesignTokens.neutral100,
+                                                borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
                                               ),
                                               child: Text(
                                                 '${i + 1}',
-                                                style: AppleTypography.withAppleFont(
-                                                  AppleTypography.body2.copyWith(
-                                                    fontWeight: FontWeight.w600,
-                                                    color: Colors.grey.shade600,
-                                                  ),
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: AppDesignTokens.neutral600,
                                                 ),
                                               ),
                                             ),
@@ -2029,13 +1897,12 @@ Widget build(BuildContext context) {
                                               children: [
                                                 Text(
                                                   myTiles[i],
-                                                  style: AppleTypography.withAppleFont(
-                                                    AppleTypography.subtitle1.copyWith(
-                                                      fontWeight: FontWeight.w600,
-                                                      color: i == currentCallIndex 
-                                                          ? const Color.fromRGBO(64, 105, 225, 1)
-                                                          : Colors.grey.shade800,
-                                                    ),
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: i == currentCallIndex 
+                                                        ? AppDesignTokens.primary
+                                                        : AppDesignTokens.neutral800,
                                                   ),
                                                   maxLines: 1,
                                                   overflow: TextOverflow.ellipsis,
@@ -2047,16 +1914,15 @@ Widget build(BuildContext context) {
                                                       Icon(
                                                         Icons.phone_outlined,
                                                         size: 14,
-                                                        color: Colors.grey.shade500,
+                                                        color: AppDesignTokens.neutral500,
                                                       ),
                                                       const SizedBox(width: 4),
                                                       Expanded(
                                                         child: Text(
                                                           contactsData[i]['contact_phone_number'] ?? '',
-                                                          style: AppleTypography.withAppleFont(
-                                                            AppleTypography.body2.copyWith(
-                                                              color: Colors.grey.shade600,
-                                                            ),
+                                                          style: TextStyle(
+                                                            fontSize: 14,
+                                                            color: AppDesignTokens.neutral600,
                                                           ),
                                                           maxLines: 1,
                                                           overflow: TextOverflow.ellipsis,
@@ -2071,12 +1937,12 @@ Widget build(BuildContext context) {
                                           // Note button only during call cycle
                                           Container(
                                             decoration: BoxDecoration(
-                                              color: const Color.fromRGBO(64, 105, 225, 0.1),
-                                              borderRadius: BorderRadius.circular(10),
+                                              color: AppDesignTokens.primarySoft,
+                                              borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
                                             ),
                                             child: IconButton(
                                               icon: const Icon(Icons.note_add),
-                                              color: const Color.fromRGBO(64, 105, 225, 1),
+                                              color: AppDesignTokens.primary,
                                               iconSize: 22,
                                               onPressed: () {
                                                 if (i < contactsData.length) {
@@ -2115,8 +1981,8 @@ Widget build(BuildContext context) {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          Colors.orange.shade500,
-                          Colors.orange.shade600,
+                          AppDesignTokens.warning,
+                          AppDesignTokens.warningDark,
                         ],
                       ),
                     ),
@@ -2131,7 +1997,7 @@ Widget build(BuildContext context) {
                           builder: (BuildContext context) {
                             return Container(
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: AppDesignTokens.surface,
                                 borderRadius: BorderRadius.only(
                                   topLeft: Radius.circular(24),
                                   topRight: Radius.circular(24),
@@ -2146,22 +2012,24 @@ Widget build(BuildContext context) {
                                     width: 40,
                                     height: 4,
                                     decoration: BoxDecoration(
-                                      color: Colors.grey.shade300,
+                                      color: AppDesignTokens.neutral300,
                                       borderRadius: BorderRadius.circular(2),
                                     ),
                                   ),
                                   SizedBox(height: 20),
                                   Text(
                                     'Add Contacts to List',
-                                    style: AppleTypography.withAppleFont(
-                                      AppleTypography.headline5.copyWith(fontWeight: FontWeight.bold),
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   SizedBox(height: 6),
                                   Text(
                                     'Choose how to add contacts to "${widget.listName}"',
-                                    style: AppleTypography.withAppleFont(
-                                      AppleTypography.body2.copyWith(color: Colors.grey.shade500),
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: AppDesignTokens.neutral500,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -2170,13 +2038,13 @@ Widget build(BuildContext context) {
                                     leading: Container(
                                       padding: EdgeInsets.all(10),
                                       decoration: BoxDecoration(
-                                        color: Colors.blue.shade100,
-                                        borderRadius: BorderRadius.circular(12),
+                                        color: AppDesignTokens.primarySoft,
+                                        borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
                                       ),
-                                      child: Icon(Icons.person_add, color: Colors.blue.shade700),
+                                      child: Icon(Icons.person_add, color: AppDesignTokens.primaryDark),
                                     ),
-                                    title: Text('Add Single Contact', style: AppleTypography.withAppleFont(AppleTypography.subtitle1.copyWith(fontWeight: FontWeight.w600))),
-                                    subtitle: Text('Pick one contact from your phone', style: AppleTypography.withAppleFont(AppleTypography.body2.copyWith(color: Colors.grey.shade500))),
+                                    title: Text('Add Single Contact', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                                    subtitle: Text('Pick one contact from your phone', style: TextStyle(fontSize: 14, color: AppDesignTokens.neutral500)),
                                     onTap: () => Navigator.pop(context, 'single'),
                                   ),
                                   SizedBox(height: 8),
@@ -2184,13 +2052,13 @@ Widget build(BuildContext context) {
                                     leading: Container(
                                       padding: EdgeInsets.all(10),
                                       decoration: BoxDecoration(
-                                        color: Colors.green.shade100,
-                                        borderRadius: BorderRadius.circular(12),
+                                        color: AppDesignTokens.successSoft,
+                                        borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
                                       ),
-                                      child: Icon(Icons.table_chart, color: Colors.green.shade700),
+                                      child: Icon(Icons.table_chart, color: Color(0xFF15803d)),
                                     ),
-                                    title: Text('Upload from Spreadsheet', style: AppleTypography.withAppleFont(AppleTypography.subtitle1.copyWith(fontWeight: FontWeight.w600))),
-                                    subtitle: Text('Import contacts from Excel or CSV file', style: AppleTypography.withAppleFont(AppleTypography.body2.copyWith(color: Colors.grey.shade500))),
+                                    title: Text('Upload from Spreadsheet', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                                    subtitle: Text('Import contacts from Excel or CSV file', style: TextStyle(fontSize: 14, color: AppDesignTokens.neutral500)),
                                     onTap: () => Navigator.pop(context, 'spreadsheet'),
                                   ),
                                   SizedBox(height: 8),
@@ -2198,32 +2066,33 @@ Widget build(BuildContext context) {
                                     leading: Container(
                                       padding: EdgeInsets.all(10),
                                       decoration: BoxDecoration(
-                                        color: Colors.purple.shade100,
-                                        borderRadius: BorderRadius.circular(12),
+                                        color: AppDesignTokens.primarySoft,
+                                        borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
                                       ),
-                                      child: Icon(Icons.folder_shared, color: Colors.purple.shade700),
+                                      child: Icon(Icons.folder_shared, color: AppDesignTokens.primaryDark),
                                     ),
-                                    title: Text('Upload from App Contact Directory', style: AppleTypography.withAppleFont(AppleTypography.subtitle1.copyWith(fontWeight: FontWeight.w600))),
-                                    subtitle: Text('Add contacts already in your directory', style: AppleTypography.withAppleFont(AppleTypography.body2.copyWith(color: Colors.grey.shade500))),
+                                    title: Text('Upload from App Contact Directory', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                                    subtitle: Text('Add contacts already in your directory', style: TextStyle(fontSize: 14, color: AppDesignTokens.neutral500)),
                                     onTap: () => Navigator.pop(context, 'directory'),
                                   ),
                                   SizedBox(height: 16),
                                   Container(
                                     padding: EdgeInsets.all(12),
                                     decoration: BoxDecoration(
-                                      color: Colors.blue.shade50,
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: Colors.blue.shade100),
+                                      color: AppDesignTokens.primarySoft,
+                                      borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+                                      border: Border.all(color: AppDesignTokens.primarySoft),
                                     ),
                                     child: Row(
                                       children: [
-                                        Icon(Icons.info_outline, color: Colors.blue.shade600, size: 18),
+                                        Icon(Icons.info_outline, color: AppDesignTokens.primary, size: 18),
                                         SizedBox(width: 10),
                                         Expanded(
                                           child: Text(
                                             'Spreadsheet columns: "Name" and "Phone" (.xlsx, .xls, .csv)',
-                                            style: AppleTypography.withAppleFont(
-                                              AppleTypography.caption.copyWith(color: Colors.blue.shade700),
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: AppDesignTokens.primaryDark,
                                             ),
                                           ),
                                         ),
@@ -2269,8 +2138,8 @@ Widget build(BuildContext context) {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          Colors.green.shade500,
-                          Colors.green.shade600,
+                          AppDesignTokens.success,
+                          AppDesignTokens.successDark,
                         ],
                       ),
                     ),
@@ -2300,8 +2169,8 @@ Widget build(BuildContext context) {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          const Color(0xFF6BB6FF),
-                          const Color(0xFF5AA8EE),
+                          AppDesignTokens.accentBlue,
+                          AppDesignTokens.accentBlue,
                         ],
                       ),
                     ),
@@ -2485,13 +2354,13 @@ Widget build(BuildContext context) {
           context: context,
           barrierDismissible: false,
           builder: (context) => Dialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg)),
             child: Padding(
               padding: EdgeInsets.all(20),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(color: Color.fromRGBO(64, 105, 225, 1)),
+                  CircularProgressIndicator(color: AppDesignTokens.primary),
                   SizedBox(width: 20),
                   Text('Checking ${contacts.length} contacts...'),
                 ],
@@ -2529,7 +2398,7 @@ Widget build(BuildContext context) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('No new contacts to import'),
-              backgroundColor: Colors.orange,
+              backgroundColor: AppDesignTokens.warning,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -2543,13 +2412,13 @@ Widget build(BuildContext context) {
           context: context,
           barrierDismissible: false,
           builder: (context) => Dialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg)),
             child: Padding(
               padding: EdgeInsets.all(20),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(color: Color.fromRGBO(64, 105, 225, 1)),
+                  CircularProgressIndicator(color: AppDesignTokens.primary),
                   SizedBox(width: 20),
                   Text('Adding ${contactsToUpload.length} contacts to ${widget.listName}...'),
                 ],
@@ -2574,7 +2443,7 @@ Widget build(BuildContext context) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Added $addedCount contact${addedCount == 1 ? '' : 's'} from spreadsheet to ${widget.listName}'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppDesignTokens.success,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -2585,7 +2454,7 @@ Widget build(BuildContext context) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to import spreadsheet: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppDesignTokens.danger,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -2604,13 +2473,13 @@ Widget build(BuildContext context) {
           context: context,
           barrierDismissible: false,
           builder: (context) => Dialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg)),
             child: Padding(
               padding: EdgeInsets.all(20),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(color: Color.fromRGBO(64, 105, 225, 1)),
+                  CircularProgressIndicator(color: AppDesignTokens.primary),
                   SizedBox(width: 20),
                   Text('Loading your contacts...'),
                 ],
@@ -2635,7 +2504,7 @@ Widget build(BuildContext context) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('No contacts found in your directory. Add contacts to your directory first.'),
-              backgroundColor: Colors.orange,
+              backgroundColor: AppDesignTokens.warning,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -2686,13 +2555,13 @@ Widget build(BuildContext context) {
           context: context,
           barrierDismissible: false,
           builder: (context) => Dialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg)),
             child: Padding(
               padding: EdgeInsets.all(20),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(color: Color.fromRGBO(64, 105, 225, 1)),
+                  CircularProgressIndicator(color: AppDesignTokens.primary),
                   SizedBox(width: 20),
                   Text('Adding ${selectedContacts.length} contacts to ${widget.listName}...'),
                 ],
@@ -2725,7 +2594,7 @@ Widget build(BuildContext context) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Added $addedCount contact${addedCount == 1 ? '' : 's'} to ${widget.listName}'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppDesignTokens.success,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -2736,7 +2605,7 @@ Widget build(BuildContext context) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to add contacts from directory'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppDesignTokens.danger,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -2837,12 +2706,7 @@ class _DirectoryContactSelectDialogState
             Container(
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Color.fromRGBO(64, 105, 225, 1),
-                    Color.fromRGBO(100, 140, 255, 1),
-                  ],
-                ),
+                gradient: AppDesignTokens.primaryGradient,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
@@ -2859,18 +2723,18 @@ class _DirectoryContactSelectDialogState
                           children: [
                             Text(
                               'Contact Directory',
-                              style: AppleTypography.withAppleFont(
-                                AppleTypography.headline5.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                             SizedBox(height: 2),
                             Text(
                               'Select contacts to add to "${widget.listName}"',
-                              style: AppleTypography.withAppleFont(
-                                AppleTypography.body2.copyWith(color: Colors.white70),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white70,
                               ),
                             ),
                           ],
@@ -2880,12 +2744,13 @@ class _DirectoryContactSelectDialogState
                         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
                         ),
                         child: Text(
                           '${_selectedIndices.length} selected',
-                          style: AppleTypography.withAppleFont(
-                            AppleTypography.body2.copyWith(color: Colors.white),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -2900,16 +2765,16 @@ class _DirectoryContactSelectDialogState
                     },
                     decoration: InputDecoration(
                       hintText: 'Search contacts...',
-                      prefixIcon: Icon(Icons.search, color: Colors.grey),
+                      prefixIcon: Icon(Icons.search, color: AppDesignTokens.neutral400),
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
                         borderSide: BorderSide.none,
                       ),
                       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
-                    style: AppleTypography.withAppleFont(AppleTypography.body1),
+                    style: TextStyle(fontSize: 15),
                   ),
                 ],
               ),
@@ -2917,7 +2782,7 @@ class _DirectoryContactSelectDialogState
             // Select All / Deselect buttons
             Container(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              color: Colors.grey.shade100,
+              color: AppDesignTokens.neutral100,
               child: Row(
                 children: [
                   TextButton.icon(
@@ -2933,7 +2798,7 @@ class _DirectoryContactSelectDialogState
                       });
                     },
                     icon: Icon(Icons.select_all, size: 18),
-                    label: Text('Select All', style: AppleTypography.withAppleFont(AppleTypography.body2)),
+                    label: Text('Select All', style: TextStyle(fontSize: 14)),
                   ),
                   SizedBox(width: 8),
                   TextButton.icon(
@@ -2941,7 +2806,7 @@ class _DirectoryContactSelectDialogState
                       setState(() => _selectedIndices.clear());
                     },
                     icon: Icon(Icons.deselect, size: 18),
-                    label: Text('Deselect All', style: AppleTypography.withAppleFont(AppleTypography.body2)),
+                    label: Text('Deselect All', style: TextStyle(fontSize: 14)),
                   ),
                 ],
               ),
@@ -2952,8 +2817,9 @@ class _DirectoryContactSelectDialogState
                   ? Center(
                       child: Text(
                         'No contacts found',
-                        style: AppleTypography.withAppleFont(
-                          AppleTypography.body1.copyWith(color: Colors.grey.shade500),
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: AppDesignTokens.neutral500,
                         ),
                       ),
                     )
@@ -2974,39 +2840,36 @@ class _DirectoryContactSelectDialogState
                           enabled: !isAlreadyInList,
                           leading: CircleAvatar(
                             backgroundColor: isAlreadyInList 
-                                ? Colors.grey.shade300
-                                : Color.fromRGBO(64, 105, 225, 0.15),
+                                ? AppDesignTokens.neutral300
+                                : AppDesignTokens.primarySoft,
                             child: Text(
                               initials,
-                              style: AppleTypography.withAppleFont(
-                                AppleTypography.body2.copyWith(
-                                  color: isAlreadyInList 
-                                      ? Colors.grey.shade500
-                                      : Color.fromRGBO(64, 105, 225, 1),
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: isAlreadyInList 
+                                    ? AppDesignTokens.neutral500
+                                    : AppDesignTokens.primary,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
                           title: Text(
                             name,
-                            style: AppleTypography.withAppleFont(
-                              AppleTypography.subtitle1.copyWith(
-                                fontWeight: FontWeight.w500,
-                                color: isAlreadyInList ? Colors.grey.shade400 : Colors.black87,
-                              ),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: isAlreadyInList ? AppDesignTokens.neutral400 : AppDesignTokens.neutral900,
                             ),
                           ),
                           subtitle: Text(
                             isAlreadyInList ? '$phone  •  Already in list' : phone,
-                            style: AppleTypography.withAppleFont(
-                              AppleTypography.body2.copyWith(
-                                color: isAlreadyInList ? Colors.grey.shade400 : Colors.grey.shade600,
-                              ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: isAlreadyInList ? AppDesignTokens.neutral400 : AppDesignTokens.neutral600,
                             ),
                           ),
                           trailing: isAlreadyInList
-                              ? Icon(Icons.check_circle, color: Colors.green.shade300, size: 24)
+                              ? Icon(Icons.check_circle, color: AppDesignTokens.success.withOpacity(0.6), size: 24)
                               : Checkbox(
                                   value: isSelected,
                                   onChanged: (value) {
@@ -3018,7 +2881,7 @@ class _DirectoryContactSelectDialogState
                                       }
                                     });
                                   },
-                                  activeColor: Color.fromRGBO(64, 105, 225, 1),
+                                  activeColor: AppDesignTokens.primary,
                                 ),
                           onTap: isAlreadyInList
                               ? null
@@ -3040,7 +2903,7 @@ class _DirectoryContactSelectDialogState
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                border: Border(top: BorderSide(color: Colors.grey.shade200)),
+                border: Border(top: BorderSide(color: AppDesignTokens.neutral200)),
               ),
               child: Row(
                 children: [
@@ -3049,8 +2912,9 @@ class _DirectoryContactSelectDialogState
                       onPressed: () => Navigator.pop(context, null),
                       child: Text(
                         'Cancel',
-                        style: AppleTypography.withAppleFont(
-                          AppleTypography.body1.copyWith(color: Colors.grey.shade600),
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: AppDesignTokens.neutral600,
                         ),
                       ),
                     ),
@@ -3068,10 +2932,10 @@ class _DirectoryContactSelectDialogState
                               Navigator.pop(context, selected);
                             },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color.fromRGBO(64, 105, 225, 1),
-                        disabledBackgroundColor: Colors.grey.shade300,
+                        backgroundColor: AppDesignTokens.primary,
+                        disabledBackgroundColor: AppDesignTokens.neutral300,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
                         ),
                         padding: EdgeInsets.symmetric(vertical: 14),
                       ),
@@ -3079,11 +2943,10 @@ class _DirectoryContactSelectDialogState
                         _selectedIndices.isEmpty
                             ? 'Select Contacts'
                             : 'Add ${_selectedIndices.length} Contact${_selectedIndices.length == 1 ? '' : 's'}',
-                        style: AppleTypography.withAppleFont(
-                          AppleTypography.body1.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),

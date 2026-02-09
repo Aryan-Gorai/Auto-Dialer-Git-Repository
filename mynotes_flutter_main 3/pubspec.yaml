@@ -69,6 +69,7 @@ dependencies:
   cupertino_native: ^0.1.1
   file_picker: ^8.0.0+1
   excel: ^4.0.3
+  google_fonts: ^6.1.0
   
 
 dev_dependencies:

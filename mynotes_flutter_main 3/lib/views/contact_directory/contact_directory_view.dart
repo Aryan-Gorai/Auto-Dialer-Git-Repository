@@ -6,7 +6,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:cupertino_native/cupertino_native.dart';
-import 'package:flutter_application_1/utilities/apple_typography.dart';
+import 'package:flutter_application_1/theme/components/app_components.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
 import 'package:flutter_application_1/services/excel_import_service.dart';
 import 'package:flutter_application_1/views/contact_directory/call_prediction_view.dart';
@@ -128,7 +128,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Contact updated successfully'),
-            backgroundColor: Colors.green.shade600,
+            backgroundColor: AppDesignTokens.success,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
@@ -140,7 +140,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to update contact'),
-            backgroundColor: Colors.red.shade600,
+            backgroundColor: AppDesignTokens.danger,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
@@ -155,37 +155,41 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg)),
         title: Text(
           'Delete Contact',
-          style: AppleTypography.withAppleFont(
-            AppleTypography.headline5.copyWith(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: AppDesignTokens.neutral900,
           ),
         ),
         content: Text(
           'Are you sure you want to delete "$contactName"? This action cannot be undone.',
-          style: AppleTypography.withAppleFont(AppleTypography.body1),
+          style: const TextStyle(fontSize: 16, color: AppDesignTokens.neutral700),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               'Cancel',
-              style: AppleTypography.withAppleFont(
-                AppleTypography.body1.copyWith(color: Colors.grey.shade600),
+              style: TextStyle(
+                fontSize: 16,
+                color: AppDesignTokens.neutral600,
               ),
             ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.shade500,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              backgroundColor: AppDesignTokens.danger,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm)),
             ),
-            child: Text(
+            child: const Text(
               'Delete',
-              style: AppleTypography.withAppleFont(
-                AppleTypography.body1.copyWith(color: Colors.white),
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white,
               ),
             ),
           ),
@@ -206,7 +210,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Contact deleted successfully'),
-              backgroundColor: Colors.green.shade600,
+              backgroundColor: AppDesignTokens.success,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
@@ -219,7 +223,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Failed to delete contact'),
-              backgroundColor: Colors.red.shade600,
+              backgroundColor: AppDesignTokens.danger,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
@@ -241,18 +245,18 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesignTokens.radiusXl)),
         title: Row(
           children: [
             Container(
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Color.fromRGBO(64, 105, 225, 0.1),
+                color: AppDesignTokens.primarySoft,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 Icons.edit,
-                color: Theme.of(context).colorScheme.primary,
+                color: AppDesignTokens.primary,
                 size: 24,
               ),
             ),
@@ -260,8 +264,10 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
             Expanded(
               child: Text(
                 'Edit Contact',
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.headline5.copyWith(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppDesignTokens.neutral900,
                 ),
               ),
             ),
@@ -281,7 +287,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
               },
               icon: Icon(
                 Icons.analytics_outlined,
-                color: Theme.of(context).colorScheme.primary,
+                color: AppDesignTokens.primary,
               ),
               tooltip: 'View Call Predictions',
             ),
@@ -296,60 +302,59 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                 controller: nameController,
                 decoration: InputDecoration(
                   labelText: 'Contact Name',
-                  labelStyle: AppleTypography.withAppleFont(AppleTypography.body2),
-                  prefixIcon: Icon(Icons.person_outline, color: Colors.grey.shade600),
+                  labelStyle: TextStyle(fontSize: 14, color: AppDesignTokens.neutral600),
+                  prefixIcon: Icon(Icons.person_outline, color: AppDesignTokens.neutral600),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+                    borderSide: BorderSide(color: AppDesignTokens.neutral300),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+                    borderSide: BorderSide(color: AppDesignTokens.neutral300),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                    borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+                    borderSide: BorderSide(color: AppDesignTokens.primary, width: 2),
                   ),
                   filled: true,
-                  fillColor: Colors.grey.shade50,
+                  fillColor: AppDesignTokens.neutral50,
                 ),
-                style: AppleTypography.withAppleFont(AppleTypography.body1),
+                style: TextStyle(fontSize: 16, color: AppDesignTokens.neutral900),
               ),
               SizedBox(height: 16),
               TextField(
                 controller: phoneController,
                 decoration: InputDecoration(
                   labelText: 'Phone Number',
-                  labelStyle: AppleTypography.withAppleFont(AppleTypography.body2),
-                  prefixIcon: Icon(Icons.phone_outlined, color: Colors.grey.shade600),
+                  labelStyle: TextStyle(fontSize: 14, color: AppDesignTokens.neutral600),
+                  prefixIcon: Icon(Icons.phone_outlined, color: AppDesignTokens.neutral600),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+                    borderSide: BorderSide(color: AppDesignTokens.neutral300),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+                    borderSide: BorderSide(color: AppDesignTokens.neutral300),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                    borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+                    borderSide: BorderSide(color: AppDesignTokens.primary, width: 2),
                   ),
                   filled: true,
-                  fillColor: Colors.grey.shade50,
+                  fillColor: AppDesignTokens.neutral50,
                 ),
                 keyboardType: TextInputType.phone,
-                style: AppleTypography.withAppleFont(AppleTypography.body1),
+                style: TextStyle(fontSize: 16, color: AppDesignTokens.neutral900),
               ),
               // Lists section
               if (lists.isNotEmpty) ...[
                 SizedBox(height: 20),
                 Text(
                   'Member of Lists',
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.subtitle1.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade700,
-                    ),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppDesignTokens.neutral700,
                   ),
                 ),
                 SizedBox(height: 10),
@@ -357,9 +362,9 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                   width: double.infinity,
                   padding: EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade200),
+                    color: AppDesignTokens.neutral50,
+                    borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+                    border: Border.all(color: AppDesignTokens.neutral200),
                   ),
                   child: Wrap(
                     spacing: 8,
@@ -368,10 +373,10 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                       return Container(
                         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: Color.fromRGBO(64, 105, 225, 0.1),
-                          borderRadius: BorderRadius.circular(8),
+                          color: AppDesignTokens.primarySoft,
+                          borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
                           border: Border.all(
-                            color: Color.fromRGBO(64, 105, 225, 0.3),
+                            color: AppDesignTokens.primary.withOpacity(0.3),
                           ),
                         ),
                         child: Row(
@@ -380,16 +385,15 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                             Icon(
                               Icons.list,
                               size: 14,
-                              color: Theme.of(context).colorScheme.primary,
+                              color: AppDesignTokens.primary,
                             ),
                             SizedBox(width: 6),
                             Text(
                               list.toString(),
-                              style: AppleTypography.withAppleFont(
-                                AppleTypography.body2.copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: AppDesignTokens.primary,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
@@ -407,8 +411,9 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
             onPressed: () => Navigator.pop(context),
             child: Text(
               'Cancel',
-              style: AppleTypography.withAppleFont(
-                AppleTypography.body1.copyWith(color: Colors.grey.shade600),
+              style: TextStyle(
+                fontSize: 16,
+                color: AppDesignTokens.neutral600,
               ),
             ),
           ),
@@ -422,17 +427,16 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
+              backgroundColor: AppDesignTokens.primary,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
             child: Text(
               'Save',
-              style: AppleTypography.withAppleFont(
-                AppleTypography.body1.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -463,7 +467,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
       builder: (BuildContext context) {
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppDesignTokens.surface,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(24),
               topRight: Radius.circular(24),
@@ -478,30 +482,33 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: AppDesignTokens.neutral300,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               SizedBox(height: 20),
               Text(
                 'Add Contacts to Directory',
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.headline5.copyWith(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppDesignTokens.neutral900,
                 ),
               ),
               SizedBox(height: 6),
               Text(
                 'Choose how you want to import contacts',
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.body2.copyWith(color: Colors.grey.shade500),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppDesignTokens.neutral500,
                 ),
               ),
               SizedBox(height: 20),
               // Option 1: Upload from Phone Contacts
               _buildMenuOption(
                 icon: Icons.contacts,
-                iconColor: Colors.blue.shade700,
-                bgColor: Colors.blue.shade100,
+                iconColor: AppDesignTokens.accentBlue,
+                bgColor: AppDesignTokens.accentBlueSoft,
                 title: 'Upload from Phone Contacts',
                 subtitle: 'Select contacts from your device',
                 onTap: () {
@@ -513,8 +520,8 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
               // Option 2: Upload from Excel Spreadsheet
               _buildMenuOption(
                 icon: Icons.table_chart,
-                iconColor: Colors.green.shade700,
-                bgColor: Colors.green.shade100,
+                iconColor: AppDesignTokens.success,
+                bgColor: AppDesignTokens.successSoft,
                 title: 'Upload from Spreadsheet',
                 subtitle: 'Import contacts from Excel or CSV file',
                 onTap: () {
@@ -527,19 +534,20 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
               Container(
                 padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blue.shade100),
+                  color: AppDesignTokens.accentBlueSoft,
+                  borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+                  border: Border.all(color: AppDesignTokens.accentBlue.withOpacity(0.2)),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline, color: Colors.blue.shade600, size: 18),
+                    Icon(Icons.info_outline, color: AppDesignTokens.accentBlue, size: 18),
                     SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         'Spreadsheet columns: "Name" and "Phone" (supports .xlsx, .xls, .csv)',
-                        style: AppleTypography.withAppleFont(
-                          AppleTypography.caption.copyWith(color: Colors.blue.shade700),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppDesignTokens.accentBlue,
                         ),
                       ),
                     ),
@@ -569,9 +577,9 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
         child: Container(
           padding: EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: Colors.grey.shade50,
+            color: AppDesignTokens.neutral50,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.grey.shade200),
+            border: Border.all(color: AppDesignTokens.neutral200),
           ),
           child: Row(
             children: [
@@ -579,7 +587,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                 padding: EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: bgColor,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
                 ),
                 child: Icon(icon, color: iconColor, size: 24),
               ),
@@ -590,21 +598,24 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                   children: [
                     Text(
                       title,
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.subtitle1.copyWith(fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppDesignTokens.neutral900,
                       ),
                     ),
                     SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.body2.copyWith(color: Colors.grey.shade500),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppDesignTokens.neutral500,
                       ),
                     ),
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: Colors.grey.shade400),
+              Icon(Icons.chevron_right, color: AppDesignTokens.neutral400),
             ],
           ),
         ),
@@ -626,7 +637,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Contact permission denied'),
-              backgroundColor: Colors.red.shade600,
+              backgroundColor: AppDesignTokens.danger,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
@@ -647,9 +658,9 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
+                  CircularProgressIndicator(color: AppDesignTokens.primary),
                   SizedBox(width: 20),
-                  Text('Loading contacts...', style: AppleTypography.withAppleFont(AppleTypography.body1)),
+                  Text('Loading contacts...', style: TextStyle(fontSize: 16, color: AppDesignTokens.neutral900)),
                 ],
               ),
             ),
@@ -700,7 +711,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('No contacts with phone numbers found'),
-              backgroundColor: Colors.orange.shade600,
+              backgroundColor: AppDesignTokens.warning,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
@@ -747,7 +758,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('No new contacts to import'),
-              backgroundColor: Colors.orange.shade600,
+              backgroundColor: AppDesignTokens.warning,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
@@ -768,9 +779,9 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
+                  CircularProgressIndicator(color: AppDesignTokens.primary),
                   SizedBox(width: 20),
-                  Text('Uploading ${contactsToUpload.length} contacts...', style: AppleTypography.withAppleFont(AppleTypography.body1)),
+                  Text('Uploading ${contactsToUpload.length} contacts...', style: TextStyle(fontSize: 16, color: AppDesignTokens.neutral900)),
                 ],
               ),
             ),
@@ -794,7 +805,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Successfully imported $uploadedCount contact${uploadedCount == 1 ? '' : 's'}'),
-            backgroundColor: Colors.green.shade600,
+            backgroundColor: AppDesignTokens.success,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
@@ -808,7 +819,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to import contacts: ${e.toString()}'),
-            backgroundColor: Colors.red.shade600,
+            backgroundColor: AppDesignTokens.danger,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
@@ -839,9 +850,9 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
+                  CircularProgressIndicator(color: AppDesignTokens.primary),
                   SizedBox(width: 20),
-                  Text('Checking ${contacts.length} contacts...', style: AppleTypography.withAppleFont(AppleTypography.body1)),
+                  Text('Checking ${contacts.length} contacts...', style: TextStyle(fontSize: 16, color: AppDesignTokens.neutral900)),
                 ],
               ),
             ),
@@ -879,7 +890,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('No new contacts to import'),
-              backgroundColor: Colors.orange.shade600,
+              backgroundColor: AppDesignTokens.warning,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
@@ -900,9 +911,9 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
+                  CircularProgressIndicator(color: AppDesignTokens.primary),
                   SizedBox(width: 20),
-                  Text('Uploading ${contactsToUpload.length} contacts...', style: AppleTypography.withAppleFont(AppleTypography.body1)),
+                  Text('Uploading ${contactsToUpload.length} contacts...', style: TextStyle(fontSize: 16, color: AppDesignTokens.neutral900)),
                 ],
               ),
             ),
@@ -926,7 +937,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Successfully imported $uploadedCount contact${uploadedCount == 1 ? '' : 's'} from spreadsheet'),
-            backgroundColor: Colors.green.shade600,
+            backgroundColor: AppDesignTokens.success,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
@@ -938,7 +949,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to import spreadsheet: ${e.toString()}'),
-            backgroundColor: Colors.red.shade600,
+            backgroundColor: AppDesignTokens.danger,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
@@ -955,14 +966,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
       floatingActionButton: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Theme.of(context).colorScheme.primary,
-              Color.fromRGBO(100, 140, 255, 1),
-            ],
-          ),
+          gradient: AppDesignTokens.primaryGradient,
         ),
         child: CNButton.icon(
           icon: const CNSymbol('plus', size: 22),
@@ -977,41 +981,35 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
             Container(
               padding: EdgeInsets.fromLTRB(20, 20, 20, 16),
               decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: Offset(0, 2),
-                  ),
-                ],
+                color: AppDesignTokens.surface,
+                boxShadow: AppDesignTokens.softShadow,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Contact Directory',
-                    style: AppleTypography.withAppleFont(
-                      AppleTypography.headline3.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: AppDesignTokens.primary,
                     ),
                   ),
                   SizedBox(height: 4),
                   Text(
                     '${contacts.length} contacts',
-                    style: AppleTypography.withAppleFont(
-                      AppleTypography.body2.copyWith(color: Colors.grey.shade600),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppDesignTokens.neutral600,
                     ),
                   ),
                   SizedBox(height: 16),
                   // Search bar
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade200),
+                      color: AppDesignTokens.neutral50,
+                      borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+                      border: Border.all(color: AppDesignTokens.neutral300),
                     ),
                     child: TextField(
                       controller: _searchController,
@@ -1020,13 +1018,14 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                       },
                       decoration: InputDecoration(
                         hintText: 'Search contacts...',
-                        hintStyle: AppleTypography.withAppleFont(
-                          AppleTypography.body1.copyWith(color: Colors.grey.shade500),
+                        hintStyle: TextStyle(
+                          fontSize: 16,
+                          color: AppDesignTokens.neutral500,
                         ),
-                        prefixIcon: Icon(Icons.search, color: Colors.grey.shade500),
+                        prefixIcon: Icon(Icons.search, color: AppDesignTokens.neutral500),
                         suffixIcon: searchQuery.isNotEmpty
                             ? IconButton(
-                                icon: Icon(Icons.clear, color: Colors.grey.shade500),
+                                icon: Icon(Icons.clear, color: AppDesignTokens.neutral500),
                                 onPressed: () {
                                   _searchController.clear();
                                   setState(() => searchQuery = '');
@@ -1036,7 +1035,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       ),
-                      style: AppleTypography.withAppleFont(AppleTypography.body1),
+                      style: TextStyle(fontSize: 16, color: AppDesignTokens.neutral900),
                     ),
                   ),
                 ],
@@ -1050,13 +1049,14 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           CircularProgressIndicator(
-                            color: Theme.of(context).colorScheme.primary,
+                            color: AppDesignTokens.primary,
                           ),
                           SizedBox(height: 16),
                           Text(
                             'Loading contacts...',
-                            style: AppleTypography.withAppleFont(
-                              AppleTypography.body1.copyWith(color: Colors.grey.shade600),
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: AppDesignTokens.neutral600,
                             ),
                           ),
                         ],
@@ -1070,18 +1070,17 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                               Icon(
                                 Icons.contacts_outlined,
                                 size: 80,
-                                color: Colors.grey.shade300,
+                                color: AppDesignTokens.neutral300,
                               ),
                               SizedBox(height: 16),
                               Text(
                                 searchQuery.isNotEmpty
                                     ? 'No contacts found'
                                     : 'No contacts yet',
-                                style: AppleTypography.withAppleFont(
-                                  AppleTypography.headline5.copyWith(
-                                    color: Colors.grey.shade500,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  color: AppDesignTokens.neutral500,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                               SizedBox(height: 8),
@@ -1089,8 +1088,9 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                                 searchQuery.isNotEmpty
                                     ? 'Try a different search term'
                                     : 'Contacts will appear here',
-                                style: AppleTypography.withAppleFont(
-                                  AppleTypography.body1.copyWith(color: Colors.grey.shade400),
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: AppDesignTokens.neutral400,
                                 ),
                               ),
                             ],
@@ -1098,7 +1098,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                         )
                       : RefreshIndicator(
                           onRefresh: _fetchContacts,
-                          color: Theme.of(context).colorScheme.primary,
+                          color: AppDesignTokens.primary,
                           child: ListView.builder(
                             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             itemCount: filteredContacts.length,
@@ -1120,8 +1120,8 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                                 background: Container(
                                   margin: EdgeInsets.only(bottom: 10),
                                   decoration: BoxDecoration(
-                                    color: Colors.red,
-                                    borderRadius: BorderRadius.circular(16),
+                                    color: AppDesignTokens.danger,
+                                    borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg),
                                   ),
                                   alignment: Alignment.centerRight,
                                   padding: EdgeInsets.only(right: 20),
@@ -1134,21 +1134,15 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                                 child: Container(
                                   margin: EdgeInsets.only(bottom: 10),
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(16),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.04),
-                                        blurRadius: 8,
-                                        offset: Offset(0, 2),
-                                      ),
-                                    ],
+                                    color: AppDesignTokens.surface,
+                                    borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg),
+                                    boxShadow: AppDesignTokens.cardShadow,
                                   ),
                                   child: Material(
                                     color: Colors.transparent,
-                                    borderRadius: BorderRadius.circular(16),
+                                    borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg),
                                     child: InkWell(
-                                      borderRadius: BorderRadius.circular(16),
+                                      borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg),
                                       onTap: () => _showEditDialog(contact),
                                       child: Padding(
                                         padding: EdgeInsets.all(12),
@@ -1159,24 +1153,16 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                                             width: 50,
                                             height: 50,
                                             decoration: BoxDecoration(
-                                              gradient: LinearGradient(
-                                                begin: Alignment.topLeft,
-                                                end: Alignment.bottomRight,
-                                                colors: [
-                                                  Theme.of(context).colorScheme.primary,
-                                                  Color.fromRGBO(100, 140, 255, 1),
-                                                ],
-                                              ),
+                                              gradient: AppDesignTokens.primaryGradient,
                                               borderRadius: BorderRadius.circular(14),
                                             ),
                                             child: Center(
                                               child: Text(
                                                 initials,
-                                                style: AppleTypography.withAppleFont(
-                                                  AppleTypography.subtitle1.copyWith(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
                                                 ),
                                               ),
                                             ),
@@ -1189,11 +1175,10 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                                               children: [
                                                 Text(
                                                   name,
-                                                  style: AppleTypography.withAppleFont(
-                                                    AppleTypography.subtitle1.copyWith(
-                                                      fontWeight: FontWeight.w600,
-                                                      color: Colors.grey.shade800,
-                                                    ),
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: AppDesignTokens.neutral800,
                                                   ),
                                                   maxLines: 1,
                                                   overflow: TextOverflow.ellipsis,
@@ -1204,16 +1189,15 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                                                     Icon(
                                                       Icons.phone_outlined,
                                                       size: 14,
-                                                      color: Colors.grey.shade500,
+                                                      color: AppDesignTokens.neutral500,
                                                     ),
                                                     SizedBox(width: 4),
                                                     Expanded(
                                                       child: Text(
                                                         phone.isNotEmpty ? phone : 'No phone number',
-                                                        style: AppleTypography.withAppleFont(
-                                                          AppleTypography.body2.copyWith(
-                                                            color: Colors.grey.shade600,
-                                                          ),
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                          color: AppDesignTokens.neutral600,
                                                         ),
                                                         maxLines: 1,
                                                         overflow: TextOverflow.ellipsis,
@@ -1234,16 +1218,15 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                                                               return Container(
                                                                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                                                 decoration: BoxDecoration(
-                                                                  color: Color.fromRGBO(64, 105, 225, 0.1),
+                                                                  color: AppDesignTokens.primarySoft,
                                                                   borderRadius: BorderRadius.circular(6),
                                                                 ),
                                                                 child: Text(
                                                                   list.toString(),
-                                                                  style: AppleTypography.withAppleFont(
-                                                                    AppleTypography.caption.copyWith(
-                                                                      color: Theme.of(context).colorScheme.primary,
-                                                                      fontWeight: FontWeight.w500,
-                                                                    ),
+                                                                  style: TextStyle(
+                                                                    fontSize: 12,
+                                                                    color: AppDesignTokens.primary,
+                                                                    fontWeight: FontWeight.w500,
                                                                   ),
                                                                   maxLines: 1,
                                                                   overflow: TextOverflow.ellipsis,
@@ -1254,16 +1237,15 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                                                               Container(
                                                                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                                                 decoration: BoxDecoration(
-                                                                  color: Colors.grey.shade200,
+                                                                  color: AppDesignTokens.neutral200,
                                                                   borderRadius: BorderRadius.circular(6),
                                                                 ),
                                                                 child: Text(
                                                                   '+${lists.length - 2} more',
-                                                                  style: AppleTypography.withAppleFont(
-                                                                    AppleTypography.caption.copyWith(
-                                                                      color: Colors.grey.shade600,
-                                                                      fontWeight: FontWeight.w500,
-                                                                    ),
+                                                                  style: TextStyle(
+                                                                    fontSize: 12,
+                                                                    color: AppDesignTokens.neutral600,
+                                                                    fontWeight: FontWeight.w500,
                                                                   ),
                                                                 ),
                                                               ),
@@ -1279,7 +1261,7 @@ class _ContactDirectoryViewState extends State<ContactDirectoryView> {
                                           // Edit indicator
                                           Icon(
                                             Icons.chevron_right,
-                                            color: Colors.grey.shade400,
+                                            color: AppDesignTokens.neutral400,
                                             size: 24,
                                           ),
                                         ],

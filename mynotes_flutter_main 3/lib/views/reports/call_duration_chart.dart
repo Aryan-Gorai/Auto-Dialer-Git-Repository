@@ -7,7 +7,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
 import 'package:flutter_application_1/theme/app_colors.dart';
-import 'package:flutter_application_1/utilities/apple_typography.dart';
+import 'package:flutter_application_1/theme/components/app_components.dart';
 import 'package:intl/intl.dart';
 
 class CallDurationChart extends StatefulWidget {
@@ -463,7 +463,7 @@ class _CallDurationChartState extends State<CallDurationChart> {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
+              color: AppDesignTokens.neutral800,
             ),
           ),
           const SizedBox(height: 8),
@@ -471,7 +471,7 @@ class _CallDurationChartState extends State<CallDurationChart> {
             'Understand typical call lengths and time spent per call',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[600],
+              color: AppDesignTokens.neutral600,
             ),
           ),
           const SizedBox(height: 16),
@@ -486,7 +486,7 @@ class _CallDurationChartState extends State<CallDurationChart> {
                       'Time Range:',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.grey[700],
+                        color: AppDesignTokens.neutral700,
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -553,7 +553,7 @@ class _CallDurationChartState extends State<CallDurationChart> {
                       'Selected: ${DateFormat('MMM d').format(_customStartDate!)} - ${DateFormat('MMM d, yyyy').format(_customEndDate!)}',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey[600],
+                        color: AppDesignTokens.neutral600,
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -568,10 +568,10 @@ class _CallDurationChartState extends State<CallDurationChart> {
             spacing: 16,
             runSpacing: 8,
             children: [
-              _buildLegendItem('Successful', Colors.green),
-              _buildLegendItem('Unsuccessful', Colors.red),
+              _buildLegendItem('Successful', AppDesignTokens.success),
+              _buildLegendItem('Unsuccessful', AppDesignTokens.danger),
               _buildLegendItem('Median', AppColors.coral),
-              _buildLegendItem('Percentiles', Colors.orange),
+              _buildLegendItem('Percentiles', AppDesignTokens.warning),
             ],
           ),
 
@@ -590,13 +590,13 @@ class _CallDurationChartState extends State<CallDurationChart> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.timer_off, size: 64, color: Colors.grey[400]),
+                    Icon(Icons.timer_off, size: 64, color: AppDesignTokens.neutral400),
                     const SizedBox(height: 16),
                     Text(
                       'No call duration data found',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.grey[600],
+                        color: AppDesignTokens.neutral600,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -604,7 +604,7 @@ class _CallDurationChartState extends State<CallDurationChart> {
                       'Try selecting a different time range',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[500],
+                        color: AppDesignTokens.neutral500,
                       ),
                     ),
                   ],
@@ -638,7 +638,7 @@ class _CallDurationChartState extends State<CallDurationChart> {
                             TextSpan(
                               text: '${isSuccessful ? "Successful" : "Unsuccessful"}: $count',
                               style: TextStyle(
-                                color: isSuccessful ? Colors.green : Colors.red,
+                                color: isSuccessful ? AppDesignTokens.success : AppDesignTokens.danger,
                                 fontSize: 12,
                               ),
                             ),
@@ -697,7 +697,7 @@ class _CallDurationChartState extends State<CallDurationChart> {
                   ),
                   borderData: FlBorderData(
                     show: true,
-                    border: Border.all(color: Colors.grey.shade400),
+                    border: Border.all(color: AppDesignTokens.neutral400),
                   ),
                   gridData: FlGridData(
                     show: true,
@@ -705,7 +705,7 @@ class _CallDurationChartState extends State<CallDurationChart> {
                     horizontalInterval: _getMaxY() > 10 ? 5 : 1,
                     getDrawingHorizontalLine: (value) {
                       return FlLine(
-                        color: Colors.grey.shade300,
+                        color: AppDesignTokens.neutral300,
                         strokeWidth: 1,
                       );
                     },
@@ -734,7 +734,7 @@ class _CallDurationChartState extends State<CallDurationChart> {
                       // 25th percentile
                       HorizontalLine(
                         y: _convertDurationToBarPosition(_percentile25),
-                        color: Colors.orange.shade300,
+                        color: AppDesignTokens.warning,
                         strokeWidth: 1.5,
                         dashArray: [3, 3],
                         label: HorizontalLineLabel(
@@ -742,7 +742,7 @@ class _CallDurationChartState extends State<CallDurationChart> {
                           alignment: Alignment.topLeft,
                           padding: const EdgeInsets.only(left: 5, bottom: 5),
                           style: TextStyle(
-                            color: Colors.orange.shade700,
+                            color: AppDesignTokens.warningDark,
                             fontSize: 9,
                             fontWeight: FontWeight.bold,
                           ),
@@ -752,7 +752,7 @@ class _CallDurationChartState extends State<CallDurationChart> {
                       // 75th percentile
                       HorizontalLine(
                         y: _convertDurationToBarPosition(_percentile75),
-                        color: Colors.orange.shade300,
+                        color: AppDesignTokens.warning,
                         strokeWidth: 1.5,
                         dashArray: [3, 3],
                         label: HorizontalLineLabel(
@@ -760,7 +760,7 @@ class _CallDurationChartState extends State<CallDurationChart> {
                           alignment: Alignment.bottomLeft,
                           padding: const EdgeInsets.only(left: 5, top: 5),
                           style: TextStyle(
-                            color: Colors.orange.shade700,
+                            color: AppDesignTokens.warningDark,
                             fontSize: 9,
                             fontWeight: FontWeight.bold,
                           ),
@@ -780,8 +780,8 @@ class _CallDurationChartState extends State<CallDurationChart> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(8),
+                color: AppDesignTokens.neutral100,
+                borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -791,7 +791,7 @@ class _CallDurationChartState extends State<CallDurationChart> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
+                      color: AppDesignTokens.neutral800,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -803,11 +803,10 @@ class _CallDurationChartState extends State<CallDurationChart> {
                   const SizedBox(height: 16),
                   Text(
                     'Duration Distribution',
-                    style: AppleTypography.withAppleFont(
-                      AppleTypography.body1.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
-                      )
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppDesignTokens.neutral800,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -834,15 +833,15 @@ class _CallDurationChartState extends State<CallDurationChart> {
                           Expanded(
                             child: Row(
                               children: [
-                                _buildStatBadge('S: ${bin.successfulCalls}', Colors.green),
+                                _buildStatBadge('S: ${bin.successfulCalls}', AppDesignTokens.success),
                                 const SizedBox(width: 8),
-                                _buildStatBadge('U: ${bin.unsuccessfulCalls}', Colors.red),
+                                _buildStatBadge('U: ${bin.unsuccessfulCalls}', AppDesignTokens.danger),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Total: $total ($percentage%)',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Colors.grey[700],
+                                    color: AppDesignTokens.neutral700,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -892,7 +891,7 @@ class _CallDurationChartState extends State<CallDurationChart> {
             label,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[700],
+              color: AppDesignTokens.neutral700,
             ),
           ),
           Text(
@@ -938,7 +937,7 @@ class _CallDurationChartState extends State<CallDurationChart> {
           barRods: [
             BarChartRodData(
               toY: bin.successfulCalls.toDouble(),
-              color: Colors.green,
+              color: AppDesignTokens.success,
               width: 12,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(4),
@@ -947,7 +946,7 @@ class _CallDurationChartState extends State<CallDurationChart> {
             ),
             BarChartRodData(
               toY: bin.unsuccessfulCalls.toDouble(),
-              color: Colors.red,
+              color: AppDesignTokens.danger,
               width: 12,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(4),

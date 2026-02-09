@@ -16,10 +16,9 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:string_validator/string_validator.dart';
-import 'package:flutter_application_1/utilities/apple_typography.dart';
 import 'package:flutter_application_1/services/team_service.dart';
-import 'package:flutter_application_1/theme/app_colors.dart';
 import 'package:flutter_application_1/theme/theme_provider.dart';
+import 'package:flutter_application_1/theme/components/app_components.dart';
 
 import 'package:provider/provider.dart';
 // import 'package:email_validator/email_validator.dart';
@@ -133,11 +132,10 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
                 padding: EdgeInsets.only(bottom: 20),
                 child: Text(
                   'Edit Profile',
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.headline3.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    )
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: AppDesignTokens.primary,
                   ),
                 ),
               ),
@@ -210,11 +208,10 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
         children: [
           Text(
             'Appearance',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.caption.copyWith(
-                fontWeight: FontWeight.w500,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: AppDesignTokens.neutral500,
             ),
           ),
           const SizedBox(height: 8),
@@ -222,8 +219,8 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
             width: double.infinity,
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
+              color: AppDesignTokens.neutral100,
+              borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
             ),
             child: Row(
               children: [
@@ -247,8 +244,8 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            gradient: isSelected ? AppColors.primaryGradient : null,
-            borderRadius: BorderRadius.circular(10),
+            gradient: isSelected ? AppDesignTokens.primaryGradient : null,
+            borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -256,16 +253,15 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
               Icon(
                 icon,
                 size: 16,
-                color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,
+                color: isSelected ? Colors.white : AppDesignTokens.neutral500,
               ),
               const SizedBox(width: 4),
               Text(
                 label,
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.caption.copyWith(
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                    color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                  color: isSelected ? Colors.white : AppDesignTokens.neutral500,
                 ),
               ),
             ],
@@ -291,11 +287,10 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
             children: [
               Text(
                 'Team',
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.caption.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey,
-                  ),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: AppDesignTokens.neutral500,
                 ),
               ),
               const SizedBox(height: 4),
@@ -303,29 +298,29 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.2)),
+                  color: AppDesignTokens.primarySoft,
+                  borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
+                  border: Border.all(color: AppDesignTokens.primary.withOpacity(0.2)),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.group, color: Theme.of(context).colorScheme.primary, size: 20),
+                    Icon(Icons.group, color: AppDesignTokens.primary, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         _teamName ?? 'Team',
-                        style: AppleTypography.withAppleFont(
-                          AppleTypography.body1.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppDesignTokens.neutral900,
                         ),
                       ),
                     ),
                     TextButton(
                       onPressed: _showLeaveTeamDialog,
-                      child: const Text(
+                      child: Text(
                         'Leave',
-                        style: TextStyle(color: Colors.red),
+                        style: TextStyle(color: AppDesignTokens.danger),
                       ),
                     ),
                   ],
@@ -365,21 +360,20 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
           width: double.infinity,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.orange.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.orange.withOpacity(0.2)),
+            color: AppDesignTokens.warningSoft,
+            borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
+            border: Border.all(color: AppDesignTokens.warning.withOpacity(0.3)),
           ),
           child: Row(
             children: [
-              const Icon(Icons.admin_panel_settings, color: Colors.orange, size: 20),
+              Icon(Icons.admin_panel_settings, color: AppDesignTokens.warning, size: 20),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   'Manage your team from the Team tab',
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.body2.copyWith(
-                      color: Colors.grey[700],
-                    ),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppDesignTokens.neutral600,
                   ),
                 ),
               ),
@@ -494,7 +488,7 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
                 const SnackBar(content: Text('You have left the team.')),
               );
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: AppDesignTokens.danger),
             child: const Text('Leave', style: TextStyle(color: Colors.white)),
           ),
         ],
@@ -512,11 +506,10 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
           children: [
             Text(
               title,
-              style: AppleTypography.withAppleFont(
-                AppleTypography.caption.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey,
-                )
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: AppDesignTokens.neutral500,
               ),
             ),
             SizedBox(height: 1),
@@ -526,7 +519,7 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
               decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
-                    color: Colors.grey,
+                    color: AppDesignTokens.neutral300,
                     width: 1,
                   ),
                 ),
@@ -539,17 +532,17 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
                     },
                     child: Text(
                       getValue,
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.body1.copyWith(
-                          height: 1.4,
-                        )
+                      style: TextStyle(
+                        fontSize: 16,
+                        height: 1.4,
+                        color: AppDesignTokens.neutral900,
                       ),
                     ),
                   ),
                 ),
                 Icon(
                   Icons.keyboard_arrow_right,
-                  color: Colors.grey,
+                  color: AppDesignTokens.neutral400,
                   size: 40.0,
                 )
               ]),
@@ -567,20 +560,20 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
       children: [
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w500,
-            color: Colors.grey,
+            color: AppDesignTokens.neutral500,
           ),
         ),
         const SizedBox(height: 1),
         Container(
           width: 350,
           height: 40,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
-                color: Colors.grey,
+                color: AppDesignTokens.neutral300,
                 width: 1,
               ),
             ),
@@ -588,11 +581,10 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
           alignment: Alignment.centerLeft,
           child: Text(
             '  $value',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.body1.copyWith(
-                height: 1.4, 
-                color: Colors.black87
-              )
+            style: TextStyle(
+              fontSize: 16,
+              height: 1.4,
+              color: AppDesignTokens.neutral800,
             ),
           ),
         )
@@ -612,7 +604,7 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w500,
-            color: Colors.grey,
+            color: AppDesignTokens.neutral500,
           ),
         ),
         const SizedBox(height: 1),
@@ -622,7 +614,7 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
-                color: Colors.grey,
+                color: AppDesignTokens.neutral300,
                 width: 1,
               ),
             ),
@@ -646,10 +638,10 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
                     alignment: Alignment.topLeft,
                     child: Text(
                       about.isEmpty ? 'Tap to add a short bio' : about,
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.body1.copyWith(
-                          height: 1.4,
-                        )
+                      style: TextStyle(
+                        fontSize: 16,
+                        height: 1.4,
+                        color: AppDesignTokens.neutral900,
                       ),
                     ),
                   ),
@@ -658,7 +650,7 @@ class _UserProfileEditorState extends State<UserProfileEditor> {
             ),
             Icon(
               Icons.keyboard_arrow_right,
-              color: Colors.grey,
+              color: AppDesignTokens.neutral400,
               size: 40.0,
             )
           ]),
@@ -852,7 +844,7 @@ class _EditNameFormPageState extends State<_EditNameFormPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(color: AppDesignTokens.neutral900),
         leading: BackButton(),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -870,6 +862,7 @@ class _EditNameFormPageState extends State<_EditNameFormPage> {
                 style: TextStyle(
                   fontSize: 25,
                   fontWeight: FontWeight.bold,
+                  color: AppDesignTokens.neutral900,
                 ),
               ),
             ),
@@ -977,7 +970,7 @@ class _EditPhoneFormPageState extends State<_EditPhoneFormPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(color: AppDesignTokens.neutral900),
         leading: BackButton(),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -992,10 +985,10 @@ class _EditPhoneFormPageState extends State<_EditPhoneFormPage> {
               width: 320,
               child: Text(
                 "What's Your Phone Number?",
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.headline6.copyWith(
-                    fontWeight: FontWeight.bold,
-                  )
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppDesignTokens.neutral900,
                 ),
               ),
             ),
@@ -1156,7 +1149,7 @@ class _EditImagePageState extends State<_EditImagePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(color: AppDesignTokens.neutral900),
         leading: BackButton(),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -1199,7 +1192,7 @@ class _EditImagePageState extends State<_EditImagePage> {
                               )
                             : Container(
                                 height: 200,
-                                color: Colors.grey[200],
+                                color: AppDesignTokens.neutral200,
                                 alignment: Alignment.center,
                                 child: const Text('Tap to choose a photo'),
                               ))
@@ -1268,7 +1261,7 @@ class _EditDescriptionFormPageState extends State<_EditDescriptionFormPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(color: AppDesignTokens.neutral900),
         leading: BackButton(),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -1283,10 +1276,10 @@ class _EditDescriptionFormPageState extends State<_EditDescriptionFormPage> {
               width: 350,
               child: Text(
                 "What type of passenger\nare you?",
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.headline4.copyWith(
-                    fontWeight: FontWeight.bold,
-                  )
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: AppDesignTokens.neutral900,
                 ),
               ),
             ),

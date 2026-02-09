@@ -11,6 +11,7 @@ import 'package:flutter_application_1/models/team.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
 import 'package:flutter_application_1/services/team_service.dart';
 import 'package:flutter_application_1/utilities/apple_typography.dart';
+import 'package:flutter_application_1/theme/components/app_components.dart';
 import 'package:intl/intl.dart';
 
 import 'heatmap/call_heatmap.dart';
@@ -202,16 +203,26 @@ class _TeamReportsViewState extends State<TeamReportsView> with SingleTickerProv
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
+        backgroundColor: AppDesignTokens.surface,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
         title: Text(
           'Team Reports',
           style: AppleTypography.withAppleFont(
-            AppleTypography.headline5.copyWith(fontWeight: FontWeight.normal),
+            AppleTypography.headline5.copyWith(
+              fontWeight: FontWeight.normal,
+              color: AppDesignTokens.neutral900,
+            ),
           ),
         ),
         bottom: _selectedMemberId != null
             ? TabBar(
                 controller: _tabController,
                 isScrollable: true,
+                indicatorColor: AppDesignTokens.primary,
+                labelColor: AppDesignTokens.primary,
+                unselectedLabelColor: AppDesignTokens.neutral500,
+                indicatorWeight: 3,
                 tabs: const [
                   Tab(icon: Icon(Icons.grid_on), text: 'Heatmap'),
                   Tab(icon: Icon(Icons.show_chart), text: 'Weekly Trends'),
@@ -253,16 +264,16 @@ class _TeamReportsViewState extends State<TeamReportsView> with SingleTickerProv
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.group_off, size: 64, color: Colors.grey[400]),
+            Icon(Icons.group_off, size: 64, color: AppDesignTokens.neutral400),
             const SizedBox(height: 16),
             Text(
               'No team created yet',
-              style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 18, color: AppDesignTokens.neutral600),
             ),
             const SizedBox(height: 8),
             Text(
               'Go to the Team tab to create your team first.',
-              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+              style: TextStyle(fontSize: 14, color: AppDesignTokens.neutral500),
               textAlign: TextAlign.center,
             ),
           ],
@@ -300,7 +311,7 @@ class _TeamReportsViewState extends State<TeamReportsView> with SingleTickerProv
   Widget _buildMemberSelector() {
     return Card(
       margin: const EdgeInsets.all(8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
@@ -311,7 +322,7 @@ class _TeamReportsViewState extends State<TeamReportsView> with SingleTickerProv
               'Viewing:',
               style: TextStyle(
                 fontSize: 15,
-                color: Colors.grey[700],
+                color: AppDesignTokens.neutral700,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -345,18 +356,18 @@ class _TeamReportsViewState extends State<TeamReportsView> with SingleTickerProv
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.people_outline, size: 64, color: Colors.grey[400]),
+          Icon(Icons.people_outline, size: 64, color: AppDesignTokens.neutral400),
           const SizedBox(height: 16),
           Text(
             'Select a team member to view their reports',
-            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 16, color: AppDesignTokens.neutral600),
           ),
           if (_members.isEmpty) ...[
             const SizedBox(height: 8),
             Text(
               'No members in your team yet.\nShare your join code to invite members.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Colors.grey[500]),
+              style: TextStyle(fontSize: 13, color: AppDesignTokens.neutral500),
             ),
           ],
         ],
@@ -373,7 +384,7 @@ class _TeamReportsViewState extends State<TeamReportsView> with SingleTickerProv
       child: Column(
         children: [
           Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm)),
             margin: const EdgeInsets.all(8),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -385,7 +396,7 @@ class _TeamReportsViewState extends State<TeamReportsView> with SingleTickerProv
                     style: AppleTypography.withAppleFont(
                       AppleTypography.headline5.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
+                        color: AppDesignTokens.neutral800,
                       ),
                     ),
                   ),
@@ -424,7 +435,7 @@ class _TeamReportsViewState extends State<TeamReportsView> with SingleTickerProv
       child: Column(
         children: [
           Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm)),
             margin: const EdgeInsets.all(8),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -438,7 +449,7 @@ class _TeamReportsViewState extends State<TeamReportsView> with SingleTickerProv
             ),
           ),
           Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm)),
             margin: const EdgeInsets.all(8),
             child: WeeklyCallsChart(
               selectedTimeRange: _weeklyTrendsTimeRange,
@@ -458,7 +469,7 @@ class _TeamReportsViewState extends State<TeamReportsView> with SingleTickerProv
       child: Column(
         children: [
           Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm)),
             margin: const EdgeInsets.all(8),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -472,7 +483,7 @@ class _TeamReportsViewState extends State<TeamReportsView> with SingleTickerProv
             ),
           ),
           Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm)),
             margin: const EdgeInsets.all(8),
             child: CallDurationChart(
               selectedTimeRange: _callDurationTimeRange,
@@ -490,7 +501,7 @@ class _TeamReportsViewState extends State<TeamReportsView> with SingleTickerProv
   Widget _buildListPerformanceTab() {
     return SingleChildScrollView(
       child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm)),
         margin: const EdgeInsets.all(8),
         child: ListPerformanceChart(
           selectedList: _selectedListFilter,
@@ -505,7 +516,7 @@ class _TeamReportsViewState extends State<TeamReportsView> with SingleTickerProv
       child: Column(
         children: [
           Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm)),
             margin: const EdgeInsets.all(8),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -519,7 +530,7 @@ class _TeamReportsViewState extends State<TeamReportsView> with SingleTickerProv
             ),
           ),
           Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm)),
             margin: const EdgeInsets.all(8),
             child: CallOutcomeDonutChart(
               selectedTimeRange: _outcomesTimeRange,
@@ -546,7 +557,7 @@ class _TeamReportsViewState extends State<TeamReportsView> with SingleTickerProv
   Widget _buildTimeScaleDropdown() {
     return Row(
       children: [
-        Text('Time Scale:', style: TextStyle(color: Colors.grey[700])),
+        Text('Time Scale:', style: TextStyle(color: AppDesignTokens.neutral700)),
         const SizedBox(width: 12),
         DropdownButton<String>(
           value: _selectedTimeScale,
@@ -574,7 +585,7 @@ class _TeamReportsViewState extends State<TeamReportsView> with SingleTickerProv
   Widget _buildListFilterDropdown() {
     return Row(
       children: [
-        Text('List:', style: TextStyle(color: Colors.grey[700])),
+        Text('List:', style: TextStyle(color: AppDesignTokens.neutral700)),
         const SizedBox(width: 12),
         Expanded(
           child: DropdownButton<String>(
@@ -604,7 +615,7 @@ class _TeamReportsViewState extends State<TeamReportsView> with SingleTickerProv
       children: [
         Row(
           children: [
-            Text('Time Range:', style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+            Text('Time Range:', style: TextStyle(fontSize: 16, color: AppDesignTokens.neutral700)),
             const SizedBox(width: 16),
             DropdownButton<String>(
               value: currentValue,
@@ -629,7 +640,7 @@ class _TeamReportsViewState extends State<TeamReportsView> with SingleTickerProv
             padding: const EdgeInsets.only(top: 8),
             child: Text(
               'Selected: ${DateFormat('MMM d').format(customStartDate)} - ${DateFormat('MMM d, yyyy').format(customEndDate)}',
-              style: TextStyle(fontSize: 12, color: Colors.grey[600], fontStyle: FontStyle.italic),
+              style: TextStyle(fontSize: 12, color: AppDesignTokens.neutral600, fontStyle: FontStyle.italic),
             ),
           ),
       ],

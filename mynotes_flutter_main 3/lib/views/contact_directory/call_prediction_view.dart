@@ -6,7 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
 import 'package:flutter_application_1/services/ml/naive_bayes_classifier.dart';
-import 'package:flutter_application_1/utilities/apple_typography.dart';
+import 'package:flutter_application_1/theme/components/app_components.dart';
 import 'package:intl/intl.dart';
 
 class CallPredictionView extends StatefulWidget {
@@ -73,15 +73,15 @@ class _CallPredictionViewState extends State<CallPredictionView> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Call Predictions',
-          style: AppleTypography.withAppleFont(
-            AppleTypography.headline5.copyWith(
-              fontWeight: FontWeight.normal,
-            ),
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.normal,
+            color: Colors.white,
           ),
         ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: AppDesignTokens.primary,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -102,12 +102,13 @@ class _CallPredictionViewState extends State<CallPredictionView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.red.shade400),
+            Icon(Icons.error_outline, size: 64, color: AppDesignTokens.dangerLight),
             const SizedBox(height: 16),
             Text(
               _errorMessage ?? 'Unknown error',
-              style: AppleTypography.withAppleFont(
-                AppleTypography.body1.copyWith(color: Colors.grey[700]),
+              style: const TextStyle(
+                fontSize: 16,
+                color: AppDesignTokens.neutral700,
               ),
               textAlign: TextAlign.center,
             ),
@@ -124,22 +125,22 @@ class _CallPredictionViewState extends State<CallPredictionView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.analytics_outlined, size: 64, color: Colors.grey.shade400),
+            Icon(Icons.analytics_outlined, size: 64, color: AppDesignTokens.neutral400),
             const SizedBox(height: 16),
             Text(
               'No Call History Available',
-              style: AppleTypography.withAppleFont(
-                AppleTypography.headline6.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[800],
-                ),
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppDesignTokens.neutral800,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Make some calls to ${widget.contactName} to build prediction data.',
-              style: AppleTypography.withAppleFont(
-                AppleTypography.body2.copyWith(color: Colors.grey[600]),
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppDesignTokens.neutral600,
               ),
               textAlign: TextAlign.center,
             ),
@@ -191,15 +192,9 @@ class _CallPredictionViewState extends State<CallPredictionView> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: AppDesignTokens.surface,
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+        boxShadow: AppDesignTokens.cardShadow,
       ),
       child: Row(
         children: [
@@ -207,24 +202,18 @@ class _CallPredictionViewState extends State<CallPredictionView> {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).colorScheme.primary,
-                  const Color.fromRGBO(100, 140, 255, 1),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(12),
+              gradient: AppDesignTokens.primaryGradient,
+              borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
             ),
             child: Center(
               child: Text(
                 widget.contactName.isNotEmpty
                     ? widget.contactName[0].toUpperCase()
                     : '?',
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.headline5.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                style: const TextStyle(
+                  fontSize: 20,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
@@ -236,26 +225,24 @@ class _CallPredictionViewState extends State<CallPredictionView> {
               children: [
                 Text(
                   widget.contactName,
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.subtitle1.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
-                    ),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppDesignTokens.neutral800,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   widget.phoneNumber,
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.body2.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppDesignTokens.neutral600,
                   ),
                 ),
               ],
             ),
           ),
-          Icon(Icons.phone, color: Theme.of(context).colorScheme.primary),
+          const Icon(Icons.phone, color: AppDesignTokens.primary),
         ],
       ),
     );
@@ -272,19 +259,15 @@ class _CallPredictionViewState extends State<CallPredictionView> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: shouldCall
-              ? [Colors.green.shade400, Colors.green.shade600]
-              : [Colors.orange.shade400, Colors.orange.shade600],
+              ? [AppDesignTokens.success, AppDesignTokens.successDark]
+              : [AppDesignTokens.warning, AppDesignTokens.warningDark],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: (shouldCall ? Colors.green : Colors.orange).withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+        boxShadow: shouldCall
+            ? [BoxShadow(color: AppDesignTokens.success.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))]
+            : [BoxShadow(color: AppDesignTokens.warning.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -300,11 +283,10 @@ class _CallPredictionViewState extends State<CallPredictionView> {
               Expanded(
                 child: Text(
                   shouldCall ? 'Good Time to Call!' : 'Not the Best Time',
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.headline6.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
               ),
@@ -315,7 +297,7 @@ class _CallPredictionViewState extends State<CallPredictionView> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -325,19 +307,17 @@ class _CallPredictionViewState extends State<CallPredictionView> {
                   children: [
                     Text(
                       'Current Time',
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.body2.copyWith(
-                          color: Colors.white.withOpacity(0.9),
-                        ),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white.withOpacity(0.9),
                       ),
                     ),
                     Text(
                       DateFormat('EEEE, h:mm a').format(now),
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.body2.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
@@ -348,19 +328,17 @@ class _CallPredictionViewState extends State<CallPredictionView> {
                   children: [
                     Text(
                       'Success Probability',
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.body2.copyWith(
-                          color: Colors.white.withOpacity(0.9),
-                        ),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white.withOpacity(0.9),
                       ),
                     ),
                     Text(
                       '${(probability * 100).toStringAsFixed(1)}%',
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.body2.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
@@ -368,11 +346,10 @@ class _CallPredictionViewState extends State<CallPredictionView> {
                 const SizedBox(height: 8),
                 Text(
                   reason,
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.caption.copyWith(
-                      color: Colors.white.withOpacity(0.9),
-                      fontStyle: FontStyle.italic,
-                    ),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white.withOpacity(0.9),
+                    fontStyle: FontStyle.italic,
                   ),
                 ),
               ],
@@ -387,30 +364,23 @@ class _CallPredictionViewState extends State<CallPredictionView> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: AppDesignTokens.surface,
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+        boxShadow: AppDesignTokens.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.star, color: Colors.amber.shade600, size: 24),
+              const Icon(Icons.star, color: AppDesignTokens.warning, size: 24),
               const SizedBox(width: 8),
-              Text(
+              const Text(
                 'Top 5 Best Times to Call',
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.subtitle1.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
-                  ),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppDesignTokens.neutral800,
                 ),
               ),
             ],
@@ -431,9 +401,9 @@ class _CallPredictionViewState extends State<CallPredictionView> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
+        color: AppDesignTokens.neutral50,
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
+        border: Border.all(color: AppDesignTokens.neutral200),
       ),
       child: Row(
         children: [
@@ -442,18 +412,17 @@ class _CallPredictionViewState extends State<CallPredictionView> {
             height: 32,
             decoration: BoxDecoration(
               color: rank <= 3
-                  ? Theme.of(context).colorScheme.primary
-                  : Colors.grey.shade400,
+                  ? AppDesignTokens.primary
+                  : AppDesignTokens.neutral400,
               shape: BoxShape.circle,
             ),
             child: Center(
               child: Text(
                 '$rank',
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.body2.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
@@ -465,20 +434,18 @@ class _CallPredictionViewState extends State<CallPredictionView> {
               children: [
                 Text(
                   '${prediction.dayName}, ${prediction.timeRange}',
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.body1.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[800],
-                    ),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppDesignTokens.neutral800,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '${prediction.answeredCalls}/${prediction.totalCalls} calls answered',
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.caption.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppDesignTokens.neutral600,
                   ),
                 ),
               ],
@@ -489,11 +456,10 @@ class _CallPredictionViewState extends State<CallPredictionView> {
             children: [
               Text(
                 '${(prediction.probability * 100).toStringAsFixed(1)}%',
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.subtitle2.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: AppDesignTokens.primary,
                 ),
               ),
               const SizedBox(height: 2),
@@ -510,7 +476,7 @@ class _CallPredictionViewState extends State<CallPredictionView> {
       width: 60,
       height: 6,
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
+        color: AppDesignTokens.neutral200,
         borderRadius: BorderRadius.circular(3),
       ),
       child: FractionallySizedBox(
@@ -518,7 +484,7 @@ class _CallPredictionViewState extends State<CallPredictionView> {
         widthFactor: probability,
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary,
+            color: AppDesignTokens.primary,
             borderRadius: BorderRadius.circular(3),
           ),
         ),
@@ -530,26 +496,19 @@ class _CallPredictionViewState extends State<CallPredictionView> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: AppDesignTokens.surface,
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+        boxShadow: AppDesignTokens.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Predictions by Day',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.subtitle1.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppDesignTokens.neutral800,
             ),
           ),
           const SizedBox(height: 16),
@@ -564,8 +523,8 @@ class _CallPredictionViewState extends State<CallPredictionView> {
               margin: const EdgeInsets.only(bottom: 8),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(8),
+                color: AppDesignTokens.neutral50,
+                borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
               ),
               child: Row(
                 children: [
@@ -573,17 +532,16 @@ class _CallPredictionViewState extends State<CallPredictionView> {
                     width: 50,
                     padding: const EdgeInsets.symmetric(vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color.fromRGBO(64, 105, 225, 0.1),
+                      color: AppDesignTokens.primarySoft,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Center(
                       child: Text(
                         dayNames[day - 1],
-                        style: AppleTypography.withAppleFont(
-                          AppleTypography.body2.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: AppDesignTokens.primary,
                         ),
                       ),
                     ),
@@ -595,19 +553,17 @@ class _CallPredictionViewState extends State<CallPredictionView> {
                       children: [
                         Text(
                           'Best: ${bestTime.timeRange}',
-                          style: AppleTypography.withAppleFont(
-                            AppleTypography.body2.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey[800],
-                            ),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppDesignTokens.neutral800,
                           ),
                         ),
                         Text(
                           '${predictions.length} time slots',
-                          style: AppleTypography.withAppleFont(
-                            AppleTypography.caption.copyWith(
-                              color: Colors.grey[600],
-                            ),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppDesignTokens.neutral600,
                           ),
                         ),
                       ],
@@ -615,11 +571,10 @@ class _CallPredictionViewState extends State<CallPredictionView> {
                   ),
                   Text(
                     '${(bestTime.probability * 100).toStringAsFixed(0)}%',
-                    style: AppleTypography.withAppleFont(
-                      AppleTypography.body1.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppDesignTokens.primary,
                     ),
                   ),
                 ],
@@ -639,26 +594,19 @@ class _CallPredictionViewState extends State<CallPredictionView> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: AppDesignTokens.surface,
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+        boxShadow: AppDesignTokens.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Statistics Summary',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.subtitle1.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppDesignTokens.neutral800,
             ),
           ),
           const SizedBox(height: 16),
@@ -669,7 +617,7 @@ class _CallPredictionViewState extends State<CallPredictionView> {
                   'Total Calls',
                   totalDataPoints.toString(),
                   Icons.phone_callback,
-                  Colors.blue,
+                  AppDesignTokens.accentBlue,
                 ),
               ),
               const SizedBox(width: 12),
@@ -678,7 +626,7 @@ class _CallPredictionViewState extends State<CallPredictionView> {
                   'Answered',
                   totalAnswered.toString(),
                   Icons.check_circle,
-                  Colors.green,
+                  AppDesignTokens.success,
                 ),
               ),
             ],
@@ -691,7 +639,7 @@ class _CallPredictionViewState extends State<CallPredictionView> {
                   'Success Rate',
                   '${(overallSuccessRate * 100).toStringAsFixed(1)}%',
                   Icons.trending_up,
-                  Colors.purple,
+                  AppDesignTokens.primary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -700,7 +648,7 @@ class _CallPredictionViewState extends State<CallPredictionView> {
                   'Time Slots',
                   _predictions.length.toString(),
                   Icons.access_time,
-                  Colors.orange,
+                  AppDesignTokens.warning,
                 ),
               ),
             ],
@@ -715,7 +663,7 @@ class _CallPredictionViewState extends State<CallPredictionView> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
       ),
       child: Column(
         children: [
@@ -723,20 +671,18 @@ class _CallPredictionViewState extends State<CallPredictionView> {
           const SizedBox(height: 8),
           Text(
             value,
-            style: AppleTypography.withAppleFont(
-              AppleTypography.headline6.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: color,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             label,
-            style: AppleTypography.withAppleFont(
-              AppleTypography.caption.copyWith(
-                color: Colors.grey[700],
-              ),
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppDesignTokens.neutral700,
             ),
             textAlign: TextAlign.center,
           ),

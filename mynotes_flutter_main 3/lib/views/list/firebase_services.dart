@@ -1244,20 +1244,36 @@ Future<void> showListDialog(BuildContext context) async {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text('Create New List'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.list_alt, color: Theme.of(context).colorScheme.primary, size: 22),
+            const SizedBox(width: 8),
+            const Text('Create list', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+          ],
+        ),
         content: TextField(
           controller: listNameController,
-          decoration: InputDecoration(hintText: 'Enter list name'),
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: 'Enter list name',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          ),
         ),
         actions: <Widget>[
           TextButton(
-            child: Text('Cancel'),
+            child: Text('Cancel', style: TextStyle(color: Colors.grey.shade600)),
             onPressed: () {
               Navigator.of(context).pop();
             },
           ),
-          TextButton(
-            child: Text('OK'),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Create'),
             onPressed: () {
               String listName = listNameController.text;
               addNewList(listName);

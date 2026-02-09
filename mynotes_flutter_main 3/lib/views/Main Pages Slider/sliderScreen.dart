@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:cupertino_native/cupertino_native.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
+import 'package:flutter_application_1/theme/components/app_components.dart';
 
 import 'package:flutter_application_1/views/list/list_view_visible.dart';
 import 'package:flutter_application_1/views/profile/user_profile_editor.dart';
@@ -154,16 +155,16 @@ class _OnBoardingScreenState extends State<sliderScreen> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.blue.withOpacity(0.1) : Colors.grey.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(10),
+          color: isSelected ? AppDesignTokens.primarySoft : AppDesignTokens.neutral100,
+          borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
           border: Border.all(
-            color: isSelected ? Colors.blue : Colors.grey.withOpacity(0.3),
+            color: isSelected ? AppDesignTokens.primary : AppDesignTokens.neutral300,
             width: isSelected ? 2 : 1,
           ),
         ),
         child: Row(
           children: [
-            Icon(icon, color: isSelected ? Colors.blue : Colors.grey, size: 28),
+            Icon(icon, color: isSelected ? AppDesignTokens.primary : AppDesignTokens.neutral400, size: 28),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -173,17 +174,17 @@ class _OnBoardingScreenState extends State<sliderScreen> {
                     title,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: isSelected ? Colors.blue : Colors.black87,
+                      color: isSelected ? AppDesignTokens.primary : AppDesignTokens.neutral900,
                     ),
                   ),
                   Text(
                     subtitle,
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    style: TextStyle(fontSize: 12, color: AppDesignTokens.neutral500),
                   ),
                 ],
               ),
             ),
-            if (isSelected) const Icon(Icons.check_circle, color: Colors.blue),
+            if (isSelected) const Icon(Icons.check_circle, color: AppDesignTokens.primary),
           ],
         ),
       ),
@@ -244,7 +245,7 @@ class _OnBoardingScreenState extends State<sliderScreen> {
   Widget build(BuildContext context) {
     if (_roleLoading) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: Center(child: CircularProgressIndicator(color: AppDesignTokens.primary)),
       );
     }
 

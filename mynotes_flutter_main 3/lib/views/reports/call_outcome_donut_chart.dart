@@ -6,7 +6,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
 import 'package:flutter_application_1/theme/app_colors.dart';
-import 'package:flutter_application_1/utilities/apple_typography.dart';
+import 'package:flutter_application_1/theme/components/app_components.dart';
 import 'package:intl/intl.dart';
 
 class CallOutcomeDonutChart extends StatefulWidget {
@@ -230,7 +230,7 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
+              color: AppDesignTokens.neutral800,
             ),
           ),
           const SizedBox(height: 8),
@@ -238,7 +238,7 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
             'Overall success rate at a glance',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[600],
+              color: AppDesignTokens.neutral600,
             ),
           ),
           const SizedBox(height: 16),
@@ -253,7 +253,7 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
                       'Period:',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.grey[700],
+                        color: AppDesignTokens.neutral700,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -330,13 +330,13 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.pie_chart_outline, size: 64, color: Colors.grey[400]),
+                    Icon(Icons.pie_chart_outline, size: 64, color: AppDesignTokens.neutral400),
                     const SizedBox(height: 16),
                     Text(
                       'No call data for ${_getTimeRangeLabel().toLowerCase()}',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.grey[600],
+                        color: AppDesignTokens.neutral600,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -344,7 +344,7 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
                       'Make some calls to see outcome statistics',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[500],
+                        color: AppDesignTokens.neutral500,
                       ),
                     ),
                   ],
@@ -386,20 +386,17 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
                         children: [
                           Text(
                             '$_totalCalls',
-                            style: AppleTypography.withAppleFont(
-                              TextStyle(
-                                fontSize: 40,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey[800],
-                              )
+                            style: TextStyle(
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                              color: AppDesignTokens.neutral800,
                             ),
                           ),
                           Text(
                             'Total Calls',
-                            style: AppleTypography.withAppleFont(
-                              AppleTypography.body2.copyWith(
-                                color: Colors.grey[600],
-                              )
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: AppDesignTokens.neutral600,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -407,7 +404,7 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
                             _getTimeRangeLabel(),
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[500],
+                              color: AppDesignTokens.neutral500,
                               fontStyle: FontStyle.italic,
                             ),
                           ),
@@ -429,8 +426,8 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(8),
+                color: AppDesignTokens.neutral100,
+                borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -440,7 +437,7 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
+                      color: AppDesignTokens.neutral800,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -448,21 +445,21 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
                     'Connected',
                     _connectedCalls,
                     _getPercentage(_connectedCalls),
-                    Colors.green,
+                    AppDesignTokens.success,
                   ),
                   const SizedBox(height: 12),
                   _buildOutcomeRow(
                     'No Answer',
                     _noAnswerCalls,
                     _getPercentage(_noAnswerCalls),
-                    Colors.orange,
+                    AppDesignTokens.warning,
                   ),
                   const SizedBox(height: 12),
                   _buildOutcomeRow(
                     'Busy/Failed',
                     _busyFailedCalls,
                     _getPercentage(_busyFailedCalls),
-                    Colors.red,
+                    AppDesignTokens.danger,
                   ),
                   const SizedBox(height: 12),
                   _buildOutcomeRow(
@@ -479,11 +476,10 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
                     children: [
                       Text(
                         'Success Rate',
-                        style: AppleTypography.withAppleFont(
-                          AppleTypography.body1.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[800],
-                          )
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppDesignTokens.neutral800,
                         ),
                       ),
                       Text(
@@ -491,7 +487,7 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.green,
+                          color: AppDesignTokens.success,
                         ),
                       ),
                     ],
@@ -509,7 +505,7 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
   List<PieChartSectionData> _buildPieChartSections() {
     return [
       PieChartSectionData(
-        color: Colors.green,
+        color: AppDesignTokens.success,
         value: _connectedCalls.toDouble(),
         title: _touchedIndex == 0 ? '${_getPercentage(_connectedCalls).toStringAsFixed(1)}%' : '',
         radius: _touchedIndex == 0 ? 70 : 60,
@@ -520,7 +516,7 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
         ),
       ),
       PieChartSectionData(
-        color: Colors.orange,
+        color: AppDesignTokens.warning,
         value: _noAnswerCalls.toDouble(),
         title: _touchedIndex == 1 ? '${_getPercentage(_noAnswerCalls).toStringAsFixed(1)}%' : '',
         radius: _touchedIndex == 1 ? 70 : 60,
@@ -531,7 +527,7 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
         ),
       ),
       PieChartSectionData(
-        color: Colors.red,
+        color: AppDesignTokens.danger,
         value: _busyFailedCalls.toDouble(),
         title: _touchedIndex == 2 ? '${_getPercentage(_busyFailedCalls).toStringAsFixed(1)}%' : '',
         radius: _touchedIndex == 2 ? 70 : 60,
@@ -563,19 +559,19 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
       children: [
         _buildLegendItem(
           'Connected',
-          Colors.green,
+          AppDesignTokens.success,
           _connectedCalls,
           _getPercentage(_connectedCalls),
         ),
         _buildLegendItem(
           'No Answer',
-          Colors.orange,
+          AppDesignTokens.warning,
           _noAnswerCalls,
           _getPercentage(_noAnswerCalls),
         ),
         _buildLegendItem(
           'Busy/Failed',
-          Colors.red,
+          AppDesignTokens.danger,
           _busyFailedCalls,
           _getPercentage(_busyFailedCalls),
         ),
@@ -661,7 +657,7 @@ class _CallOutcomeDonutChartState extends State<CallOutcomeDonutChart> {
         const SizedBox(height: 6),
         LinearProgressIndicator(
           value: percentage / 100,
-          backgroundColor: Colors.grey.shade300,
+          backgroundColor: AppDesignTokens.neutral300,
           valueColor: AlwaysStoppedAnimation<Color>(color),
           minHeight: 8,
         ),

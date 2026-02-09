@@ -10,6 +10,7 @@ import 'package:flutter_application_1/enums/menu_action.dart';
 import 'package:flutter_application_1/utilities/dialogs/logout_dialog.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
 import 'package:flutter_application_1/utilities/apple_typography.dart';
+import 'package:flutter_application_1/theme/components/app_components.dart';
 import 'package:intl/intl.dart';
 
 import 'heatmap/call_heatmap.dart';
@@ -383,17 +384,25 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
+        backgroundColor: AppDesignTokens.surface,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
         title: Text(
           'Reports View',
           style: AppleTypography.withAppleFont(
             AppleTypography.headline5.copyWith(
               fontWeight: FontWeight.normal,
+              color: AppDesignTokens.neutral900,
             )
           ),
         ),
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
+          indicatorColor: AppDesignTokens.primary,
+          labelColor: AppDesignTokens.primary,
+          unselectedLabelColor: AppDesignTokens.neutral500,
+          indicatorWeight: 3,
           tabs: const [
             Tab(
               icon: Icon(Icons.grid_on),
@@ -477,7 +486,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
               // Heatmap Card
               Card(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
                 ),
                 margin: const EdgeInsets.all(8.0),
                 child: Column(
@@ -493,7 +502,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                             style: AppleTypography.withAppleFont(
                               AppleTypography.headline5.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.grey[800],
+                                color: AppDesignTokens.neutral800,
                               )
                             ),
                           ),
@@ -505,7 +514,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                                 'Filter by Contact:',
                                 style: AppleTypography.withAppleFont(
                                   AppleTypography.body1.copyWith(
-                                    color: Colors.grey[700],
+                                    color: AppDesignTokens.neutral700,
                                   )
                                 ),
                               ),
@@ -576,7 +585,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                                 'Filter by List:',
                                 style: AppleTypography.withAppleFont(
                                   AppleTypography.body1.copyWith(
-                                    color: Colors.grey[700],
+                                    color: AppDesignTokens.neutral700,
                                   )
                                 ),
                               ),
@@ -643,7 +652,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                                 'Time Scale:',
                                 style: AppleTypography.withAppleFont(
                                   AppleTypography.body1.copyWith(
-                                    color: Colors.grey[700],
+                                    color: AppDesignTokens.neutral700,
                                   )
                                 ),
                               ),
@@ -690,7 +699,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                                 'Selected: ${DateFormat('MMM d').format(_customStartDate!)} - ${DateFormat('MMM d, yyyy').format(_customEndDate!)}',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey[600],
+                                  color: AppDesignTokens.neutral600,
                                   fontStyle: FontStyle.italic,
                                 ),
                               ),
@@ -703,7 +712,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                                 'Max Call Threshold:',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: Colors.grey[700],
+                                  color: AppDesignTokens.neutral700,
                                 ),
                               ),
                               const SizedBox(width: 16),
@@ -742,7 +751,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                                 },
                                 child: const Text(
                                   'Refresh Data',
-                                  style: TextStyle(color: Colors.green),
+                                  style: TextStyle(color: AppDesignTokens.success),
                                 ),
                               ),
                               TextButton(
@@ -828,7 +837,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
           children: [
             Card(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
               ),
               margin: const EdgeInsets.all(8.0),
               child: Column(
@@ -845,7 +854,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                               'Filter by List:',
                               style: AppleTypography.withAppleFont(
                                 AppleTypography.body1.copyWith(
-                                  color: Colors.grey[700],
+                                  color: AppDesignTokens.neutral700,
                                 )
                               ),
                             ),
@@ -924,7 +933,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
             ),
             Card(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
               ),
               margin: const EdgeInsets.all(8.0),
               child: WeeklyCallsChart(
@@ -949,7 +958,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
           children: [
             Card(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
               ),
               margin: const EdgeInsets.all(8.0),
               child: Column(
@@ -966,7 +975,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
                               'Filter by List:',
                               style: AppleTypography.withAppleFont(
                                 AppleTypography.body1.copyWith(
-                                  color: Colors.grey[700],
+                                  color: AppDesignTokens.neutral700,
                                 )
                               ),
                             ),
@@ -1045,7 +1054,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
             ),
             Card(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
               ),
               margin: const EdgeInsets.all(8.0),
               child: CallDurationChart(
@@ -1068,7 +1077,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
       child: SingleChildScrollView(
         child: Card(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
           ),
           margin: const EdgeInsets.all(8.0),
           child: ListPerformanceChart(selectedList: _selectedListFilter),
@@ -1086,7 +1095,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
           children: [
             Card(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
               ),
               margin: const EdgeInsets.all(8.0),
               child: Padding(
@@ -1106,7 +1115,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
             ),
             Card(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
               ),
               margin: const EdgeInsets.all(8.0),
               child: CallOutcomeDonutChart(
@@ -1137,7 +1146,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
               'Time Range:',
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey[700],
+                color: AppDesignTokens.neutral700,
               ),
             ),
             const SizedBox(width: 16),
@@ -1180,7 +1189,7 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
               'Selected: ${DateFormat('MMM d').format(customStartDate)} - ${DateFormat('MMM d, yyyy').format(customEndDate)}',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey[600],
+                color: AppDesignTokens.neutral600,
                 fontStyle: FontStyle.italic,
               ),
             ),

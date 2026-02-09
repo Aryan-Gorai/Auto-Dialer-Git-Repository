@@ -8,6 +8,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
 import 'package:flutter_application_1/theme/app_colors.dart';
+import 'package:flutter_application_1/theme/components/app_components.dart';
 import 'package:intl/intl.dart';
 
 class WeeklyCallsChart extends StatefulWidget {
@@ -631,7 +632,7 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
+              color: AppDesignTokens.neutral800,
             ),
           ),
           const SizedBox(height: 8),
@@ -639,7 +640,7 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
             'Track calling patterns and identify peak productivity days',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[600],
+              color: AppDesignTokens.neutral600,
             ),
           ),
           const SizedBox(height: 16),
@@ -654,7 +655,7 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
                       'Time Range:',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.grey[700],
+                        color: AppDesignTokens.neutral700,
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -720,7 +721,7 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
                       'Selected: ${DateFormat('MMM d').format(_customStartDate!)} - ${DateFormat('MMM d, yyyy').format(_customEndDate!)}',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey[600],
+                        color: AppDesignTokens.neutral600,
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -734,9 +735,9 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
             spacing: 16,
             runSpacing: 8,
             children: [
-              _buildLegendItem('Successful', Colors.green),
-              _buildLegendItem('Failed', Colors.red),
-              _buildLegendItem('Missed Callbacks', Colors.orange),
+              _buildLegendItem('Successful', AppDesignTokens.success),
+              _buildLegendItem('Failed', AppDesignTokens.danger),
+              _buildLegendItem('Missed Callbacks', AppDesignTokens.warning),
               _buildLegendItem('7-Day Avg', AppColors.coral.withOpacity(0.4)),
             ],
           ),
@@ -756,13 +757,13 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.phone_disabled, size: 64, color: Colors.grey[400]),
+                    Icon(Icons.phone_disabled, size: 64, color: AppDesignTokens.neutral400),
                     const SizedBox(height: 16),
                     Text(
                       'No call data found for selected period',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.grey[600],
+                        color: AppDesignTokens.neutral600,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -770,7 +771,7 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
                       'Try selecting a different time range',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[500],
+                        color: AppDesignTokens.neutral500,
                       ),
                     ),
                   ],
@@ -789,13 +790,13 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
                     verticalInterval: 1,
                     getDrawingHorizontalLine: (value) {
                       return FlLine(
-                        color: Colors.grey.shade300,
+                        color: AppDesignTokens.neutral300,
                         strokeWidth: 1,
                       );
                     },
                     getDrawingVerticalLine: (value) {
                       return FlLine(
-                        color: Colors.grey.shade300,
+                        color: AppDesignTokens.neutral300,
                         strokeWidth: 1,
                       );
                     },
@@ -870,7 +871,7 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
                   ),
                   borderData: FlBorderData(
                     show: true,
-                    border: Border.all(color: Colors.grey.shade400),
+                    border: Border.all(color: AppDesignTokens.neutral400),
                   ),
                   minX: 0,
                   maxX: _useWeeklyView ? 6 : (_callDataByDate.length - 1).toDouble(),
@@ -962,7 +963,7 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
                                 TextSpan(
                                   text: '━━━━━━━━━\n',
                                   style: TextStyle(
-                                    color: Colors.grey.shade400,
+                                    color: AppDesignTokens.neutral400,
                                     fontSize: 10,
                                   ),
                                 ),
@@ -989,7 +990,7 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
                       return spotIndexes.map((spotIndex) {
                         return TouchedSpotIndicatorData(
                           FlLine(
-                            color: Colors.grey.shade800,
+                            color: AppDesignTokens.neutral800,
                             strokeWidth: 2,
                           ),
                           FlDotData(
@@ -1011,39 +1012,39 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
                     LineChartBarData(
                       spots: _successfulSpots,
                       isCurved: true,
-                      color: Colors.green,
+                      color: AppDesignTokens.success,
                       barWidth: 3,
                       isStrokeCapRound: true,
                       dotData: const FlDotData(show: true),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: Colors.green.withOpacity(0.1),
+                        color: AppDesignTokens.success.withOpacity(0.1),
                       ),
                     ),
                     // Failed calls line
                     LineChartBarData(
                       spots: _failedSpots,
                       isCurved: true,
-                      color: Colors.red,
+                      color: AppDesignTokens.danger,
                       barWidth: 3,
                       isStrokeCapRound: true,
                       dotData: const FlDotData(show: true),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: Colors.red.withOpacity(0.1),
+                        color: AppDesignTokens.danger.withOpacity(0.1),
                       ),
                     ),
                     // Missed callbacks line
                     LineChartBarData(
                       spots: _missedSpots,
                       isCurved: true,
-                      color: Colors.orange,
+                      color: AppDesignTokens.warning,
                       barWidth: 3,
                       isStrokeCapRound: true,
                       dotData: const FlDotData(show: true),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: Colors.orange.withOpacity(0.1),
+                        color: AppDesignTokens.warning.withOpacity(0.1),
                       ),
                     ),
                     // Rolling average line
@@ -1068,8 +1069,8 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(8),
+                color: AppDesignTokens.neutral100,
+                borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1079,7 +1080,7 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
+                      color: AppDesignTokens.neutral800,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -1104,17 +1105,17 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
                             Expanded(
                               child: Row(
                                 children: [
-                                  _buildStatBadge('S: ${dayData.successfulCalls}', Colors.green),
+                                  _buildStatBadge('S: ${dayData.successfulCalls}', AppDesignTokens.success),
                                   const SizedBox(width: 8),
-                                  _buildStatBadge('F: ${dayData.failedCalls}', Colors.red),
+                                  _buildStatBadge('F: ${dayData.failedCalls}', AppDesignTokens.danger),
                                   const SizedBox(width: 8),
-                                  _buildStatBadge('M: ${dayData.missedCallbacks}', Colors.orange),
+                                  _buildStatBadge('M: ${dayData.missedCallbacks}', AppDesignTokens.warning),
                                   const SizedBox(width: 8),
                                   Text(
                                     'Total: $total',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: Colors.grey[700],
+                                      color: AppDesignTokens.neutral700,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -1152,14 +1153,14 @@ class _WeeklyCallsChartState extends State<WeeklyCallsChart> {
                                   spacing: 6,
                                   runSpacing: 4,
                                   children: [
-                                    _buildStatBadge('S: ${dayData.successfulCalls}', Colors.green),
-                                    _buildStatBadge('F: ${dayData.failedCalls}', Colors.red),
-                                    _buildStatBadge('M: ${dayData.missedCallbacks}', Colors.orange),
+                                    _buildStatBadge('S: ${dayData.successfulCalls}', AppDesignTokens.success),
+                                    _buildStatBadge('F: ${dayData.failedCalls}', AppDesignTokens.danger),
+                                    _buildStatBadge('M: ${dayData.missedCallbacks}', AppDesignTokens.warning),
                                     Text(
                                       'Total: $total',
                                       style: TextStyle(
                                         fontSize: 11,
-                                        color: Colors.grey[700],
+                                        color: AppDesignTokens.neutral700,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),

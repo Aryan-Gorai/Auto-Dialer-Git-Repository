@@ -8,8 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/views/dialer/dialer.dart';
 import 'package:flutter_application_1/views/list/firebase_services.dart';
-import 'package:flutter_application_1/utilities/apple_typography.dart';
-import 'package:cupertino_native/cupertino_native.dart';
+import 'package:flutter_application_1/theme/components/app_components.dart';
 
 
 class list_view_visible extends StatefulWidget {
@@ -104,6 +103,8 @@ class _list_view_visibleState extends State<list_view_visible> with SingleTicker
   bool isLoading = true;
   late AnimationController _animationController;
   Map<String, TextEditingController> descriptionControllers = {};
+  final Map<String, ExpansionTileController> _expansionControllers = {};
+  final Set<String> _expandedTiles = {};
 
   @override
   void initState() {
@@ -267,31 +268,55 @@ class _list_view_visibleState extends State<list_view_visible> with SingleTicker
 @override
 Widget build(BuildContext context) {
   return Scaffold(
-    backgroundColor: const Color.fromRGBO(248, 248, 250, 1),
+    backgroundColor: AppDesignTokens.scaffoldBg,
     body: SafeArea(
       child: Column(
         children: [
           // Header
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  'Lists',
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.headline3.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: const Color.fromRGBO(64, 105, 225, 1),
-                    ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Lists',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w700,
+                          color: AppDesignTokens.neutral900,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Drag to reorder calling queues',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppDesignTokens.neutral500,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Drag to reorder',
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.body2.copyWith(color: Colors.grey.shade600),
-                  ),
+                const SizedBox(width: 12),
+                AppPrimaryButton(
+                  label: 'New list',
+                  icon: Icons.add,
+                  height: 40,
+                  expanded: false,
+                  onPressed: () async {
+                    await showListDialog(context);
+                    fetchTilesAsArray(userId).then((contacts) {
+                      setState(() {
+                        myTiles = contacts;
+                        isLoading = false;
+                      });
+                    });
+                  },
                 ),
               ],
             ),
@@ -302,275 +327,278 @@ Widget build(BuildContext context) {
               onTap: () {
                 FocusScope.of(context).unfocus();
               },
-              child: Stack(
-                children: [
-                  isLoading
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const CircularProgressIndicator(
-                                color: Color.fromRGBO(64, 105, 225, 1),
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Loading lists...',
-                                style: AppleTypography.withAppleFont(
-                                  AppleTypography.body1.copyWith(color: Colors.grey.shade600),
-                                ),
-                              ),
-                            ],
+              child: isLoading
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const CircularProgressIndicator(
+                            color: AppDesignTokens.primary,
                           ),
-                        )
-                      : ReorderableListView.builder(
-                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
-                          itemCount: myTiles.length,
-                          onReorder: onReorder,
-                          buildDefaultDragHandles: false,
-                          proxyDecorator: (child, index, animation) {
-                            return Material(
-                              color: Colors.transparent,
-                              child: child,
-                            );
-                          },
-                          itemBuilder: (context, index) {
-                            final tile = myTiles[index];
-                            return Padding(
-                              key: ValueKey(tile),
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: Material(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                                clipBehavior: Clip.antiAlias,
-                                elevation: 1,
-                                shadowColor: Colors.black.withOpacity(0.1),
-                                child: Theme(
-                                  data: Theme.of(context).copyWith(
-                                    dividerColor: Colors.transparent,
-                                    splashColor: Colors.transparent,
-                                    highlightColor: Colors.transparent,
+                          const SizedBox(height: 16),
+                          Text(
+                            'Loading lists...',
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: AppDesignTokens.neutral500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ReorderableListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
+                      itemCount: myTiles.length,
+                      onReorder: onReorder,
+                      buildDefaultDragHandles: false,
+                      proxyDecorator: (child, index, animation) {
+                        return Material(
+                          color: Colors.transparent,
+                          child: child,
+                        );
+                      },
+                      itemBuilder: (context, index) {
+                        final tile = myTiles[index];
+                        _expansionControllers.putIfAbsent(tile, () => ExpansionTileController());
+                        final expansionController = _expansionControllers[tile]!;
+                        return Padding(
+                          key: ValueKey(tile),
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: AppDesignTokens.surface,
+                              borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+                              border: Border.all(color: AppDesignTokens.neutral200),
+                              boxShadow: AppDesignTokens.cardShadow,
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: Theme(
+                              data: Theme.of(context).copyWith(
+                                dividerColor: Colors.transparent,
+                                splashColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
+                              ),
+                              child: ExpansionTile(
+                                controller: expansionController,
+                                initiallyExpanded: false,
+                                maintainState: false,
+                                tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                                childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                                leading: ReorderableDragStartListener(
+                                  index: index,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: AppDesignTokens.neutral100,
+                                      borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
+                                    ),
+                                    child: const Icon(Icons.drag_handle, color: AppDesignTokens.neutral500),
                                   ),
-                                  child: ExpansionTile(
-                                    initiallyExpanded: false,
-                                    maintainState: false,
-                                    tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                                    childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                                    leading: ReorderableDragStartListener(
-                                      index: index,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(6),
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey.shade100,
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Icon(Icons.drag_handle, color: Colors.grey.shade600),
-                                      ),
-                                    ),
-                                    title: Text(
-                                      tile,
-                                      style: AppleTypography.withAppleFont(
-                                        AppleTypography.subtitle1.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.grey.shade800,
-                                        ),
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        CNButton.icon(
-                                          icon: const CNSymbol('person.2.fill', size: 20),
-                                          style: CNButtonStyle.prominentGlass,
-                                          onPressed: () {
-                                            Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                builder: (context) => DialerContactsView(listName: tile),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                        const SizedBox(width: 8),
-                                        IgnorePointer(
-                                          child: Opacity(
-                                            opacity: 0.5,
-                                            child: CNButton.icon(
-                                              icon: const CNSymbol('info.circle', size: 20),
-                                              style: CNButtonStyle.prominentGlass,
-                                              onPressed: () {},
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                ),
+                                title: Text(
+                                  tile,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppDesignTokens.neutral900,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    TextField(
-                                      controller: descriptionControllers[tile],
-                                      decoration: InputDecoration(
-                                        hintText: 'Enter list description',
-                                        hintStyle: AppleTypography.withAppleFont(
-                                          AppleTypography.body2.copyWith(color: Colors.grey.shade500),
-                                        ),
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: BorderSide(color: Colors.grey.shade300),
-                                        ),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: BorderSide(color: Colors.grey.shade300),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: const BorderSide(
-                                            color: Color.fromRGBO(64, 105, 225, 1),
-                                            width: 2,
-                                          ),
-                                        ),
-                                        filled: true,
-                                        fillColor: Colors.grey.shade50,
-                                      ),
-                                      maxLines: 3,
-                                      onChanged: (value) {
-                                        updateListDescription(tile, value);
-                                      },
-                                    ),
-                                    const SizedBox(height: 16),
-                                    FutureBuilder(
-                                      future: _getListStats(tile),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.hasData) {
-                                          final stats = snapshot.data as Map<String, dynamic>;
-                                          return Row(
-                                            children: [
-                                              Expanded(
-                                                child: Container(
-                                                  padding: const EdgeInsets.all(12),
-                                                  decoration: BoxDecoration(
-                                                    color: const Color.fromRGBO(64, 105, 225, 0.08),
-                                                    borderRadius: BorderRadius.circular(12),
-                                                  ),
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      Text(
-                                                        'Contacts',
-                                                        style: AppleTypography.withAppleFont(
-                                                          AppleTypography.caption.copyWith(color: Colors.grey.shade600),
-                                                        ),
-                                                      ),
-                                                      const SizedBox(height: 4),
-                                                      Text(
-                                                        '${stats['count']}',
-                                                        style: AppleTypography.withAppleFont(
-                                                          AppleTypography.subtitle1.copyWith(
-                                                            fontWeight: FontWeight.w600,
-                                                            color: const Color.fromRGBO(64, 105, 225, 1),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 12),
-                                              Expanded(
-                                                child: Container(
-                                                  padding: const EdgeInsets.all(12),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.grey.shade100,
-                                                    borderRadius: BorderRadius.circular(12),
-                                                  ),
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      Text(
-                                                        'Last dialed',
-                                                        style: AppleTypography.withAppleFont(
-                                                          AppleTypography.caption.copyWith(color: Colors.grey.shade600),
-                                                        ),
-                                                      ),
-                                                      const SizedBox(height: 4),
-                                                      Text(
-                                                        '${stats['lastDialed'] ?? 'Never'}',
-                                                        style: AppleTypography.withAppleFont(
-                                                          AppleTypography.body2.copyWith(
-                                                            fontWeight: FontWeight.w600,
-                                                            color: Colors.grey.shade800,
-                                                          ),
-                                                        ),
-                                                        maxLines: 2,
-                                                        overflow: TextOverflow.ellipsis,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          );
-                                        }
-                                        return const Center(
-                                          child: SizedBox(
-                                            height: 24,
-                                            width: 24,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              color: Color.fromRGBO(64, 105, 225, 1),
-                                            ),
+                                    AppIconButton(
+                                      icon: Icons.people_outline,
+                                      iconColor: AppDesignTokens.primary,
+                                      backgroundColor: AppDesignTokens.primarySoft,
+                                      size: 38,
+                                      tooltip: 'View contacts',
+                                      onPressed: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) => DialerContactsView(listName: tile),
                                           ),
                                         );
                                       },
                                     ),
-                                    const SizedBox(height: 16),
-                                    Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: TextButton.icon(
-                                        onPressed: () {
-                                          deleteSpecificContact(tile);
-                                        },
-                                        icon: const Icon(Icons.delete_outline, color: Colors.red),
-                                        label: Text(
-                                          'Delete',
-                                          style: AppleTypography.withAppleFont(
-                                            AppleTypography.body2.copyWith(color: Colors.red),
-                                          ),
-                                        ),
-                                      ),
+                                    const SizedBox(width: 8),
+                                    AppIconButton(
+                                      icon: Icons.info_outline,
+                                      iconColor: AppDesignTokens.neutral500,
+                                      backgroundColor: AppDesignTokens.neutral100,
+                                      size: 38,
+                                      tooltip: 'Details',
+                                      onPressed: () {
+                                        if (_expandedTiles.contains(tile)) {
+                                          expansionController.collapse();
+                                        } else {
+                                          expansionController.expand();
+                                        }
+                                      },
                                     ),
                                   ],
-                                  onExpansionChanged: (expanded) {
-                                    if (expanded) {
-                                      _animationController.forward();
-                                      FocusScope.of(context).unfocus();
-                                    } else {
-                                      _animationController.reverse();
-                                    }
+                                ),
+                              children: [
+                                // Description field
+                                TextField(
+                                  controller: descriptionControllers[tile],
+                                  decoration: InputDecoration(
+                                    hintText: 'Enter list description',
+                                    hintStyle: const TextStyle(
+                                      fontSize: 14,
+                                      color: AppDesignTokens.neutral400,
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
+                                      borderSide: const BorderSide(color: AppDesignTokens.neutral300),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
+                                      borderSide: const BorderSide(color: AppDesignTokens.neutral300),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
+                                      borderSide: const BorderSide(
+                                        color: AppDesignTokens.primary,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    filled: true,
+                                    fillColor: AppDesignTokens.neutral50,
+                                  ),
+                                  maxLines: 3,
+                                  onChanged: (value) {
+                                    updateListDescription(tile, value);
                                   },
                                 ),
-                              ),
+                                const SizedBox(height: 16),
+                                // Stats tiles
+                                FutureBuilder(
+                                  future: _getListStats(tile),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      final stats = snapshot.data as Map<String, dynamic>;
+                                      return Row(
+                                        children: [
+                                          Expanded(
+                                            child: Container(
+                                              padding: const EdgeInsets.all(14),
+                                              decoration: BoxDecoration(
+                                                color: AppDesignTokens.primary.withOpacity(0.06),
+                                                borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+                                                border: Border.all(color: AppDesignTokens.primary.withOpacity(0.15)),
+                                              ),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Contacts',
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      fontWeight: FontWeight.w500,
+                                                      color: AppDesignTokens.neutral600,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    '${stats['count']}',
+                                                    style: const TextStyle(
+                                                      fontSize: 20,
+                                                      fontWeight: FontWeight.w700,
+                                                      color: AppDesignTokens.primary,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Container(
+                                              padding: const EdgeInsets.all(14),
+                                              decoration: BoxDecoration(
+                                                color: AppDesignTokens.neutral100,
+                                                borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+                                                border: Border.all(color: AppDesignTokens.neutral200),
+                                              ),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Last dialed',
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      fontWeight: FontWeight.w500,
+                                                      color: AppDesignTokens.neutral600,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    '${stats['lastDialed'] ?? 'Never'}',
+                                                    style: const TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: AppDesignTokens.neutral800,
+                                                    ),
+                                                    maxLines: 2,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    }
+                                    return const Center(
+                                      child: SizedBox(
+                                        height: 24,
+                                        width: 24,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: AppDesignTokens.primary,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                const SizedBox(height: 14),
+                                // Delete button
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: TextButton.icon(
+                                    onPressed: () {
+                                      deleteSpecificContact(tile);
+                                    },
+                                    icon: const Icon(Icons.delete_outline, color: AppDesignTokens.danger, size: 18),
+                                    label: const Text(
+                                      'Delete list',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppDesignTokens.danger,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                              onExpansionChanged: (expanded) {
+                                if (expanded) {
+                                  _expandedTiles.add(tile);
+                                  _animationController.forward();
+                                  FocusScope.of(context).unfocus();
+                                } else {
+                                  _expandedTiles.remove(tile);
+                                  _animationController.reverse();
+                                }
+                              },
                             ),
-                          );
-                        },
-                      ),
-                  Positioned(
-                    bottom: 30,
-                    right: 30,
-                    child: CNButton.icon(
-                      icon: const CNSymbol('plus', size: 22),
-                      style: CNButtonStyle.prominentGlass,
-                      onPressed: () async {
-                        await showListDialog(context);
-                        fetchTilesAsArray(userId).then((contacts) {
-                          setState(() {
-                            myTiles = contacts;
-                            isLoading = false;
-                          });
-                        });
-                      },
-                    ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                ],
-              ),
             ),
           ),
         ],

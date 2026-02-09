@@ -9,7 +9,7 @@ import 'package:flutter_application_1/services/auth/auth_service.dart';
 import 'package:flutter_application_1/services/ml/linear_regression.dart';
 import 'package:flutter_application_1/services/ml/wilson_score.dart';
 import 'package:flutter_application_1/services/ml/kaplan_meier.dart';
-import 'package:flutter_application_1/utilities/apple_typography.dart';
+import 'package:flutter_application_1/theme/components/app_components.dart';
 
 class LinearRegressionStatsView extends StatefulWidget {
   final String? targetUserId;
@@ -134,20 +134,18 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
               // Page title
               Text(
                 'Machine Learning Analytics',
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.headline4.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
-                  ),
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: AppDesignTokens.neutral800,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Advanced statistical analysis powered by AI',
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.body2.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppDesignTokens.neutral600,
                 ),
               ),
               const SizedBox(height: 20),
@@ -186,15 +184,9 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
   Widget _buildLinearRegressionSection() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: AppDesignTokens.surface,
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+        boxShadow: AppDesignTokens.cardShadow,
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -210,13 +202,8 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
           leading: Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  Color.fromRGBO(64, 105, 225, 1),
-                  Color.fromRGBO(100, 140, 255, 1),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(10),
+              gradient: AppDesignTokens.primaryGradient,
+              borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
             ),
             child: const Icon(
               Icons.functions,
@@ -226,19 +213,17 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
           ),
           title: Text(
             'Linear Regression',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.headline6.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppDesignTokens.neutral800,
             ),
           ),
           subtitle: Text(
             'Predict lead conversion likelihood',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.caption.copyWith(
-                color: Colors.grey[600],
-              ),
+            style: TextStyle(
+              fontSize: 12,
+              color: AppDesignTokens.neutral600,
             ),
           ),
           children: [
@@ -261,15 +246,9 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
   Widget _buildWilsonScoreSection() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: AppDesignTokens.surface,
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+        boxShadow: AppDesignTokens.cardShadow,
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -285,13 +264,13 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
           leading: Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
+              gradient: LinearGradient(
                 colors: [
-                  Color.fromRGBO(138, 43, 226, 1),
-                  Color.fromRGBO(168, 85, 247, 1),
+                  AppDesignTokens.primaryDark,
+                  AppDesignTokens.primary,
                 ],
               ),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
             ),
             child: const Icon(
               Icons.analytics,
@@ -301,19 +280,17 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
           ),
           title: Text(
             'Wilson Score',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.headline6.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppDesignTokens.neutral800,
             ),
           ),
           subtitle: Text(
             'Statistical confidence in success rates',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.caption.copyWith(
-                color: Colors.grey[600],
-              ),
+            style: TextStyle(
+              fontSize: 12,
+              color: AppDesignTokens.neutral600,
             ),
           ),
           children: [
@@ -333,18 +310,18 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           colors: [
-            Color.fromRGBO(138, 43, 226, 1),
-            Color.fromRGBO(168, 85, 247, 1),
+            AppDesignTokens.primaryDark,
+            AppDesignTokens.primary,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg),
         boxShadow: [
           BoxShadow(
-            color: const Color.fromRGBO(138, 43, 226, 0.3),
+            color: AppDesignTokens.primaryDark.withOpacity(0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -355,11 +332,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
         children: [
           Text(
             'How Wilson Score Works',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.headline6.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 12),
@@ -367,29 +343,27 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Formula: CI = (p + z²/2n ± z√(p(1-p)/n + z²/4n²)) / (1 + z²/n)',
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.body2.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'monospace',
-                    ),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'monospace',
                   ),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   'What it does:',
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.body2.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -407,7 +381,7 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -418,11 +392,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                           const SizedBox(width: 8),
                           Text(
                             'Example:',
-                            style: AppleTypography.withAppleFont(
-                              AppleTypography.body2.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
@@ -430,47 +403,42 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                       const SizedBox(height: 6),
                       Text(
                         '• Contact A: 10/10 calls successful (100%)',
-                        style: AppleTypography.withAppleFont(
-                          AppleTypography.caption.copyWith(
-                            color: Colors.white.withOpacity(0.95),
-                          ),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white.withOpacity(0.95),
                         ),
                       ),
                       Text(
                         '  Wilson says: "Only 10 calls... true rate is 72%-100%"',
-                        style: AppleTypography.withAppleFont(
-                          AppleTypography.caption.copyWith(
-                            color: Colors.white.withOpacity(0.9),
-                            fontStyle: FontStyle.italic,
-                          ),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white.withOpacity(0.9),
+                          fontStyle: FontStyle.italic,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '• Contact B: 45/50 calls successful (90%)',
-                        style: AppleTypography.withAppleFont(
-                          AppleTypography.caption.copyWith(
-                            color: Colors.white.withOpacity(0.95),
-                          ),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white.withOpacity(0.95),
                         ),
                       ),
                       Text(
                         '  Wilson says: "50 calls is solid... true rate is 82%-96%"',
-                        style: AppleTypography.withAppleFont(
-                          AppleTypography.caption.copyWith(
-                            color: Colors.white.withOpacity(0.9),
-                            fontStyle: FontStyle.italic,
-                          ),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white.withOpacity(0.9),
+                          fontStyle: FontStyle.italic,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         '→ Contact B is more reliable despite lower percentage!',
-                        style: AppleTypography.withAppleFont(
-                          AppleTypography.caption.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
@@ -495,10 +463,9 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
           Expanded(
             child: Text(
               text,
-              style: AppleTypography.withAppleFont(
-                AppleTypography.caption.copyWith(
-                  color: Colors.white.withOpacity(0.95),
-                ),
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.white.withOpacity(0.95),
               ),
             ),
           ),
@@ -514,10 +481,9 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
           padding: const EdgeInsets.all(24.0),
           child: Text(
             'No data available for Wilson Score analysis',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.body2.copyWith(
-                color: Colors.grey[600],
-              ),
+            style: TextStyle(
+              fontSize: 14,
+              color: AppDesignTokens.neutral600,
             ),
           ),
         ),
@@ -529,15 +495,14 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
       children: [
         Row(
           children: [
-            const Icon(Icons.emoji_events, color: Colors.amber, size: 24),
+            Icon(Icons.emoji_events, color: AppDesignTokens.warning, size: 24),
             const SizedBox(width: 8),
             Text(
               'Confidence Rankings',
-              style: AppleTypography.withAppleFont(
-                AppleTypography.subtitle1.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[800],
-                ),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppDesignTokens.neutral800,
               ),
             ),
           ],
@@ -545,10 +510,9 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
         const SizedBox(height: 4),
         Text(
           'Contacts ranked by statistical confidence (most reliable first)',
-          style: AppleTypography.withAppleFont(
-            AppleTypography.caption.copyWith(
-              color: Colors.grey[600],
-            ),
+          style: TextStyle(
+            fontSize: 12,
+            color: AppDesignTokens.neutral600,
           ),
         ),
         const SizedBox(height: 16),
@@ -569,8 +533,8 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(10),
+        color: AppDesignTokens.neutral50,
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
         border: Border.all(
           color: confidenceColor.withOpacity(0.3),
           width: 1.5,
@@ -591,11 +555,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                 child: Center(
                   child: Text(
                     '$rank',
-                    style: AppleTypography.withAppleFont(
-                      AppleTypography.body2.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
@@ -607,11 +570,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                   children: [
                     Text(
                       result.contactName,
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.body1.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[800],
-                        ),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppDesignTokens.neutral800,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -619,10 +581,9 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                     const SizedBox(height: 2),
                     Text(
                       result.phoneNumber,
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.caption.copyWith(
-                          color: Colors.grey[600],
-                        ),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppDesignTokens.neutral600,
                       ),
                     ),
                   ],
@@ -635,7 +596,7 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: confidenceColor.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -644,11 +605,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                         const SizedBox(width: 4),
                         Text(
                           '${result.confidenceScore.toStringAsFixed(0)}%',
-                          style: AppleTypography.withAppleFont(
-                            AppleTypography.body2.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: confidenceColor,
-                            ),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: confidenceColor,
                           ),
                         ),
                       ],
@@ -657,11 +617,9 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                   const SizedBox(height: 4),
                   Text(
                     'confidence',
-                    style: AppleTypography.withAppleFont(
-                      AppleTypography.caption.copyWith(
-                        color: Colors.grey[500],
-                        fontSize: 10,
-                      ),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: AppDesignTokens.neutral500,
                     ),
                   ),
                 ],
@@ -674,8 +632,8 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
+              color: AppDesignTokens.surface,
+              borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -685,20 +643,18 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                   children: [
                     Text(
                       'Success Rate:',
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.caption.copyWith(
-                          color: Colors.grey[700],
-                          fontWeight: FontWeight.w600,
-                        ),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppDesignTokens.neutral700,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     Text(
                       '${(result.successRate * 100).toStringAsFixed(1)}%',
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.body1.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[800],
-                        ),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppDesignTokens.neutral800,
                       ),
                     ),
                   ],
@@ -709,19 +665,17 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                   children: [
                     Text(
                       '95% Confidence Interval:',
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.caption.copyWith(
-                          color: Colors.grey[600],
-                        ),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppDesignTokens.neutral600,
                       ),
                     ),
                     Text(
                       '${(result.lowerBound * 100).toStringAsFixed(1)}% - ${(result.upperBound * 100).toStringAsFixed(1)}%',
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.caption.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: confidenceColor,
-                        ),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: confidenceColor,
                       ),
                     ),
                   ],
@@ -730,7 +684,7 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                 Container(
                   height: 6,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
+                    color: AppDesignTokens.neutral200,
                     borderRadius: BorderRadius.circular(3),
                   ),
                   child: Stack(
@@ -771,7 +725,7 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                 child: _buildStatChip(
                   Icons.phone,
                   '${result.successfulCalls}/${result.totalCalls} answered',
-                  Colors.blue,
+                  AppDesignTokens.accentBlue,
                 ),
               ),
               const SizedBox(width: 8),
@@ -790,11 +744,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                       Expanded(
                         child: Text(
                           interpretation,
-                          style: AppleTypography.withAppleFont(
-                            AppleTypography.caption.copyWith(
-                              color: confidenceColor,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: confidenceColor,
+                            fontWeight: FontWeight.w600,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -815,26 +768,20 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
   // green (>=75), orange (>=50), red (<50).
   Color _getConfidenceColor(double confidenceScore) {
     if (confidenceScore >= 75) {
-      return Colors.green;
+      return AppDesignTokens.success;
     } else if (confidenceScore >= 50) {
-      return Colors.orange;
+      return AppDesignTokens.warning;
     } else {
-      return Colors.red;
+      return AppDesignTokens.danger;
     }
   }
 
   Widget _buildKaplanMeierSection() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: AppDesignTokens.surface,
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+        boxShadow: AppDesignTokens.cardShadow,
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -850,13 +797,8 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
           leading: Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  Color.fromRGBO(34, 139, 34, 1),
-                  Color.fromRGBO(60, 179, 113, 1),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(10),
+              gradient: AppDesignTokens.successGradient,
+              borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
             ),
             child: const Icon(
               Icons.timeline,
@@ -866,19 +808,17 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
           ),
           title: Text(
             'Kaplan-Meier Estimator',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.headline6.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppDesignTokens.neutral800,
             ),
           ),
           subtitle: Text(
             'Time-to-conversion survival analysis',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.caption.copyWith(
-                color: Colors.grey[600],
-              ),
+            style: TextStyle(
+              fontSize: 12,
+              color: AppDesignTokens.neutral600,
             ),
           ),
           children: [
@@ -898,18 +838,11 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color.fromRGBO(34, 139, 34, 1),
-            Color.fromRGBO(60, 179, 113, 1),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
+        gradient: AppDesignTokens.successGradient,
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg),
         boxShadow: [
           BoxShadow(
-            color: const Color.fromRGBO(34, 139, 34, 0.3),
+            color: AppDesignTokens.successDark.withOpacity(0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -920,11 +853,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
         children: [
           Text(
             'How Kaplan-Meier Works',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.headline6.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 12),
@@ -932,29 +864,27 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Formula: S(t) = Π(1 - dᵢ/nᵢ) for all i where tᵢ ≤ t',
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.body2.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'monospace',
-                    ),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'monospace',
                   ),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   'What it does:',
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.body2.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -972,7 +902,7 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -983,11 +913,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                           const SizedBox(width: 8),
                           Text(
                             'Example:',
-                            style: AppleTypography.withAppleFont(
-                              AppleTypography.body2.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
@@ -995,36 +924,32 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                       const SizedBox(height: 6),
                       Text(
                         '• Day 1: 100 leads, 10 convert → 90% haven\'t converted',
-                        style: AppleTypography.withAppleFont(
-                          AppleTypography.caption.copyWith(
-                            color: Colors.white.withOpacity(0.95),
-                          ),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white.withOpacity(0.95),
                         ),
                       ),
                       Text(
                         '• Day 3: 85 leads left, 15 convert → 70% haven\'t converted',
-                        style: AppleTypography.withAppleFont(
-                          AppleTypography.caption.copyWith(
-                            color: Colors.white.withOpacity(0.95),
-                          ),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white.withOpacity(0.95),
                         ),
                       ),
                       Text(
                         '• Day 7: 60 leads left, 20 convert → 47% haven\'t converted',
-                        style: AppleTypography.withAppleFont(
-                          AppleTypography.caption.copyWith(
-                            color: Colors.white.withOpacity(0.95),
-                          ),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white.withOpacity(0.95),
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         '→ By day 7, 53% of leads have converted!',
-                        style: AppleTypography.withAppleFont(
-                          AppleTypography.caption.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
@@ -1049,10 +974,9 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
           Expanded(
             child: Text(
               text,
-              style: AppleTypography.withAppleFont(
-                AppleTypography.caption.copyWith(
-                  color: Colors.white.withOpacity(0.95),
-                ),
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.white.withOpacity(0.95),
               ),
             ),
           ),
@@ -1068,10 +992,9 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
           padding: const EdgeInsets.all(24.0),
           child: Text(
             'No data available for Kaplan-Meier analysis',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.body2.copyWith(
-                color: Colors.grey[600],
-              ),
+            style: TextStyle(
+              fontSize: 14,
+              color: AppDesignTokens.neutral600,
             ),
           ),
         ),
@@ -1106,30 +1029,23 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: AppDesignTokens.surface,
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+        boxShadow: AppDesignTokens.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.summarize, color: Colors.green, size: 24),
+              Icon(Icons.summarize, color: AppDesignTokens.success, size: 24),
               const SizedBox(width: 8),
               Text(
                 'Summary Statistics',
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.subtitle1.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
-                  ),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppDesignTokens.neutral800,
                 ),
               ),
             ],
@@ -1142,7 +1058,7 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                   'Total Leads',
                   '${result.totalLeads}',
                   Icons.people,
-                  Colors.blue,
+                  AppDesignTokens.accentBlue,
                 ),
               ),
               const SizedBox(width: 12),
@@ -1151,7 +1067,7 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                   'Converted',
                   '${result.convertedLeads}',
                   Icons.check_circle,
-                  Colors.green,
+                  AppDesignTokens.success,
                 ),
               ),
             ],
@@ -1164,7 +1080,7 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                   'Not Yet Converted',
                   '${result.censoredLeads}',
                   Icons.hourglass_empty,
-                  Colors.orange,
+                  AppDesignTokens.warning,
                 ),
               ),
               const SizedBox(width: 12),
@@ -1173,7 +1089,7 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                   'Conversion Rate',
                   '${(conversionRate * 100).toStringAsFixed(1)}%',
                   Icons.trending_up,
-                  Colors.purple,
+                  AppDesignTokens.primary,
                 ),
               ),
             ],
@@ -1183,23 +1099,23 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                   colors: [
-                    Color.fromRGBO(34, 139, 34, 0.1),
-                    Color.fromRGBO(60, 179, 113, 0.1),
+                    AppDesignTokens.successSoft,
+                    AppDesignTokens.successSoft,
                   ],
                 ),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
                 border: Border.all(
-                  color: const Color.fromRGBO(34, 139, 34, 0.3),
+                  color: AppDesignTokens.successDark.withOpacity(0.3),
                   width: 1.5,
                 ),
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.access_time,
-                    color: Color.fromRGBO(34, 139, 34, 1),
+                    color: AppDesignTokens.successDark,
                     size: 24,
                   ),
                   const SizedBox(width: 12),
@@ -1209,31 +1125,27 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                       children: [
                         Text(
                           'Median Time to Conversion',
-                          style: AppleTypography.withAppleFont(
-                            AppleTypography.caption.copyWith(
-                              color: Colors.grey[700],
-                              fontWeight: FontWeight.w600,
-                            ),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppDesignTokens.neutral700,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${result.medianTimeToConversion!.toInt()} days',
-                          style: AppleTypography.withAppleFont(
-                            AppleTypography.headline5.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: const Color.fromRGBO(34, 139, 34, 1),
-                            ),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AppDesignTokens.successDark,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           '50% of leads convert by this time',
-                          style: AppleTypography.withAppleFont(
-                            AppleTypography.caption.copyWith(
-                              color: Colors.grey[600],
-                              fontSize: 11,
-                            ),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppDesignTokens.neutral600,
                           ),
                         ),
                       ],
@@ -1253,7 +1165,7 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1265,11 +1177,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
               Expanded(
                 child: Text(
                   label,
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.caption.copyWith(
-                      color: Colors.grey[700],
-                      fontWeight: FontWeight.w600,
-                    ),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppDesignTokens.neutral700,
+                    fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1280,11 +1191,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
           const SizedBox(height: 6),
           Text(
             value,
-            style: AppleTypography.withAppleFont(
-              AppleTypography.headline6.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: color,
             ),
           ),
         ],
@@ -1298,30 +1208,23 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: AppDesignTokens.surface,
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+        boxShadow: AppDesignTokens.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.timeline, color: Colors.green, size: 24),
+              Icon(Icons.timeline, color: AppDesignTokens.success, size: 24),
               const SizedBox(width: 8),
               Text(
                 'Conversion Timeline',
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.subtitle1.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
-                  ),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppDesignTokens.neutral800,
                 ),
               ),
             ],
@@ -1329,10 +1232,9 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
           const SizedBox(height: 4),
           Text(
             'Probability of conversion at key time points',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.caption.copyWith(
-                color: Colors.grey[600],
-              ),
+            style: TextStyle(
+              fontSize: 12,
+              color: AppDesignTokens.neutral600,
             ),
           ),
           const SizedBox(height: 16),
@@ -1359,8 +1261,8 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(8),
+        color: AppDesignTokens.neutral50,
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
         border: Border.all(
           color: color.withOpacity(0.3),
           width: 1.5,
@@ -1378,12 +1280,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
             child: Center(
               child: Text(
                 dayLabel,
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.caption.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                    fontSize: 11,
-                  ),
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: color,
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 1,
@@ -1403,11 +1303,9 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                     Flexible(
                       child: Text(
                         'Conversion Probability',
-                        style: AppleTypography.withAppleFont(
-                          AppleTypography.caption.copyWith(
-                            color: Colors.grey[600],
-                            fontSize: 11,
-                          ),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppDesignTokens.neutral600,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -1416,12 +1314,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                     const SizedBox(width: 8),
                     Text(
                       '${percent.toStringAsFixed(1)}%',
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.body2.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: color,
-                          fontSize: 14,
-                        ),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: color,
                       ),
                     ),
                   ],
@@ -1429,7 +1325,7 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                 const SizedBox(height: 6),
                 LinearProgressIndicator(
                   value: (percent / 100).clamp(0.0, 1.0),
-                  backgroundColor: Colors.grey.shade200,
+                  backgroundColor: AppDesignTokens.neutral200,
                   valueColor: AlwaysStoppedAnimation<Color>(color),
                   minHeight: 6,
                   borderRadius: BorderRadius.circular(3),
@@ -1446,30 +1342,23 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: AppDesignTokens.surface,
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+        boxShadow: AppDesignTokens.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.show_chart, color: Colors.green, size: 24),
+              Icon(Icons.show_chart, color: AppDesignTokens.success, size: 24),
               const SizedBox(width: 8),
               Text(
                 'Survival Curve Data',
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.subtitle1.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
-                  ),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppDesignTokens.neutral800,
                 ),
               ),
             ],
@@ -1477,10 +1366,9 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
           const SizedBox(height: 4),
           Text(
             'Detailed conversion events over time',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.caption.copyWith(
-                color: Colors.grey[600],
-              ),
+            style: TextStyle(
+              fontSize: 12,
+              color: AppDesignTokens.neutral600,
             ),
           ),
           const SizedBox(height: 16),
@@ -1488,7 +1376,7 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: AppDesignTokens.neutral100,
               borderRadius: BorderRadius.circular(6),
             ),
             child: Row(
@@ -1497,11 +1385,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                   flex: 2,
                   child: Text(
                     'Day',
-                    style: AppleTypography.withAppleFont(
-                      AppleTypography.caption.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[700],
-                      ),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: AppDesignTokens.neutral700,
                     ),
                   ),
                 ),
@@ -1509,11 +1396,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                   flex: 2,
                   child: Text(
                     'At Risk',
-                    style: AppleTypography.withAppleFont(
-                      AppleTypography.caption.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[700],
-                      ),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: AppDesignTokens.neutral700,
                     ),
                   ),
                 ),
@@ -1521,11 +1407,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                   flex: 3,
                   child: Text(
                     'Converted',
-                    style: AppleTypography.withAppleFont(
-                      AppleTypography.caption.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[700],
-                      ),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: AppDesignTokens.neutral700,
                     ),
                   ),
                 ),
@@ -1533,11 +1418,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                   flex: 3,
                   child: Text(
                     'Conversion %',
-                    style: AppleTypography.withAppleFont(
-                      AppleTypography.caption.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[700],
-                      ),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: AppDesignTokens.neutral700,
                     ),
                     textAlign: TextAlign.right,
                   ),
@@ -1552,7 +1436,7 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
               margin: const EdgeInsets.only(bottom: 6),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
-                color: Colors.grey.shade50,
+                color: AppDesignTokens.neutral50,
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Row(
@@ -1561,11 +1445,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                     flex: 2,
                     child: Text(
                       '${point.timeInDays}',
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.body2.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[800],
-                        ),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppDesignTokens.neutral800,
                       ),
                     ),
                   ),
@@ -1573,10 +1456,9 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                     flex: 2,
                     child: Text(
                       '${point.atRisk}',
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.body2.copyWith(
-                          color: Colors.grey[700],
-                        ),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppDesignTokens.neutral700,
                       ),
                     ),
                   ),
@@ -1584,10 +1466,9 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                     flex: 3,
                     child: Text(
                       '${point.events}',
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.body2.copyWith(
-                          color: Colors.grey[700],
-                        ),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppDesignTokens.neutral700,
                       ),
                     ),
                   ),
@@ -1595,11 +1476,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                     flex: 3,
                     child: Text(
                       '${(point.conversionProbability * 100).toStringAsFixed(1)}%',
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.body2.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: _getTimelineColor(point.conversionProbability * 100),
-                        ),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: _getTimelineColor(point.conversionProbability * 100),
                       ),
                       textAlign: TextAlign.right,
                     ),
@@ -1613,11 +1493,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
             Center(
               child: Text(
                 '... and ${result.survivalCurve.length - 10} more data points',
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.caption.copyWith(
-                    color: Colors.grey[500],
-                    fontStyle: FontStyle.italic,
-                  ),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppDesignTokens.neutral500,
+                  fontStyle: FontStyle.italic,
                 ),
               ),
             ),
@@ -1629,11 +1508,11 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
 
   Color _getTimelineColor(double percent) {
     if (percent >= 60) {
-      return Colors.green;
+      return AppDesignTokens.success;
     } else if (percent >= 30) {
-      return Colors.orange;
+      return AppDesignTokens.warning;
     } else {
-      return Colors.red;
+      return AppDesignTokens.danger;
     }
   }
 
@@ -1641,18 +1520,11 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color.fromRGBO(64, 105, 225, 1),
-            Color.fromRGBO(100, 140, 255, 1),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
+        gradient: AppDesignTokens.primaryGradient,
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusLg),
         boxShadow: [
           BoxShadow(
-            color: const Color.fromRGBO(64, 105, 225, 0.3),
+            color: AppDesignTokens.primary.withOpacity(0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -1663,11 +1535,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
         children: [
           Text(
             'How Linear Regression Works',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.headline6.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 12),
@@ -1675,28 +1546,26 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Formula: y = β₀ + β₁x₁ + β₂x₂ + β₃x₃',
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.body1.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'monospace',
-                    ),
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'monospace',
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Predicts lead conversion based on:',
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.caption.copyWith(
-                      color: Colors.white.withOpacity(0.9),
-                    ),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white.withOpacity(0.9),
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -1712,10 +1581,9 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                           const SizedBox(width: 6),
                           Text(
                             feature,
-                            style: AppleTypography.withAppleFont(
-                              AppleTypography.caption.copyWith(
-                                color: Colors.white.withOpacity(0.95),
-                              ),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.white.withOpacity(0.95),
                             ),
                           ),
                         ],
@@ -1724,11 +1592,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                 const SizedBox(height: 8),
                 Text(
                   'Uses Least Squares Method: β = (XᵀX)⁻¹Xᵀy',
-                  style: AppleTypography.withAppleFont(
-                    AppleTypography.caption.copyWith(
-                      color: Colors.white.withOpacity(0.85),
-                      fontFamily: 'monospace',
-                    ),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white.withOpacity(0.85),
+                    fontFamily: 'monospace',
                   ),
                 ),
               ],
@@ -1746,15 +1613,9 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: AppDesignTokens.surface,
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+        boxShadow: AppDesignTokens.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1763,17 +1624,16 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
             children: [
               Icon(
                 isGoodFit ? Icons.trending_up : Icons.info_outline,
-                color: isGoodFit ? Colors.green : Colors.orange,
+                color: isGoodFit ? AppDesignTokens.success : AppDesignTokens.warning,
                 size: 24,
               ),
               const SizedBox(width: 8),
               Text(
                 'Model Accuracy (R² Score)',
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.subtitle1.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
-                  ),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppDesignTokens.neutral800,
                 ),
               ),
             ],
@@ -1787,11 +1647,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                   children: [
                     Text(
                       '${percentage.toStringAsFixed(1)}%',
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.headline3.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: isGoodFit ? Colors.green : Colors.orange.shade700,
-                        ),
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: isGoodFit ? AppDesignTokens.success : AppDesignTokens.warningDark,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -1799,10 +1658,9 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                       isGoodFit
                           ? 'Good model fit - predictions are reliable'
                           : 'Moderate fit - more data may improve accuracy',
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.caption.copyWith(
-                          color: Colors.grey[600],
-                        ),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppDesignTokens.neutral600,
                       ),
                     ),
                   ],
@@ -1813,9 +1671,9 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
           const SizedBox(height: 12),
           LinearProgressIndicator(
             value: _r2Score.clamp(0.0, 1.0),
-            backgroundColor: Colors.grey.shade200,
+            backgroundColor: AppDesignTokens.neutral200,
             valueColor: AlwaysStoppedAnimation<Color>(
-              isGoodFit ? Colors.green : Colors.orange.shade700,
+              isGoodFit ? AppDesignTokens.success : AppDesignTokens.warningDark,
             ),
             minHeight: 8,
             borderRadius: BorderRadius.circular(4),
@@ -1824,20 +1682,19 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.blue.shade50,
-              borderRadius: BorderRadius.circular(8),
+              color: AppDesignTokens.accentBlueSoft,
+              borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
             ),
             child: Row(
               children: [
-                Icon(Icons.lightbulb_outline, color: Colors.blue.shade700, size: 20),
+                Icon(Icons.lightbulb_outline, color: AppDesignTokens.accentBlue, size: 20),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Trained on ${_leads.length} leads with call history',
-                    style: AppleTypography.withAppleFont(
-                      AppleTypography.caption.copyWith(
-                        color: Colors.blue.shade700,
-                      ),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppDesignTokens.accentBlue,
                     ),
                   ),
                 ),
@@ -1853,35 +1710,27 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: AppDesignTokens.surface,
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
+        boxShadow: AppDesignTokens.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Lead Conversion Predictions',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.subtitle1.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppDesignTokens.neutral800,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             'Ranked by predicted conversion likelihood (highest first)',
-            style: AppleTypography.withAppleFont(
-              AppleTypography.caption.copyWith(
-                color: Colors.grey[600],
-              ),
+            style: TextStyle(
+              fontSize: 12,
+              color: AppDesignTokens.neutral600,
             ),
           ),
           const SizedBox(height: 16),
@@ -1904,12 +1753,12 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(10),
+        color: AppDesignTokens.neutral50,
+        borderRadius: BorderRadius.circular(AppDesignTokens.radiusSm),
         border: Border.all(
           color: isHighPotential
-              ? Colors.green.withOpacity(0.3)
-              : Colors.grey.shade300,
+              ? AppDesignTokens.success.withOpacity(0.3)
+              : AppDesignTokens.neutral300,
           width: 1.5,
         ),
       ),
@@ -1922,17 +1771,16 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: isHighPotential ? Colors.green : Colors.grey.shade400,
+                  color: isHighPotential ? AppDesignTokens.success : AppDesignTokens.neutral400,
                   shape: BoxShape.circle,
                 ),
                 child: Center(
                   child: Text(
                     '$rank',
-                    style: AppleTypography.withAppleFont(
-                      AppleTypography.body2.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
@@ -1944,11 +1792,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                   children: [
                     Text(
                       lead.contactName,
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.body1.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[800],
-                        ),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppDesignTokens.neutral800,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -1956,10 +1803,9 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                     const SizedBox(height: 2),
                     Text(
                       lead.phoneNumber,
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.caption.copyWith(
-                          color: Colors.grey[600],
-                        ),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppDesignTokens.neutral600,
                       ),
                     ),
                   ],
@@ -1972,28 +1818,25 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: isHighPotential
-                          ? Colors.green.withOpacity(0.2)
-                          : Colors.orange.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
+                          ? AppDesignTokens.success.withOpacity(0.2)
+                          : AppDesignTokens.warning.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(AppDesignTokens.radiusMd),
                     ),
                     child: Text(
                       '${predictionPct.toStringAsFixed(0)}%',
-                      style: AppleTypography.withAppleFont(
-                        AppleTypography.body2.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: isHighPotential ? Colors.green.shade700 : Colors.orange.shade700,
-                        ),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: isHighPotential ? AppDesignTokens.successDark : AppDesignTokens.warningDark,
                       ),
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'predicted',
-                    style: AppleTypography.withAppleFont(
-                      AppleTypography.caption.copyWith(
-                        color: Colors.grey[500],
-                        fontSize: 10,
-                      ),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: AppDesignTokens.neutral500,
                     ),
                   ),
                 ],
@@ -2007,7 +1850,7 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                 child: _buildStatChip(
                   Icons.phone,
                   '${lead.totalCalls} calls',
-                  Colors.blue,
+                  AppDesignTokens.accentBlue,
                 ),
               ),
               const SizedBox(width: 8),
@@ -2015,7 +1858,7 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                 child: _buildStatChip(
                   Icons.timer,
                   '${lead.totalDurationMinutes.toStringAsFixed(1)}m',
-                  Colors.purple,
+                  AppDesignTokens.primary,
                 ),
               ),
               const SizedBox(width: 8),
@@ -2023,7 +1866,7 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                 child: _buildStatChip(
                   Icons.calendar_today,
                   '${lead.daysSinceFirstContact}d',
-                  Colors.orange,
+                  AppDesignTokens.warning,
                 ),
               ),
             ],
@@ -2033,19 +1876,17 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
             children: [
               Text(
                 'Actual: ',
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.caption.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppDesignTokens.neutral600,
                 ),
               ),
               Text(
                 '${actualPct.toStringAsFixed(0)}%',
-                style: AppleTypography.withAppleFont(
-                  AppleTypography.caption.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[700],
-                  ),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: AppDesignTokens.neutral700,
                 ),
               ),
               const SizedBox(width: 16),
@@ -2053,7 +1894,7 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                 child: Container(
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
+                    color: AppDesignTokens.neutral200,
                     borderRadius: BorderRadius.circular(2),
                   ),
                   child: FractionallySizedBox(
@@ -2061,7 +1902,7 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
                     widthFactor: (actualPct / 100).clamp(0.0, 1.0),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade600,
+                        color: AppDesignTokens.neutral600,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -2090,11 +1931,10 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
           Expanded(
             child: Text(
               text,
-              style: AppleTypography.withAppleFont(
-                AppleTypography.caption.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w600,
-                ),
+              style: TextStyle(
+                fontSize: 12,
+                color: color,
+                fontWeight: FontWeight.w600,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -2112,12 +1952,13 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.red.shade400),
+            Icon(Icons.error_outline, size: 64, color: AppDesignTokens.dangerLight),
             const SizedBox(height: 16),
             Text(
               _errorMessage ?? 'Unknown error',
-              style: AppleTypography.withAppleFont(
-                AppleTypography.body1.copyWith(color: Colors.grey[700]),
+              style: TextStyle(
+                fontSize: 16,
+                color: AppDesignTokens.neutral700,
               ),
               textAlign: TextAlign.center,
             ),
@@ -2127,7 +1968,7 @@ class _LinearRegressionStatsViewState extends State<LinearRegressionStatsView> {
               icon: const Icon(Icons.refresh),
               label: const Text('Retry'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromRGBO(64, 105, 225, 1),
+                backgroundColor: AppDesignTokens.primary,
                 foregroundColor: Colors.white,
               ),
             ),

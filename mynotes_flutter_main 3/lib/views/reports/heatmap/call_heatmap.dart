@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/theme/app_colors.dart';
+import 'package:flutter_application_1/theme/components/app_components.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
 import 'package:intl/intl.dart';
 
@@ -476,15 +477,15 @@ class _CallHeatmapState extends State<CallHeatmap> {
   // Get color based on call count and threshold
   Color getHeatmapColor(int callCount) {
     if (callCount == 0) {
-      return Colors.grey[300]!;
+      return AppDesignTokens.neutral300;
     }
     
     // Calculate opacity based on call count and threshold
     final double opacity = callCount / widget.maxCallThreshold;
     final double clampedOpacity = opacity.clamp(0.1, 1.0);
     
-    // Use green with varying opacity
-    return Color.fromRGBO(0, 128, 0, clampedOpacity);
+    // Use success green with varying opacity
+    return AppDesignTokens.success.withOpacity(clampedOpacity);
   }
 
   // Get label for a cell based on time scale
@@ -681,7 +682,7 @@ class _CallHeatmapState extends State<CallHeatmap> {
               Container(
                 width: 20,
                 height: 20,
-                color: Colors.grey[300]!,
+                color: AppDesignTokens.neutral300,
               ),
               const SizedBox(width: 4),
               const Text('None'),
@@ -689,7 +690,7 @@ class _CallHeatmapState extends State<CallHeatmap> {
               Container(
                 width: 20,
                 height: 20,
-                color: Color.fromRGBO(0, 128, 0, 0.5),
+                color: AppDesignTokens.success.withOpacity(0.5),
               ),
               const SizedBox(width: 4),
               const Text('Medium'),
@@ -697,7 +698,7 @@ class _CallHeatmapState extends State<CallHeatmap> {
               Container(
                 width: 20,
                 height: 20,
-                color: Color.fromRGBO(0, 128, 0, 1.0),
+                color: AppDesignTokens.success,
               ),
               const SizedBox(width: 4),
               const Text('Many'),

@@ -23,8 +23,8 @@ import 'package:flutter_application_1/views/call/contact_upload.dart';
 import 'package:flutter_application_1/views/notes/create_update_note_view.dart';
 import 'package:flutter_application_1/views/profile/user_profile_editor.dart';
 import 'package:flutter_application_1/views/team/team_management_view.dart';
-import 'package:flutter_application_1/utilities/apple_typography.dart';
 import 'package:flutter_application_1/firebase_options.dart';
+import 'package:flutter_application_1/theme/app_theme.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -41,29 +41,9 @@ Future<void> main() async {
     ChangeNotifierProvider(
       create: (_) => ThemeProvider(),
       child: MaterialApp(
-      title: 'Flutter Demo',
-      // Global theme using Apple-style typography for a consistent look across the app
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        fontFamily: AppleTypography.fontFamily,
-        textTheme: TextTheme(
-          displayLarge: AppleTypography.withAppleFont(AppleTypography.headline1),
-          displayMedium: AppleTypography.withAppleFont(AppleTypography.headline2),
-          displaySmall: AppleTypography.withAppleFont(AppleTypography.headline3),
-          headlineLarge: AppleTypography.withAppleFont(AppleTypography.headline4),
-          headlineMedium: AppleTypography.withAppleFont(AppleTypography.headline5),
-          headlineSmall: AppleTypography.withAppleFont(AppleTypography.headline6),
-          titleLarge: AppleTypography.withAppleFont(AppleTypography.subtitle1),
-          titleMedium: AppleTypography.withAppleFont(AppleTypography.subtitle1),
-          titleSmall: AppleTypography.withAppleFont(AppleTypography.subtitle2),
-          bodyLarge: AppleTypography.withAppleFont(AppleTypography.body1),
-          bodyMedium: AppleTypography.withAppleFont(AppleTypography.body2),
-          bodySmall: AppleTypography.withAppleFont(AppleTypography.caption),
-          labelLarge: AppleTypography.withAppleFont(AppleTypography.body2),
-          labelMedium: AppleTypography.withAppleFont(AppleTypography.caption),
-          labelSmall: AppleTypography.withAppleFont(AppleTypography.caption),
-        ),
-      ),
+      title: 'Auto Dialer',
+      // Enterprise design system theme — see lib/theme/app_theme.dart
+      theme: AppDesignTokens.lightTheme(),
       // Wraps the root widget with BlocProvider so all children can access auth state
       home: BlocProvider<AuthBloc>(
         create: (context) => AuthBloc(FirebaseAuthProvider()),
