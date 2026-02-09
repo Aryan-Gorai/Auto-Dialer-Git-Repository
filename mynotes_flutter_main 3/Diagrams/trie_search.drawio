@@ -1,0 +1,176 @@
+<mxfile host="app.diagrams.net" agent="NEA Analysis" version="24.0.0">
+  <diagram name="Trie Search DFD" id="trie-dfd">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="t1" value="Data Flow Diagram: Trie Data Structure (Autocomplete Search)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#000000;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="550" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- External Entity: User -->
+        <mxCell id="e1" value="User" style="shape=rectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="250" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- External Entity: Notes Search UI -->
+        <mxCell id="e2" value="Contact Notes&#xa;Search View (UI)" style="shape=rectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="100" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Process 1.0: Insert Text -->
+        <mxCell id="p1" value="1.0&#xa;insertText()&#xa;(Index Note Content&#xa;Word-by-Word)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="300" y="80" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 2.0: Insert Word -->
+        <mxCell id="p2" value="2.0&#xa;insert()&#xa;(Traverse/Create&#xa;Nodes per Character)&#xa;O(k)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="300" y="240" width="200" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- Process 3.0: Search -->
+        <mxCell id="p3" value="3.0&#xa;search()&#xa;(Exact Word Match)&#xa;O(k)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="620" y="80" width="180" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 4.0: Get Document IDs -->
+        <mxCell id="p4" value="4.0&#xa;getDocumentIdsWithPrefix()&#xa;(Find Notes Containing&#xa;Matching Words)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="620" y="240" width="230" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- Process 5.0: Autocomplete -->
+        <mxCell id="p5" value="5.0&#xa;getAutocompleteSuggestions()&#xa;(Prefix → Word List&#xa;Sorted by Frequency)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="620" y="400" width="240" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- Process 6.0: Find Node -->
+        <mxCell id="p6" value="6.0&#xa;_findNode()&#xa;(Traverse Trie&#xa;to Prefix End)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="960" y="80" width="180" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 7.0: Collect -->
+        <mxCell id="p7" value="7.0&#xa;_collectDocumentIds()&#xa;_collectWords()&#xa;(DFS Traversal)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="960" y="240" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: Trie Tree -->
+        <mxCell id="d1" value="D1 | Trie Tree (TrieNode: children, isEndOfWord, documentIds, frequency)" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=10;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="280" y="420" width="300" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: Note Documents -->
+        <mxCell id="d2" value="D2 | Firestore Note Documents (documentId, text)" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="280" y="520" width="300" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: Suggestions -->
+        <mxCell id="d3" value="D3 | Autocomplete Suggestions (word, frequency, documentCount)" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=10;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="920" y="420" width="340" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Flows -->
+        <mxCell id="f1" value="Type search&#xa;prefix" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e1" target="e2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Notes loaded -> Insert Text -->
+        <mxCell id="f2" value="Note text +&#xa;documentId" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="d2" target="p1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="260" y="540" />
+              <mxPoint x="260" y="130" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Insert Text -> Insert Word -->
+        <mxCell id="f3" value="Split text →&#xa;individual words&#xa;(lowercase)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p1" target="p2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Insert Word -> Trie -->
+        <mxCell id="f4" value="Create/traverse&#xa;TrieNode chain,&#xa;set isEndOfWord,&#xa;add documentId" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p2" target="d1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- User search -> Search/GetDocs/Autocomplete -->
+        <mxCell id="f5" value="Search prefix" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e2" target="p3" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f6" value="Search prefix" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e2" target="p4" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="130" />
+              <mxPoint x="200" y="295" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="f7" value="Search prefix" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e2" target="p5" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="160" />
+              <mxPoint x="200" y="455" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Search/GetDocs/Autocomplete -> Find Node -->
+        <mxCell id="f8" value="Prefix string" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p3" target="p6" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f9" value="Prefix string" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p4" target="p6" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="295" />
+              <mxPoint x="900" y="130" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Find Node reads Trie -->
+        <mxCell id="f10" value="Traverse Trie&#xa;nodes" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p6" target="d1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1200" y="130" />
+              <mxPoint x="1200" y="560" />
+              <mxPoint x="430" y="560" />
+              <mxPoint x="430" y="460" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Find Node -> Collect -->
+        <mxCell id="f11" value="TrieNode at&#xa;prefix end" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p6" target="p7" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Collect -> Suggestions -->
+        <mxCell id="f12" value="DFS: words +&#xa;frequencies +&#xa;document IDs" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p7" target="d3" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Suggestions -> Autocomplete -->
+        <mxCell id="f13" value="Top N suggestions&#xa;(sorted by frequency)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;dashed=1;" edge="1" source="d3" target="p5" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Autocomplete -> UI -->
+        <mxCell id="f14" value="List&lt;String&gt;&#xa;suggestions /&#xa;Set&lt;String&gt;&#xa;documentIds" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;dashed=1;" edge="1" source="p5" target="e2" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="740" y="520" />
+              <mxPoint x="180" y="520" />
+              <mxPoint x="180" y="130" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

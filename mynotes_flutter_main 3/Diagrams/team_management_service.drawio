@@ -1,0 +1,193 @@
+<mxfile host="app.diagrams.net" agent="NEA Analysis" version="24.0.0">
+  <diagram name="Team Management Service DFD" id="team-dfd">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="t1" value="Data Flow Diagram: Team Management Service" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#000000;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="450" y="20" width="400" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- External Entity: Team Owner -->
+        <mxCell id="e1" value="Team Owner" style="shape=rectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- External Entity: Team Member -->
+        <mxCell id="e2" value="Team Member" style="shape=rectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="400" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Process 1.0: Create Team -->
+        <mxCell id="p1" value="1.0&#xa;createTeam()&#xa;(Team Creation)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="300" y="80" width="180" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 2.0: Generate Join Code -->
+        <mxCell id="p2" value="2.0&#xa;_generateUniqueJoinCode()&#xa;(6-char Alphanumeric)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="560" y="80" width="220" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 3.0: Join Team -->
+        <mxCell id="p3" value="3.0&#xa;joinTeam()&#xa;(Membership via Code)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="300" y="250" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 4.0: Leave/Remove -->
+        <mxCell id="p4" value="4.0&#xa;leaveTeam() /&#xa;removeMember()&#xa;(Membership Removal)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="300" y="410" width="200" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- Process 5.0: Get Team Members -->
+        <mxCell id="p5" value="5.0&#xa;getTeamMembers()&#xa;(Query Members)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="600" y="360" width="180" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 6.0: Stream Team -->
+        <mxCell id="p6" value="6.0&#xa;streamTeam()&#xa;(Real-time Updates)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="600" y="240" width="180" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Process 7.0: Team/AppUser Model -->
+        <mxCell id="p7" value="7.0&#xa;Team.fromFirestore()&#xa;AppUser.fromFirestore()&#xa;(Data Mapping)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="900" y="240" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: teams -->
+        <mxCell id="d1" value="D1 | Firestore 'teams' Collection" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="870" y="100" width="260" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: user_profiles -->
+        <mxCell id="d2" value="D2 | Firestore 'user_profiles' Collection" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="870" y="420" width="280" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Flows -->
+        <!-- Owner -> Create Team -->
+        <mxCell id="f1" value="teamName,&#xa;ownerId" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e1" target="p1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Create Team -> Generate Code -->
+        <mxCell id="f2" value="Request unique&#xa;join code" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p1" target="p2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Generate Code -> Teams (check uniqueness) -->
+        <mxCell id="f3" value="Check code&#xa;uniqueness" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p2" target="d1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Create Team -> Teams -->
+        <mxCell id="f4" value="teams.add()&#xa;{owner_id, team_name,&#xa;join_code, members}" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p1" target="d1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="390" y="80" />
+              <mxPoint x="840" y="80" />
+              <mxPoint x="840" y="120" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Create Team -> user_profiles -->
+        <mxCell id="f5" value="Set team_id&#xa;on owner profile" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p1" target="d2" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="390" y="200" />
+              <mxPoint x="840" y="200" />
+              <mxPoint x="840" y="440" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Member -> Join Team -->
+        <mxCell id="f6" value="joinCode" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e2" target="p3" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="100" y="300" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Join Team -> Teams (query by code) -->
+        <mxCell id="f7" value="Query by join_code,&#xa;arrayUnion(userId)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p3" target="d1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="220" />
+              <mxPoint x="830" y="220" />
+              <mxPoint x="830" y="120" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Join Team -> user_profiles -->
+        <mxCell id="f8" value="Set team_id&#xa;on member profile" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p3" target="d2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Leave/Remove -> Teams -->
+        <mxCell id="f9" value="arrayRemove(userId)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p4" target="d1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="540" />
+              <mxPoint x="1200" y="540" />
+              <mxPoint x="1200" y="120" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Leave/Remove -> user_profiles -->
+        <mxCell id="f10" value="Clear team_id" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p4" target="d2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Owner -> Remove Member -->
+        <mxCell id="f11" value="removeMember()&#xa;(memberId, teamId)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e1" target="p4" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="100" y="410" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Member -> Leave Team -->
+        <mxCell id="f12" value="leaveTeam()" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e2" target="p4" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Get Members reads both stores -->
+        <mxCell id="f13" value="Read team members[]" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;dashed=1;" edge="1" source="d1" target="p5" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f14" value="Batch query by&#xa;member user IDs" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p5" target="d2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Model mapping -->
+        <mxCell id="f15" value="DocumentSnapshot" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="d1" target="p7" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f16" value="Team / AppUser&#xa;objects" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;dashed=1;" edge="1" source="p7" target="p6" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Stream -> UI -->
+        <mxCell id="f17" value="Stream&lt;Team?&gt;&#xa;(real-time updates)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;dashed=1;" edge="1" source="p6" target="e1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="690" y="220" />
+              <mxPoint x="200" y="220" />
+              <mxPoint x="200" y="150" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

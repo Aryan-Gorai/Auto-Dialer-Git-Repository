@@ -1,0 +1,177 @@
+<mxfile host="app.diagrams.net" agent="NEA Analysis" version="24.0.0">
+  <diagram name="App Initialisation and Navigation DFD" id="app-init-dfd">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="t1" value="Data Flow Diagram: App Initialisation and Navigation" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#000000;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="500" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- External Entity: User -->
+        <mxCell id="e1" value="User" style="shape=rectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="280" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Process 1.0: main() -->
+        <mxCell id="p1" value="1.0&#xa;main()&#xa;(App Entry Point)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="280" y="80" width="180" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 2.0: Firebase Init -->
+        <mxCell id="p2" value="2.0&#xa;Firebase.initializeApp()&#xa;(Platform Config)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="280" y="250" width="200" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Process 3.0: HomePage -->
+        <mxCell id="p3" value="3.0&#xa;HomePage&#xa;(Auth State Check)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="600" y="160" width="180" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 4.0: Route to Login -->
+        <mxCell id="p4" value="4.0&#xa;LoginScreen1&#xa;(Not Authenticated)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="900" y="80" width="180" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Process 5.0: Route to Main App -->
+        <mxCell id="p5" value="5.0&#xa;sliderScreen&#xa;(Authenticated)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="900" y="240" width="180" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Process 6.0: BlocProvider -->
+        <mxCell id="p6" value="6.0&#xa;BlocProvider&lt;AuthBloc&gt;&#xa;(State Management)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="600" y="340" width="200" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Process 7.0: ThemeProvider -->
+        <mxCell id="p7" value="7.0&#xa;ThemeProvider&#xa;(ChangeNotifier)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="280" y="400" width="180" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Process 8.0: Named Routes -->
+        <mxCell id="p8" value="8.0&#xa;Named Routes&#xa;(MaterialApp Router)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="600" y="480" width="200" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: Firebase Config -->
+        <mxCell id="d1" value="D1 | DefaultFirebaseOptions (Platform Config)" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="430" width="180" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: Firebase Auth -->
+        <mxCell id="d2" value="D2 | FirebaseAuth.instance.currentUser" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="870" y="400" width="260" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: Route Map -->
+        <mxCell id="d3" value="D3 | Route Map (path → Widget)" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="880" y="520" width="260" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Flows -->
+        <!-- User launches app -->
+        <mxCell id="f1" value="Launches app" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e1" target="p1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="310" />
+              <mxPoint x="200" y="130" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- main -> Firebase Init -->
+        <mxCell id="f2" value="WidgetsFlutterBinding&#xa;.ensureInitialized()" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p1" target="p2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Firebase Init -> Config -->
+        <mxCell id="f3" value="Platform-specific&#xa;Firebase config" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p2" target="d1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- main -> ThemeProvider -->
+        <mxCell id="f4" value="Wrap with&#xa;ChangeNotifierProvider" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p1" target="p7" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="370" y="200" />
+              <mxPoint x="370" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- main -> HomePage -->
+        <mxCell id="f5" value="runApp() →&#xa;MaterialApp home:" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p1" target="p3" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- main -> BlocProvider -->
+        <mxCell id="f6" value="BlocProvider wraps&#xa;HomePage with AuthBloc" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p1" target="p6" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="560" y="130" />
+              <mxPoint x="560" y="385" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- HomePage -> Firebase Auth -->
+        <mxCell id="f7" value="Check&#xa;currentUser" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p3" target="d2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Firebase Auth -> Login (null) -->
+        <mxCell id="f8" value="User is null&#xa;(not logged in)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p3" target="p4" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Firebase Auth -> Main App (not null) -->
+        <mxCell id="f9" value="User is not null&#xa;(logged in)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p3" target="p5" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Login -> User -->
+        <mxCell id="f10" value="Display login screen" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;dashed=1;" edge="1" source="p4" target="e1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="990" y="60" />
+              <mxPoint x="1200" y="60" />
+              <mxPoint x="1200" y="600" />
+              <mxPoint x="100" y="600" />
+              <mxPoint x="100" y="340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Main App -> User -->
+        <mxCell id="f11" value="Display main&#xa;app screens" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;dashed=1;" edge="1" source="p5" target="e1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1180" y="285" />
+              <mxPoint x="1180" y="580" />
+              <mxPoint x="90" y="580" />
+              <mxPoint x="90" y="340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Named Routes map -->
+        <mxCell id="f12" value="Route definitions:&#xa;/login/, /register/,&#xa;notes/new-note/,&#xa;/contact_update/,&#xa;/sliderScreenRoute/" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=9;" edge="1" source="p8" target="d3" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- main -> Named Routes -->
+        <mxCell id="f13" value="Register named&#xa;routes" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p1" target="p8" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="540" y="80" />
+              <mxPoint x="540" y="520" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

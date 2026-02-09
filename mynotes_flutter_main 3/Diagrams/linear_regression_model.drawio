@@ -1,0 +1,189 @@
+<mxfile host="app.diagrams.net" agent="NEA Analysis" version="24.0.0">
+  <diagram name="Linear Regression Model DFD" id="linreg-dfd">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="t1" value="Data Flow Diagram: Linear Regression Model (Lead Conversion Prediction)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#000000;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="550" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- External Entity: User -->
+        <mxCell id="e1" value="User" style="shape=rectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="280" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- External Entity: Stats View -->
+        <mxCell id="e2" value="Linear Regression&#xa;Stats View (UI)" style="shape=rectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="100" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Process 1.0: Fetch Leads Data -->
+        <mxCell id="p1" value="1.0&#xa;fetchLeadsData()&#xa;(Aggregate Call&#xa;Statistics per Contact)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="300" y="80" width="220" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- Process 2.0: Train Model -->
+        <mxCell id="p2" value="2.0&#xa;trainModel()&#xa;(Least Squares Method&#xa;β = (XᵀX)⁻¹Xᵀy)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="620" y="80" width="220" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- Process 3.0: Matrix Operations -->
+        <mxCell id="p3" value="3.0&#xa;Matrix Operations&#xa;(_transpose, _matrixMultiply,&#xa;_matrixInverse,&#xa;_matrixVectorMultiply)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="950" y="80" width="220" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- Process 4.0: Predict -->
+        <mxCell id="p4" value="4.0&#xa;predict()&#xa;(y = β₀ + β₁x₁ +&#xa;β₂x₂ + β₃x₃)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="620" y="280" width="200" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- Process 5.0: Calculate R² -->
+        <mxCell id="p5" value="5.0&#xa;calculateR2()&#xa;(R² = 1 - SSres/SStot&#xa;Model Accuracy)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="620" y="440" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 6.0: Normalise Features -->
+        <mxCell id="p6" value="6.0&#xa;Feature Normalisation&#xa;(Scale to 0-1 Range)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="950" y="280" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: Contact Directories -->
+        <mxCell id="d1" value="D1 | Firestore 'Contact Directories' Collection" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="280" y="280" width="280" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: call_history -->
+        <mxCell id="d2" value="D2 | Firestore 'call_history' Collection" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="280" y="370" width="280" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: LeadData Objects -->
+        <mxCell id="d3" value="D3 | LeadData Objects (calls, duration, days, conversionRate)" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="280" y="460" width="290" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: Coefficients -->
+        <mxCell id="d4" value="D4 | Regression Coefficients [β₀, β₁, β₂, β₃]" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="920" y="440" width="280" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Flows -->
+        <!-- User -> UI -->
+        <mxCell id="f1" value="View lead&#xa;predictions" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e1" target="e2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- UI -> Fetch Leads -->
+        <mxCell id="f2" value="userId" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e2" target="p1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Fetch -> Contact Directories -->
+        <mxCell id="f3" value="Query contacts&#xa;by user_id" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p1" target="d1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Fetch -> call_history -->
+        <mxCell id="f4" value="Query all calls&#xa;by user_id" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p1" target="d2" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="260" y="140" />
+              <mxPoint x="260" y="390" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Fetch -> LeadData Store -->
+        <mxCell id="f5" value="Aggregated lead data&#xa;(totalCalls, duration,&#xa;daysSinceFirst,&#xa;conversionRate)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p1" target="d3" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="250" y="200" />
+              <mxPoint x="250" y="480" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- LeadData -> Train Model -->
+        <mxCell id="f6" value="List&lt;LeadData&gt;&#xa;(feature matrix X,&#xa;target vector y)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="d3" target="p2" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="425" y="500" />
+              <mxPoint x="580" y="500" />
+              <mxPoint x="580" y="140" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Train -> Matrix Ops -->
+        <mxCell id="f7" value="X, Xᵀ, XᵀX,&#xa;XᵀX⁻¹, Xᵀy" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p2" target="p3" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Matrix Ops -> Train (coefficients) -->
+        <mxCell id="f8" value="Computed&#xa;coefficients β" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;dashed=1;" edge="1" source="p3" target="p2" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1060" y="210" />
+              <mxPoint x="730" y="210" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Train -> Coefficients Store -->
+        <mxCell id="f9" value="Store trained&#xa;coefficients" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p2" target="d4" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="140" />
+              <mxPoint x="900" y="460" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Coefficients -> Predict -->
+        <mxCell id="f10" value="β₀, β₁, β₂, β₃" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="d4" target="p4" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="870" y="460" />
+              <mxPoint x="870" y="335" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Predict -> Normalise -->
+        <mxCell id="f11" value="Raw feature&#xa;values" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p4" target="p6" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Normalise -> Predict -->
+        <mxCell id="f12" value="Normalised&#xa;features (0-1)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;dashed=1;" edge="1" source="p6" target="p4" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1050" y="390" />
+              <mxPoint x="720" y="390" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Predict -> R² -->
+        <mxCell id="f13" value="Predicted values&#xa;vs actual" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p4" target="p5" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- R² -> UI -->
+        <mxCell id="f14" value="R² score,&#xa;predictions per lead&#xa;(0.0-1.0)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;dashed=1;" edge="1" source="p5" target="e2" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="560" />
+              <mxPoint x="200" y="560" />
+              <mxPoint x="200" y="130" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

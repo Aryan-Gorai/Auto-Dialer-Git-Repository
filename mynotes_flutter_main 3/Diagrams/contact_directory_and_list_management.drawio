@@ -1,0 +1,220 @@
+<mxfile host="app.diagrams.net" agent="NEA Analysis" version="24.0.0">
+  <diagram name="Contact Directory and List Management DFD" id="contact-list-dfd">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="t1" value="Data Flow Diagram: Contact Directory and List Management" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#000000;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="550" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- External Entity: User -->
+        <mxCell id="e1" value="User" style="shape=rectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="300" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- External Entity: Device Contacts -->
+        <mxCell id="e2" value="Device&#xa;Contacts" style="shape=rectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="100" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- External Entity: Phone Dialler -->
+        <mxCell id="e3" value="Phone&#xa;Dialler" style="shape=rectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="500" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Process 1.0: Add Contact to List -->
+        <mxCell id="p1" value="1.0&#xa;addContactToList()&#xa;(Create/Update Contact&#xa;in Directory &amp; List)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="300" y="80" width="220" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- Process 2.0: Fetch Contacts for List -->
+        <mxCell id="p2" value="2.0&#xa;fetchContactsForList()&#xa;(Query &amp; Sort by Index)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="300" y="240" width="220" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 3.0: Remove Contact from List -->
+        <mxCell id="p3" value="3.0&#xa;removeContactFromList()&#xa;(Remove List Membership)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="300" y="400" width="220" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Process 4.0: Normalise Phone -->
+        <mxCell id="p4" value="4.0&#xa;normalizePhone()&#xa;(Last 9 Digits)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="300" y="540" width="180" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Process 5.0: Add New List -->
+        <mxCell id="p5" value="5.0&#xa;addNewList()&#xa;(Create List Document)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="660" y="80" width="200" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Process 6.0: Cycle Through Contacts -->
+        <mxCell id="p6" value="6.0&#xa;cycleThroughContacts()&#xa;(Auto-Dialler Loop)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="660" y="220" width="220" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 7.0: Show Contact Dialog -->
+        <mxCell id="p7" value="7.0&#xa;showContactDialog()&#xa;(Display Call UI&#xa;with Dial/Cancel)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="660" y="370" width="220" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 8.0: Record Call -->
+        <mxCell id="p8" value="8.0&#xa;recordCallTimestamp()&#xa;(Log Call to History)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="660" y="520" width="200" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Process 9.0: Migrate Lists -->
+        <mxCell id="p9" value="9.0&#xa;migrateListsTo&#xa;ContactDirectories()&#xa;(Data Migration)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="80" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Process 10.0: Upload Multiple -->
+        <mxCell id="p10" value="10.0&#xa;uploadMultipleContacts()&#xa;(Batch Device Import)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="240" width="200" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: Contact Directories -->
+        <mxCell id="d1" value="D1 | Firestore 'Contact Directories' Collection" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="400" width="300" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: lists_collection -->
+        <mxCell id="d2" value="D2 | Firestore 'lists_collection'" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="480" width="260" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store: call_history -->
+        <mxCell id="d3" value="D3 | Firestore 'call_history' Collection" style="shape=partialRectangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=12;top=1;left=0;right=0;bottom=0;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="560" width="260" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Flows -->
+        <!-- User interactions -->
+        <mxCell id="f1" value="Add/remove contacts,&#xa;create lists, dial" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e1" target="p1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="330" />
+              <mxPoint x="200" y="135" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Device Contacts -> Upload -->
+        <mxCell id="f2" value="FlutterContacts&#xa;(name, phone)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e2" target="p10" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="100" y="80" />
+              <mxPoint x="100" y="60" />
+              <mxPoint x="1120" y="60" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Add Contact -> Contact Directories -->
+        <mxCell id="f3" value="doc.set()&#xa;{contact_name, phone,&#xa;normalised_phone,&#xa;list_memberships}" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p1" target="d1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="560" y="135" />
+              <mxPoint x="560" y="350" />
+              <mxPoint x="960" y="350" />
+              <mxPoint x="960" y="420" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Fetch -> Contact Directories -->
+        <mxCell id="f4" value="Query by user_id,&#xa;filter list_memberships" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p2" target="d1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Fetch -> User (return) -->
+        <mxCell id="f5" value="Sorted contact list&#xa;(by contact_index)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;dashed=1;" edge="1" source="p2" target="e1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="210" y="290" />
+              <mxPoint x="210" y="330" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Remove -> Contact Directories -->
+        <mxCell id="f6" value="Remove list key from&#xa;list_memberships map" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p3" target="d1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Add New List -> lists_collection -->
+        <mxCell id="f7" value="lists.add()&#xa;{list_name, user_id}" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p5" target="d2" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="950" y="125" />
+              <mxPoint x="950" y="500" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Cycle -> Contact Dialog -->
+        <mxCell id="f8" value="Current contact&#xa;(name, phone)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p6" target="p7" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Contact Dialog -> Phone Dialler -->
+        <mxCell id="f9" value="launchUrl()&#xa;tel:// scheme" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p7" target="e3" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="660" y="450" />
+              <mxPoint x="220" y="450" />
+              <mxPoint x="220" y="530" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Contact Dialog -> Record Call -->
+        <mxCell id="f10" value="Call completed&#xa;(name, phone, list)" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p7" target="p8" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Record Call -> call_history -->
+        <mxCell id="f11" value="call_history.add()&#xa;{address, timestamp,&#xa;user_id, list_name}" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p8" target="d3" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Normalise used by multiple -->
+        <mxCell id="f12" value="Phone number&#xa;normalisation" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p1" target="p4" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="280" y="190" />
+              <mxPoint x="280" y="580" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Upload -> Contact Directories -->
+        <mxCell id="f13" value="Batch create&#xa;contacts" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p10" target="d1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Migrate -> Contact Directories -->
+        <mxCell id="f14" value="Move legacy list data&#xa;to Contact Directories" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="p9" target="d1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1300" y="130" />
+              <mxPoint x="1300" y="420" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- User -> Cycle -->
+        <mxCell id="f15" value="Start auto-dialler&#xa;for selected list" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#000000;fontColor=#000000;fontSize=10;" edge="1" source="e1" target="p6" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="100" y="270" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
