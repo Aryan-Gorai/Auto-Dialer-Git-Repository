@@ -1,0 +1,808 @@
+NEA Class Explanations — Auto-Dialer Flutter Application
+=========================================================
+Author: NEA Documentation
+Date: February 2026
+This document provides detailed explanations for every key class and method in the codebase,
+mapped to AQA markscheme skills and project objectives.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== naive_bayes_classifier.dart (Naive Bayes Call Predictor) ===
+
+FILE PURPOSE: Implements a Naive Bayes classifier that predicts the best day and hour to call a contact based on their historical call answer patterns. Uses Laplace smoothing to handle sparse data — meaning even if a contact has only been called once or twice, the model can still produce reasonable predictions for all 168 possible day-hour slots without any slot having a zero probability.
+WHY THIS FILE EXISTS: Survey respondents and the client both identified "not knowing when to call" as a key pain point. This classifier addresses that directly by learning from past call outcomes.
+ROLE IN PROJECT: Consumed by CallPredictionView to display the top 5 best calling slots and a day-by-day heatmap of answer probabilities.
+
+IMPORTS EXPLAINED:
+- cloud_firestore: Provides access to Firestore database where call history records are stored — the classifier trains on this data
+- firebase_auth: Used to get the current user's UID so we only analyse their own call history (data privacy)
+
+[CallPrediction]
+PURPOSE: An immutable data class that holds the output of a single prediction — a specific day-of-week and hour-of-day combination along with its calculated probability of the call being answered. This is essentially a record type that makes it easy to sort and display predictions in the UI. It uses Dart's final keyword for immutability, meaning once a prediction is created, its values cannot be changed — this prevents accidental mutation of results during sorting or filtering.
+MARKSCHEME: Group B | Simple OOP model | Immutable data class using final fields to safely pass prediction results between the ML layer and UI layer
+OBJECTIVE: 6.1 - Naive Bayes classifier predicting optimal call times
+
+[NaiveBayesCallPredictor]
+PURPOSE: The main classifier class. It takes a userId and phoneNumber, queries Firestore for all call history records matching that contact, then applies Naive Bayes probability with Laplace smoothing to calculate P(answered | day, hour) for every possible day-of-week and hour-of-day combination. Laplace smoothing adds 1 to each count and 2 to the denominator, which prevents any slot from having zero probability (which would break the maths) and gives a sensible baseline when data is sparse. The formula used is P(answered | day, hour) ≈ (answered_count + 1) / (total_count + 2).
+MARKSCHEME: Group A | Complex user-defined algorithms (pattern matching) | Naive Bayes classification with Laplace smoothing applied to call timing prediction — a complex statistical algorithm that analyses conditional probabilities across 168 time slots
+OBJECTIVE: 6.1 - Naive Bayes classifier predicting optimal call times with Laplace smoothing and top-5 display
+
+[NaiveBayesCallPredictor.predictBestTimes]
+PURPOSE: The core prediction method. It queries Firestore's call_history collection for records matching the given phone number, groups them by day-of-week and hour-of-day, counts how many were answered vs. total for each slot, applies Laplace smoothing, and stores the resulting probabilities in a 7×24 grid (7 days × 24 hours). This is an asynchronous method because it needs to wait for the Firestore query to return before it can process the data.
+PARAMETERS:
+- userId (String): The Firebase Auth UID of the current user — used to filter call history so each user's predictions are based only on their own data
+- phoneNumber (String): The phone number of the contact we want predictions for — matched against call history records
+MARKSCHEME: Group A | Complex user-defined algorithms (pattern matching) | Implements Bayesian probability calculation across a 7×24 matrix of time slots, applying Laplace smoothing to handle sparse training data
+OBJECTIVE: 6.1 - Top 5 predicted best time slots displayed in CallPredictionView
+
+[NaiveBayesCallPredictor.getTopPredictions]
+PURPOSE: Sorts all 168 day-hour predictions by probability in descending order and returns the top N (default 5). This gives the user a quick, actionable list of when to call — e.g., "Tuesday at 2pm has a 78% chance of being answered." The sorting uses Dart's built-in sort which is O(n log n), but since n is always 168 (7 days × 24 hours), the performance is effectively constant.
+PARAMETERS:
+- count (int): How many top predictions to return — defaults to 5 as specified in objective 6.1
+MARKSCHEME: Group B | Simple user-defined algorithms (sorting and filtering) | Sorts prediction results by probability and returns the most promising time slots
+OBJECTIVE: 6.1 - Top 5 predicted best time slots
+
+[NaiveBayesCallPredictor.getCurrentTimeRecommendation]
+PURPOSE: Checks the prediction for the current day and hour right now, and returns a recommendation of whether this is a good time to call. This provides an immediate, context-aware suggestion — if the user opens the prediction screen at 3pm on Wednesday, they instantly know if that is a good slot for this contact.
+MARKSCHEME: Group B | Simple user-defined algorithms (lookup and comparison) | Retrieves the current time slot's probability and provides a contextual recommendation
+OBJECTIVE: 6.1 - Real-time call recommendation based on current time
+
+[NaiveBayesCallPredictor.getPredictionsByDay]
+PURPOSE: Groups all 24 hourly predictions for each day of the week and returns them as a structured map. This is used by CallPredictionView to render the day-by-day heatmap grid, where each cell is colour-coded by answer probability. The data structure returned is Map<int, List<CallPrediction>> where the key is the day index (0=Monday to 6=Sunday).
+MARKSCHEME: Group B | Multi-dimensional arrays | Organises predictions into a 7×24 structure (days × hours) for heatmap visualisation
+OBJECTIVE: 6.1 - Day-by-day prediction display
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== linear_regression.dart (Linear Regression Model) ===
+
+FILE PURPOSE: Implements a Linear Regression model using the Ordinary Least Squares (OLS) method with full matrix algebra. The model predicts lead conversion likelihood from three features: number of calls made, total call duration in seconds, and days since first contact. It also calculates R² (coefficient of determination) to show how well the model fits the data. The matrix calculations (transpose, multiply, inverse) are all implemented from scratch rather than using a library, demonstrating understanding of the underlying mathematics.
+WHY THIS FILE EXISTS: Objective 6.2 requires a linear regression model using matrix algebra. Implementing it from scratch demonstrates Group A algorithmic skills.
+ROLE IN PROJECT: Called by LinearRegressionStatsView to train the model on the user's call data and display predictions with R² accuracy.
+
+[LeadData]
+PURPOSE: Data class representing a single lead (contact) with the features needed for regression analysis. Each LeadData holds the contact's name, phone number, number of calls, total duration, days since first contact, and whether they have been successfully contacted (the target variable). This class converts raw Firestore data into a structured format that the regression model can consume.
+MARKSCHEME: Group B | Records / Dictionaries | Structured data type grouping multiple related fields for statistical processing
+OBJECTIVE: 6.2 - Linear regression feature extraction
+
+[LinearRegressionModel]
+PURPOSE: The core ML model. It implements the closed-form OLS solution β = (XᵀX)⁻¹Xᵀy using manual matrix operations. The design matrix X has 4 columns: a bias term (always 1), number of calls, total duration, and days since first contact. The bias term allows the model to learn an intercept — without it, the regression line would be forced through the origin. The model stores learned coefficients (β) and provides predict() and calculateR2() methods.
+MARKSCHEME: Group A | Advanced matrix operations | Full implementation of matrix transpose, multiplication, and inversion using the adjugate method — applied to solve the normal equations for least squares regression
+OBJECTIVE: 6.2 - Linear regression with R² using matrix algebra β=(XᵀX)⁻¹Xᵀy
+
+[LinearRegressionModel.fetchLeadsData]
+PURPOSE: Queries Firestore to collect training data for the model. For each contact in the user's directory, it fetches their call history, computes aggregate features (total calls, total duration, days since first contact), and determines the target variable (whether the contact was ever successfully reached). This transforms raw database records into the numerical feature vectors that the model needs.
+PARAMETERS:
+- userId (String): Firebase Auth UID to scope the query to this user's data only
+MARKSCHEME: Group A | Calling parameterised Web service APIs and parsing JSON | Queries Firestore (a cloud NoSQL database accessed via REST-like API) and transforms documents into numerical feature vectors
+OBJECTIVE: 6.2 - Feature extraction from Firestore call data
+
+[LinearRegressionModel.trainModel]
+PURPOSE: Trains the regression model by solving the normal equations. It constructs the design matrix X (with bias column), the target vector y, then computes β = (XᵀX)⁻¹Xᵀy step by step: first XᵀX (a 4×4 matrix), then its inverse using the adjugate method, then multiplies by Xᵀy to get the 4 coefficient values. The method returns false if the matrix is singular (non-invertible), which happens when features are perfectly correlated or there is insufficient data.
+PARAMETERS:
+- leads (List<LeadData>): The training dataset — each LeadData provides one row in the design matrix
+MARKSCHEME: Group A | Advanced matrix operations | Implements matrix transpose, multiplication, and inversion from scratch to solve the normal equations — this is the mathematical core of the regression model
+OBJECTIVE: 6.2 - Model training using least squares method
+
+[LinearRegressionModel.predict]
+PURPOSE: Given a new LeadData, predicts its conversion likelihood by computing the dot product of the feature vector with the learned coefficients β. The prediction is clamped to [0, 1] since it represents a probability. This is a simple linear operation: prediction = β₀ + β₁·calls + β₂·duration + β₃·daysSinceFirst.
+PARAMETERS:
+- lead (LeadData): The contact to predict conversion for
+MARKSCHEME: Group B | Simple mathematical calculations | Computes dot product of feature vector with learned coefficients to produce a prediction
+OBJECTIVE: 6.2 - Lead conversion prediction
+
+[LinearRegressionModel.calculateR2]
+PURPOSE: Computes R² (coefficient of determination), which measures how well the model fits the training data. R² = 1 - (SS_res / SS_tot), where SS_res is the sum of squared residuals (prediction errors) and SS_tot is the total variance in the target variable. R² of 1.0 means perfect fit; 0.0 means the model is no better than predicting the mean; negative values mean the model is worse than the mean.
+PARAMETERS:
+- leads (List<LeadData>): The dataset to evaluate the model against
+MARKSCHEME: Group B | Simple user-defined algorithms (statistical calculations) | Computes R² goodness-of-fit metric to validate model accuracy — demonstrates understanding of model evaluation
+OBJECTIVE: 6.2 - R² coefficient of determination displayed alongside predictions
+
+[LinearRegressionModel._transpose]
+PURPOSE: Computes the transpose of a matrix — swaps rows and columns so that element [i][j] becomes [j][i]. This is needed because the normal equations require Xᵀ (X transposed). For example, if X is an n×4 matrix (n leads, 4 features), its transpose is a 4×n matrix. The implementation iterates through each element and places it in the swapped position.
+MARKSCHEME: Group A | Advanced matrix operations | Matrix transposition implemented from first principles as part of the OLS solution pipeline
+OBJECTIVE: 6.2 - Matrix algebra operations
+
+[LinearRegressionModel._matrixMultiply]
+PURPOSE: Multiplies two matrices A and B to produce C, where C[i][j] = sum of A[i][k] * B[k][j] for all k. This is the standard O(n³) matrix multiplication algorithm. It is used multiple times during training: to compute XᵀX, then to multiply the inverse by Xᵀ, and finally by y. The method includes dimension validation to catch programming errors early.
+MARKSCHEME: Group A | Advanced matrix operations | Standard matrix multiplication algorithm implemented from scratch, used in multiple stages of the least squares computation
+OBJECTIVE: 6.2 - Matrix multiplication for normal equations
+
+[LinearRegressionModel._matrixInverse]
+PURPOSE: Computes the inverse of a square matrix using the adjugate (classical adjoint) method. The inverse is needed to solve β = (XᵀX)⁻¹Xᵀy. The method first computes the determinant; if it is zero (or very close to zero), the matrix is singular and cannot be inverted, so the method returns null. Otherwise, it computes the cofactor matrix, transposes it to get the adjugate, and divides by the determinant. This is an O(n³) operation for an n×n matrix.
+MARKSCHEME: Group A | Advanced matrix operations | Full matrix inversion using the adjugate/cofactor method — the most mathematically complex operation in the regression pipeline
+OBJECTIVE: 6.2 - Matrix inversion for solving normal equations
+
+[LinearRegressionModel._matrixVectorMultiply]
+PURPOSE: Multiplies a matrix by a column vector — a special case of matrix multiplication where the second operand has only one column. This produces the final coefficient vector β when multiplying (XᵀX)⁻¹ by Xᵀy. It is separated from the general matrix multiply for clarity and because Dart lists (vectors) and lists of lists (matrices) have different types.
+MARKSCHEME: Group A | Advanced matrix operations | Matrix-vector multiplication completing the least squares solution pipeline
+OBJECTIVE: 6.2 - Final coefficient computation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== wilson_score.dart (Wilson Score Confidence Intervals) ===
+
+FILE PURPOSE: Implements the Wilson Score Interval formula to compute statistically robust confidence intervals for each contact's call success rate. A naive success rate (e.g., "1 out of 1 = 100%") can be misleading when the sample size is small — the Wilson Score accounts for sample uncertainty, producing wider intervals for contacts with few calls and narrower intervals for contacts with many calls.
+WHY THIS FILE EXISTS: Objective 6.3 requires Wilson Score intervals to prevent misleading success rates with small samples.
+ROLE IN PROJECT: Used by LinearRegressionStatsView to rank contacts by reliable success rate rather than naive percentage.
+
+[WilsonScoreResult]
+PURPOSE: Holds the computed results for one contact: lower bound, upper bound, centre (point estimate), sample size, raw success rate, and a confidence score (0–100) that indicates how certain we are about the success rate. Contacts with many calls have high confidence; contacts with few calls have low confidence.
+MARKSCHEME: Group B | Records / Dictionaries | Structured result type for passing statistical outputs to the UI
+OBJECTIVE: 6.3 - Wilson Score confidence intervals
+
+[WilsonScoreCalculator]
+PURPOSE: The main calculator class. It queries Firestore for all contacts in the user's directory, counts successful and total calls for each, then applies the Wilson Score formula with z=1.96 (the z-score for 95% confidence). The formula is: CI = (p + z²/2n ± z√(p(1-p)/n + z²/4n²)) / (1 + z²/n). This produces a lower and upper bound that form the 95% confidence interval around the true success rate.
+MARKSCHEME: Group A | Complex user-defined algorithms (statistical calculations) | Implements the Wilson Score Interval formula — a non-trivial statistical technique that correctly handles sample size uncertainty, going beyond simple percentage calculations
+OBJECTIVE: 6.3 - Statistically robust confidence intervals for call success rates
+
+[WilsonScoreCalculator.calculateForAllContacts]
+PURPOSE: Iterates through all contacts in the user's directory, fetches their call history, counts successes and totals, then calls calculateWilsonScore() for each. Returns a list of WilsonScoreResult objects sorted by the lower bound of the confidence interval — this ranking is more reliable than sorting by raw success rate because it penalises contacts with insufficient data.
+PARAMETERS:
+- userId (String): Firebase Auth UID to scope queries
+MARKSCHEME: Group A | Complex user-defined algorithms | Batch processing of contacts through the Wilson Score pipeline with result ranking by confidence interval lower bound
+OBJECTIVE: 6.3 - Confidence intervals for all contacts
+
+[WilsonScoreCalculator.calculateWilsonScore]
+PURPOSE: The core calculation method. Takes a number of successful calls and total calls, then applies the Wilson Score formula. The z-value of 1.96 gives a 95% confidence level — meaning we are 95% confident the true success rate falls within the computed interval. The confidence score (0–100) is derived from the interval width: narrower intervals → higher confidence.
+PARAMETERS:
+- successfulCalls (int): Number of calls that were answered/connected
+- totalCalls (int): Total number of call attempts to this contact
+MARKSCHEME: Group A | Complex user-defined algorithms (statistical calculations) | Direct implementation of the Wilson Score formula with z=1.96 for 95% confidence — demonstrates understanding of statistical inference
+OBJECTIVE: 6.3 - Wilson Score calculation with sample size awareness
+
+[WilsonScoreCalculator.getConfidenceInterpretation]
+PURPOSE: Converts the numerical confidence score (0–100) into a human-readable label: "Very High" (80+), "High" (60–79), "Moderate" (40–59), "Low" (20–39), or "Very Low" (under 20). This makes the statistical output accessible to non-technical users who may not understand what a confidence interval means.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Categorical classification of numerical confidence scores for user-friendly display
+OBJECTIVE: 6.3 - Confidence score interpretation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== kaplan_meier.dart (Kaplan-Meier Survival Analysis) ===
+
+FILE PURPOSE: Implements the Kaplan-Meier survival analysis estimator to model lead conversion timing. The estimator calculates the probability of a lead converting (being successfully contacted) at key time points (1, 3, 7, 14, 30 days), correctly handling censored data (leads who have not yet converted but are still active). The survival function S(t) = Π(1 - dᵢ/nᵢ) is the product of survival probabilities at each event time, where dᵢ is the number of events (conversions) and nᵢ is the number still at risk.
+WHY THIS FILE EXISTS: Objective 6.4 requires Kaplan-Meier survival analysis for modelling conversion timing.
+ROLE IN PROJECT: Displayed in LinearRegressionStatsView as conversion probability curves and median time-to-conversion.
+
+[SurvivalDataPoint]
+PURPOSE: Represents a single point on the survival curve — a specific time (in days) with its corresponding survival probability (between 0 and 1) and the number of subjects still at risk at that time. These points are plotted to create the characteristic step-function survival curve.
+MARKSCHEME: Group B | Records / Dictionaries | Structured data point for survival curve plotting
+OBJECTIVE: 6.4 - Kaplan-Meier survival data points
+
+[LeadConversionData]
+PURPOSE: Holds the raw data for one lead needed for survival analysis: number of days from first contact to either conversion or censoring, whether the lead has converted (event occurred) or is still active (censored), and the contact's name. Censoring is crucial — without it, active leads would be treated as failures, producing falsely pessimistic survival estimates.
+MARKSCHEME: Group B | Records / Dictionaries | Structured lead data with censoring flag for survival analysis input
+OBJECTIVE: 6.4 - Lead conversion data with censoring
+
+[KaplanMeierResult]
+PURPOSE: Contains the full output of the Kaplan-Meier analysis: the list of survival curve data points, the median time to conversion (the time at which 50% of leads have converted), conversion probabilities at key time points (1, 3, 7, 14, 30 days), and the total number of leads analysed. This comprehensive result object is consumed by the UI to display both the curve and the summary statistics.
+MARKSCHEME: Group B | Records / Dictionaries | Comprehensive result type aggregating survival analysis outputs
+OBJECTIVE: 6.4 - Survival analysis results with median and key time probabilities
+
+[KaplanMeierEstimator]
+PURPOSE: The main estimator class. It collects lead data from Firestore, sorts events chronologically, then applies the Kaplan-Meier formula at each event time. At each time point where a conversion occurs, the survival probability is updated: S(t) = S(t-1) × (1 - d/n), where d is the number who converted at that time and n is the number still at risk (haven't converted or been censored yet). Censored observations reduce the at-risk count without triggering a probability drop.
+MARKSCHEME: Group A | Complex user-defined algorithms (statistical analysis) | Kaplan-Meier survival function implementation with correct censoring — an advanced statistical technique rarely seen at A-Level, demonstrating understanding of time-to-event analysis
+OBJECTIVE: 6.4 - Kaplan-Meier survival analysis with censored data
+
+[KaplanMeierEstimator.analyze]
+PURPOSE: The main entry point. Fetches all lead conversion data for the user, validates it (requires at least 2 leads), then calls _calculateKaplanMeier() to compute the survival curve. Also computes conversion probabilities at the 5 key time points (1, 3, 7, 14, 30 days) and finds the median conversion time. Returns a complete KaplanMeierResult.
+PARAMETERS:
+- userId (String): Firebase Auth UID to scope the analysis to this user's leads
+MARKSCHEME: Group A | Complex user-defined algorithms | Orchestrates the full survival analysis pipeline from data collection through curve computation to result assembly
+OBJECTIVE: 6.4 - Complete survival analysis with key time point probabilities
+
+[KaplanMeierEstimator._collectLeadConversionData]
+PURPOSE: Queries Firestore to build the dataset for survival analysis. For each contact in the directory, it looks up their call history, determines the time from first contact to either first successful call (conversion) or current date (censored). The censoring flag is set based on whether any call was successfully answered. This correctly handles the distinction between "hasn't converted yet" and "has converted" that is essential for valid survival analysis.
+MARKSCHEME: Group A | Calling parameterised Web service APIs and parsing JSON | Complex Firestore queries with cross-collection joins (directory → call history) to extract time-to-event data with correct censoring classification
+OBJECTIVE: 6.4 - Lead conversion data collection with censoring
+
+[KaplanMeierEstimator._calculateKaplanMeier]
+PURPOSE: The mathematical core. Sorts all leads by their time value, then walks through chronologically. At each time point: (1) remove any censored observations that occurred before this time from the at-risk count, (2) count how many conversions occurred at this time, (3) update the survival probability using S(t) = S(t-1) × (1 - d/n), (4) record the data point. This produces the step-function survival curve where S(t) only decreases at actual event times.
+MARKSCHEME: Group A | Complex user-defined algorithms (statistical analysis) | Core Kaplan-Meier computation implementing the product-limit estimator formula S(t) = Π(1-dᵢ/nᵢ) with proper censoring handling
+OBJECTIVE: 6.4 - Survival function computation
+
+[KaplanMeierEstimator._findMedianTime]
+PURPOSE: Finds the median survival time — the time at which S(t) first drops to 0.5 or below, meaning 50% of leads have converted by that point. If the survival curve never reaches 0.5 (more than half of leads haven't converted), it returns null. This is a simple linear scan O(n) through the sorted survival data points.
+MARKSCHEME: Group B | Simple user-defined algorithms | Linear scan to find median crossing point in survival curve
+OBJECTIVE: 6.4 - Median time to conversion
+
+[KaplanMeierEstimator._getConversionProbabilitiesAtKeyTimes]
+PURPOSE: Extracts the conversion probability (1 - S(t)) at each of the 5 key time points: 1, 3, 7, 14, and 30 days. For each time point, it finds the most recent survival curve value at or before that time. This provides a summary table for the UI: "After 7 days, 35% of leads have been converted."
+MARKSCHEME: Group B | Simple user-defined algorithms | Interpolation of survival probabilities at specified time points
+OBJECTIVE: 6.4 - Conversion probabilities at 1, 3, 7, 14, 30 days
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== nlp_service.dart (NLP Processing Pipeline) ===
+
+FILE PURPOSE: Implements a complete Natural Language Processing pipeline for analysing and summarising contact call notes. The pipeline processes text through 5 stages: tokenisation (splitting into words), stop word removal (filtering common words), stemming (reducing to root forms), TF-IDF scoring (identifying statistically important terms), and n-gram analysis (finding common multi-word phrases). The final output is a concise summary combining keywords and phrases.
+WHY THIS FILE EXISTS: Objective 6.5 requires an NLP pipeline. Implementing each stage demonstrates string processing, statistical analysis, and algorithm design.
+ROLE IN PROJECT: Called by CallFeedbackDialog to show a summary of previous notes before each call, and by ContactNotesView for note analysis.
+
+[NLPService]
+PURPOSE: A utility class with all static methods — it does not need to be instantiated because it has no state. Each method performs one stage of the NLP pipeline and can be used independently. The design follows the Unix philosophy of small, composable tools that each do one thing well, allowing them to be chained together in generateNoteSummary().
+MARKSCHEME: Group A | Complex user-defined algorithms (pattern matching) | Full NLP pipeline implementation with 5 distinct stages — demonstrates string processing, statistical analysis (TF-IDF), and algorithm design at a complexity level well beyond the standard curriculum
+OBJECTIVE: 6.5 - NLP pipeline for contact note analysis
+
+[NLPService.tokenize]
+PURPOSE: Splits raw text into individual word tokens. First converts to lowercase for case-insensitive processing, then uses a regular expression to match sequences of word characters (letters, digits, apostrophes). This is more robust than simply splitting on spaces because it correctly handles punctuation — "Hello, world!" becomes ["hello", "world"] not ["hello,", "world!"].
+PARAMETERS:
+- text (String): The raw input text to tokenise
+MARKSCHEME: Group B | Simple user-defined algorithms (string processing) | Regex-based tokenisation that correctly handles punctuation and case normalisation
+OBJECTIVE: 6.5a - Tokenisation stage of the NLP pipeline
+
+[NLPService.removeStopWords]
+PURPOSE: Filters out common English words that carry little meaning — words like "the", "is", "at", "which", "on". These are called stop words because they would dominate any frequency analysis without contributing useful information. For example, in "the client was interested in the product", removing stop words gives ["client", "interested", "product"] — much more meaningful. The stop word list contains approximately 150 common English words.
+PARAMETERS:
+- tokens (List<String>): The list of word tokens from the tokenisation stage
+MARKSCHEME: Group B | Simple user-defined algorithms (filtering) | Dictionary-based filtering using a predefined stop word set — demonstrates understanding of why frequency analysis requires preprocessing
+OBJECTIVE: 6.5b - Stop word removal stage
+
+[NLPService.stem]
+PURPOSE: Reduces words to their approximate root form using a rule-based suffix stripping algorithm. For example, "running" → "run", "interested" → "interest", "calling" → "call". This ensures that different forms of the same word are counted together in frequency analysis. The implementation uses a priority-ordered list of suffix rules (longest matches first) rather than a full Porter Stemmer, which is a pragmatic simplification that works well for the common words found in call notes.
+PARAMETERS:
+- word (String): A single word to stem
+MARKSCHEME: Group A | Complex user-defined algorithms (pattern matching) | Rule-based stemming algorithm that transforms words to root forms using suffix stripping with priority ordering — demonstrates string manipulation and linguistic pattern matching
+OBJECTIVE: 6.5c - Stemming stage
+
+[NLPService.calculateWordFrequency]
+PURPOSE: Counts how many times each word appears in a list of tokens and returns a Map<String, int>. This is a fundamental operation in text analysis — words that appear more frequently are generally more important (once stop words have been removed). The implementation uses Dart's Map with a default value pattern: map[word] = (map[word] ?? 0) + 1.
+PARAMETERS:
+- tokens (List<String>): The filtered, stemmed tokens to count
+MARKSCHEME: Group B | Dictionaries | Word frequency counting using a hash map — O(n) time complexity where n is the number of tokens
+OBJECTIVE: 6.5 - Word frequency analysis for TF-IDF
+
+[NLPService.generateNGrams]
+PURPOSE: Generates n-grams (sequences of n consecutive words) from a token list. For example, with n=2 (bigrams), ["client", "very", "interested"] produces ["client very", "very interested"]. N-grams capture multi-word phrases like "follow up", "very interested", "call back" that single-word analysis misses. The method uses a sliding window approach: for each position i, it takes tokens[i..i+n] and joins them with a space.
+PARAMETERS:
+- tokens (List<String>): The word tokens to generate n-grams from
+- n (int): The size of each n-gram (2 for bigrams, 3 for trigrams)
+MARKSCHEME: Group B | Simple user-defined algorithms (sliding window) | N-gram generation using a sliding window over token arrays — demonstrates understanding of sequential pattern extraction
+OBJECTIVE: 6.5e - N-gram analysis stage
+
+[NLPService.calculateTFIDF]
+PURPOSE: Calculates Term Frequency–Inverse Document Frequency scores for words across multiple documents (notes). TF measures how often a term appears in a specific document; IDF measures how rare the term is across all documents. The product TF × IDF highlights terms that are frequent in a specific note but rare overall — these are the most distinctive and informative words. The formula is: TF-IDF(t,d) = (count of t in d / total words in d) × log(total documents / documents containing t).
+PARAMETERS:
+- documents (List<List<String>>): A list of tokenised documents (each document is a list of words)
+MARKSCHEME: Group A | Complex user-defined algorithms (statistical calculations) | TF-IDF implementation combining term frequency with inverse document frequency — a standard information retrieval technique that requires logarithmic calculations and cross-document analysis
+OBJECTIVE: 6.5d - TF-IDF scoring for keyword extraction
+
+[NLPService.extractKeywords]
+PURPOSE: Uses the TF-IDF scores to extract the most important keywords from a set of notes. It combines TF-IDF with raw frequency, sorts by score, and returns the top N keywords. These keywords form part of the pre-call summary shown to the user.
+PARAMETERS:
+- notes (List<String>): The raw note texts to extract keywords from
+- topN (int): How many keywords to return (default 10)
+MARKSCHEME: Group B | Simple user-defined algorithms (sorting) | Keyword extraction by ranking TF-IDF scores — demonstrates multi-step processing pipeline
+OBJECTIVE: 6.5 - Keyword extraction for note summaries
+
+[NLPService.findCommonPhrases]
+PURPOSE: Identifies the most common multi-word phrases in a set of notes by generating bigrams and trigrams, counting their frequency, and returning the most frequent ones. This captures patterns like "follow up", "very interested", or "call back Wednesday" that single-word analysis would miss.
+PARAMETERS:
+- notes (List<String>): The raw note texts to analyse
+- topN (int): How many phrases to return (default 5)
+MARKSCHEME: Group B | Simple user-defined algorithms | N-gram frequency analysis combining bigrams and trigrams to find recurring phrases
+OBJECTIVE: 6.5e - Common phrase detection
+
+[NLPService.generateNoteSummary]
+PURPOSE: The main orchestration method that chains together all NLP stages to produce a comprehensive summary of a contact's note history. It processes all notes through the pipeline, then combines: (1) TF-IDF keywords, (2) word count statistics, (3) common phrases, and (4) note count into a structured Map that the UI can display. This is the method called by CallFeedbackDialog before each call to give the user a recap.
+PARAMETERS:
+- notes (List<String>): All call notes for a specific contact
+MARKSCHEME: Group A | Complex user-defined algorithms | Full NLP pipeline orchestration combining tokenisation, stop-word removal, stemming, TF-IDF, and n-gram analysis into a coherent summary generation system
+OBJECTIVE: 6.5f - Summary generation combining all NLP stages
+
+[NLPService.generateBriefSummary]
+PURPOSE: A simplified version of generateNoteSummary that produces a short, single-paragraph text summary suitable for display in compact UI areas. It extracts the top 3 keywords and top 2 phrases and formats them into a readable sentence.
+PARAMETERS:
+- notes (List<String>): All call notes for a specific contact
+MARKSCHEME: Group B | Simple user-defined algorithms | Simplified summary output for UI display
+OBJECTIVE: 6.5 - Brief pre-call summary
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== contact_priority_queue.dart (Min-Heap Priority Queue) ===
+
+FILE PURPOSE: Implements a min-heap priority queue that automatically ranks contacts by calling urgency. The priority score uses a weighted formula: days since last call (30%), success rate (25%), average call rating (20%), total attempts (15%), and days since last successful call (10%). Lower scores mean higher priority, so contactswho haven't been called recently and have low success rates float to the top. The heap provides O(log n) insertion and extraction and O(1) peek.
+WHY THIS FILE EXISTS: Objective 6.6 requires a priority queue using a min-heap. The custom implementation demonstrates Group A data structure skills.
+ROLE IN PROJECT: Used by dialer.dart when "Auto Queue" mode is toggled, reordering the contact list by calculated priority instead of manual order.
+
+[PrioritizedContact]
+PURPOSE: Wraps a contact's data with its calculated priority score for queue ordering. Implements Comparable<PrioritizedContact> so that Dart's comparison-based operations work correctly — compareTo returns negative if this contact has higher priority (lower score). Fields include contact name, phone, the raw priority score, and a breakdown map showing each factor's contribution for debugging and display.
+MARKSCHEME: Group A | Complex user-defined use of OOP (interfaces) | Implements the Comparable interface for custom ordering in the heap — demonstrates understanding of how comparison-based data structures depend on well-defined ordering
+OBJECTIVE: 6.6 - Contact priority scoring and ordering
+
+[ContactPriorityQueue]
+PURPOSE: The min-heap implementation itself. Uses a dynamic list as the backing array where the parent of element at index i is at (i-1)~/2, and children are at 2i+1 and 2i+2. The key operations are insert (add to end, sift up), extractMin (swap root with last, sift down), and buildHeap (insert all then heapify). The heap property — every parent's priority score ≤ both children's scores — is maintained after every operation.
+MARKSCHEME: Group A | Complex user-defined data structures (heap) | Full min-heap implementation with insert O(log n), extractMin O(log n), peek O(1), and buildHeap O(n log n) — demonstrates understanding of heap property maintenance through sift-up and sift-down operations
+OBJECTIVE: 6.6 - Min-heap data structure for contact prioritisation
+
+[ContactPriorityQueue.insert]
+PURPOSE: Adds a new PrioritizedContact to the heap. It appends the element to the end of the backing array, then "sifts up" — repeatedly swapping the new element with its parent until the heap property is restored. This takes O(log n) time because the heap has log n levels.
+PARAMETERS:
+- contact (PrioritizedContact): The contact with its calculated priority score to add to the queue
+MARKSCHEME: Group A | Stack/Queue Operations | Heap insertion with sift-up to maintain the min-heap property — O(log n) time complexity
+OBJECTIVE: 6.6 - Priority queue insertion
+
+[ContactPriorityQueue.extractMin]
+PURPOSE: Removes and returns the contact with the lowest priority score (highest urgency). It swaps the root (minimum) with the last element, removes the last element, then "sifts down" — repeatedly swapping the new root with its smallest child until the heap property is restored. This takes O(log n) time.
+MARKSCHEME: Group A | Stack/Queue Operations | Heap extraction with sift-down to maintain the min-heap property — O(log n) time complexity
+OBJECTIVE: 6.6 - Priority queue extraction
+
+[ContactPriorityQueue._siftUp]
+PURPOSE: Restores the heap property after an insertion by moving an element upward. Starting from the inserted element's position, it compares with its parent — if the element has a lower score (higher priority) than its parent, they swap, and the process repeats from the parent's position. Stops when the element is in the correct position or reaches the root (index 0).
+MARKSCHEME: Group A | Complex user-defined algorithms | Sift-up operation for heap property maintenance — a recursive comparison-and-swap algorithm
+OBJECTIVE: 6.6 - Heap maintenance
+
+[ContactPriorityQueue._siftDown]
+PURPOSE: Restores the heap property after an extraction by moving an element downward. Starting from the root, it compares with both children — if either child has a lower score, it swaps with the smallest child and continues from that position. Stops when the element is smaller than both children or reaches a leaf node.
+MARKSCHEME: Group A | Complex user-defined algorithms | Sift-down operation for heap property maintenance — selects minimum of three elements (parent + two children) at each level
+OBJECTIVE: 6.6 - Heap maintenance
+
+[ContactPriorityQueue.toSortedList]
+PURPOSE: Returns all contacts in priority order (lowest score first) by repeatedly calling extractMin(). This is essentially a heap sort — O(n log n) total time. Used when the dialer needs the full ordered list rather than one-at-a-time extraction.
+MARKSCHEME: Group A | Mergesort or similarly efficient sort | Heap sort via repeated extraction — O(n log n) sorting through the heap, comparable in complexity to mergesort
+OBJECTIVE: 6.6 - Sorted output of priority queue
+
+[ContactPriorityCalculator]
+PURPOSE: Calculates the priority score for each contact by querying Firestore for their call history and applying the weighted formula. The 5 factors are normalised to [0, 1] ranges before weighting, ensuring that no single factor dominates due to different scales. For example, daysSinceLastCall might range from 0 to 365, while successRate is already 0 to 1 — normalisation makes the weights meaningful.
+MARKSCHEME: Group A | Complex user-defined algorithms (scheduling) | Weighted multi-factor priority scoring with normalisation — combines 5 distinct metrics into a single urgency score using domain-specific weights derived from user requirements analysis
+OBJECTIVE: 6.6 - Priority calculation from multiple weighted factors
+
+[ContactPriorityCalculator.calculatePriority]
+PURPOSE: Computes the priority score for a single contact. Fetches their call history from Firestore, calculates each of the 5 factors, normalises them, applies weights (30%, 25%, 20%, 15%, 10%), and sums to produce a score between 0 and 1. Also builds a breakdown map showing each factor's weighted contribution, which is displayed in the dialer for transparency.
+MARKSCHEME: Group A | Complex user-defined algorithms | Individual priority calculation with weighted factor combination and normalisation
+OBJECTIVE: 6.6 - Per-contact priority computation
+
+[ContactPriorityCalculator.buildPriorityQueue]
+PURPOSE: Builds a full ContactPriorityQueue from all contacts in a given list. For each contact, it calls calculatePriority(), wraps the result in a PrioritizedContact, and inserts it into the heap. Returns the populated queue ready for the dialer to use.
+PARAMETERS:
+- userId (String): Firebase Auth UID
+- listName (String): Name of the contact list to prioritise
+MARKSCHEME: Group A | Complex user-defined data structures | End-to-end priority queue construction: data retrieval → priority calculation → heap insertion for all contacts
+OBJECTIVE: 6.6 - Full priority queue construction for dialer
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== trie.dart (Trie / Prefix Tree) ===
+
+FILE PURPOSE: Implements a Trie (prefix tree) data structure for efficient autocomplete search across contact notes. Each node in the Trie represents a character, and paths from root to marked nodes spell out complete words. Each word stores the set of Firestore document IDs where it was found and a frequency count. This enables O(k) time complexity for searching (where k = prefix length) — significantly faster than scanning every note linearly.
+WHY THIS FILE EXISTS: Objective 6.7 requires a Trie for O(k) autocomplete. Custom implementation demonstrates Group A data structure skills.
+ROLE IN PROJECT: Built from contact notes in ContactNotesView, providing real-time autocomplete suggestions as the user types search queries.
+
+[TrieNode]
+PURPOSE: Represents a single node in the Trie. Each node has a map of children (character → child TrieNode), a boolean flag indicating whether this node marks the end of a complete word, a set of document IDs where the word was found, and a frequency count. The children map uses Dart's Map<String, TrieNode> — essentially a hash map providing O(1) child lookup by character.
+MARKSCHEME: Group A | Complex user-defined data structures (tree) | Trie node with children map, document ID tracking, and frequency counting — each node represents one character in the prefix tree
+OBJECTIVE: 6.7 - Trie node structure
+
+[Trie]
+PURPOSE: The main Trie class holding the root node and providing insert, search, and autocomplete operations. The root node represents the empty string — all words branch from it. The Trie is populated by inserting every word from every note (via insertText), and then queried by prefix to find matching words and their source documents.
+MARKSCHEME: Group A | Graph/Tree Traversal | Complete Trie implementation with insert O(k), search O(k), and prefix traversal for autocomplete — demonstrates tree-based data structure design and traversal algorithms
+OBJECTIVE: 6.7 - Trie data structure for O(k) prefix lookup
+
+[Trie.insert]
+PURPOSE: Inserts a single word into the Trie, character by character. Starting from the root, for each character in the word: if a child node for that character exists, move to it; otherwise, create a new child node and move to it. After processing all characters, mark the final node as a word ending and add the document ID to its set. Time complexity is O(k) where k is the word length.
+PARAMETERS:
+- word (String): The word to insert into the Trie
+- documentId (String): The Firestore document ID of the note containing this word — used to trace search results back to specific notes
+MARKSCHEME: Group A | Graph/Tree Traversal | Trie insertion traversing the tree character by character, creating new nodes as needed — O(k) time complexity
+OBJECTIVE: 6.7 - Trie insertion
+
+[Trie.insertText]
+PURPOSE: Convenience method that tokenises a full text string (splits into words, lowercases, removes punctuation), then inserts each word individually via insert(). This makes it easy to build the Trie from complete note texts without manual preprocessing.
+PARAMETERS:
+- text (String): The full note text to process and insert
+- documentId (String): The Firestore document ID of this note
+MARKSCHEME: Group B | Simple user-defined algorithms (text processing) | Text preprocessing and batch Trie insertion
+OBJECTIVE: 6.7 - Bulk word insertion from note text
+
+[Trie.search]
+PURPOSE: Searches for an exact word in the Trie. Traverses the tree character by character; if at any point the required child node does not exist, returns false (word not found). If all characters are consumed and the final node is marked as a word ending, returns true.
+PARAMETERS:
+- word (String): The word to search for
+MARKSCHEME: Group A | Graph/Tree Traversal | Trie search traversing the tree to verify word existence — O(k) time complexity
+OBJECTIVE: 6.7 - Exact word lookup
+
+[Trie.startsWith]
+PURPOSE: Checks whether any word in the Trie starts with the given prefix. Similar to search() but does not require the final node to be marked as a word ending — any node reached after consuming the full prefix indicates that at least one word with that prefix exists.
+PARAMETERS:
+- prefix (String): The prefix to check
+MARKSCHEME: Group A | Graph/Tree Traversal | Prefix existence check in O(k) time
+OBJECTIVE: 6.7 - Prefix matching
+
+[Trie.getAutocompleteSuggestions]
+PURPOSE: Returns autocomplete suggestions for a given prefix. First traverses to the prefix's node, then performs a depth-first traversal of all descendants to find complete words. Returns up to maxSuggestions results, each with the word, its frequency, and its document IDs. The DFS traversal is O(n) where n is the number of nodes in the subtree below the prefix.
+PARAMETERS:
+- prefix (String): The prefix to autocomplete
+- maxSuggestions (int): Maximum number of suggestions to return (default 10)
+MARKSCHEME: Group A | Graph/Tree Traversal | DFS traversal of Trie subtree to collect autocomplete candidates — combines prefix traversal with recursive subtree exploration
+OBJECTIVE: 6.7 - Real-time autocomplete suggestions with document ID tracking
+
+[Trie.getDocumentIdsWithPrefix]
+PURPOSE: Returns the set of all document IDs containing words that start with the given prefix. Used by the search feature in ContactNotesView to quickly find which notes are relevant when the user types a search query. By returning document IDs rather than words, the UI can immediately filter the notes list without additional lookups.
+PARAMETERS:
+- prefix (String): The search prefix
+MARKSCHEME: Group A | Graph/Tree Traversal | Document retrieval via Trie prefix search — links autocomplete results back to source Firestore documents
+OBJECTIVE: 6.7 - Document-level search results from prefix
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== call_cycle_service.dart (Call Cycle Management) ===
+
+FILE PURPOSE: Manages the lifecycle of call cycles — from starting a new cycle, through recording individual call events (dialog shown, dial pressed, dial cancelled), to ending the cycle and running the reconciliation algorithm. All cycle data is persisted to Firestore (list_cycles collection with cycle_events subcollection) enabling cross-device resume. The reconciliation algorithm uses weighted multi-factor scoring to match native call history entries against cycle events.
+WHY THIS FILE EXISTS: Objectives 3.2, 3.3, and 3.4 require call cycle tracking, event logging, and reconciliation.
+ROLE IN PROJECT: Called by dialer.dart at each stage of a calling session. Data is consumed by reports views.
+
+[CallCycleService]
+PURPOSE: Static utility class providing all call cycle operations. Uses static methods because the service has no instance state — all data lives in Firestore. This follows the pattern used in firebase_services.dart where stateless Firestore operations are grouped as static methods for easy access without instantiation.
+MARKSCHEME: Group A | Complex user-defined algorithms | Call cycle management service implementing weighted reconciliation scoring — the reconciliation algorithm uses multi-factor matching (phone 65%, time 20%, order 10%, direction 5%) to solve the iOS limitation of no direct call state access
+OBJECTIVE: 3.2, 3.3, 3.4 - Call cycle tracking, event logging, and reconciliation
+
+[CallCycleService.startCycle]
+PURPOSE: Creates a new call cycle document in Firestore's list_cycles collection. Records the start time, selected list name, total contacts to dial, and sets status to 'in_progress'. Returns the cycle document ID so subsequent events can be linked to it.
+PARAMETERS:
+- userId (String): Firebase Auth UID
+- listName (String): Name of the contact list being dialled
+- totalContacts (int): Number of contacts in the cycle
+MARKSCHEME: Group B | Writing and reading from files | Creates a structured Firestore document to persist cycle state for cross-device resume
+OBJECTIVE: 3.2 - Call cycle tracking with persistence
+
+[CallCycleService.recordCallDialogShown]
+PURPOSE: Records that the call dialog was displayed for a specific contact in the cycle. Creates a document in the cycle_events subcollection with the contact name, phone number, timestamp, and event type 'dialog_shown'. This establishes the "intent" to call, which the reconciliation algorithm later matches against actual call history.
+MARKSCHEME: Group B | Writing and reading from files | Event logging to Firestore subcollection
+OBJECTIVE: 3.3 - Call cycle event recording
+
+[CallCycleService.recordDialPressed]
+PURPOSE: Records that the user pressed the dial button for a contact. Updates the cycle event document with event type 'dialed' and the dial timestamp. This provides the time reference that the reconciliation algorithm uses for time-proximity matching.
+MARKSCHEME: Group B | Writing and reading from files | Event update recording dial action timestamp
+OBJECTIVE: 3.3 - Dial press event logging
+
+[CallCycleService.endCycle]
+PURPOSE: Marks a call cycle as completed in Firestore. Updates the cycle document with end timestamp, status 'completed', total contacts contacted, and completion percentage. This triggers the cycle to appear in reports views.
+MARKSCHEME: Group B | Writing and reading from files | Cycle completion recording with summary statistics
+OBJECTIVE: 3.2 - Call cycle lifecycle completion
+
+[CallCycleService.reconcileCycle]
+PURPOSE: The reconciliation algorithm. After a cycle ends, it fetches both cycle events (what the app intended) and native call history (what actually happened), then attempts to match them using a weighted scoring system: phone number match (65% weight, with normalisation), time proximity (20% weight, decaying over 5 minutes), call order match (10% weight), and call direction (5% weight, outgoing preferred). A match requires a score above 0.6 threshold. This solves the fundamental iOS limitation that apps cannot programmatically detect whether an outgoing call was answered.
+PARAMETERS:
+- userId (String): Firebase Auth UID
+- cycleId (String): The Firestore document ID of the cycle to reconcile
+MARKSCHEME: Group A | Complex user-defined algorithms (pattern matching) | Multi-factor weighted scoring algorithm for call reconciliation — addresses a real platform limitation (iOS) with a probabilistic matching approach using normalised phone numbers, time decay, and order correspondence
+OBJECTIVE: 3.4 - Reconciliation algorithm with weighted scoring (65% phone, 20% time, 10% order, 5% direction)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== excel_import_service.dart (Excel/CSV Import) ===
+
+FILE PURPOSE: Handles importing contacts from Excel (.xlsx, .xls) and CSV files into the application. Provides file picking, format detection, column header mapping (automatically detecting Name and Phone columns), duplicate detection against existing contacts using normalised phone numbers, and batch upload to Firestore. Also handles importing from the device's native phone contact book.
+WHY THIS FILE EXISTS: Objective 2.2 requires importing from Excel/CSV, phone book, and manual entry. This file handles the first two.
+ROLE IN PROJECT: Called from ContactDirectoryView and dialer.dart import buttons.
+
+[ExcelContact]
+PURPOSE: Simple data class holding a contact's name and phone number as parsed from an Excel/CSV row. Acts as an intermediate representation between the raw file data and the Firestore document format.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Simple data container for import processing
+OBJECTIVE: 2.2 - Contact data extracted from Excel/CSV
+
+[DuplicateCheckResult]
+PURPOSE: Holds the result of duplicate detection: a list of new contacts (not already in the directory) and a list of duplicates (phone number already exists after normalisation). This separation allows the UI to show a summary dialog before the user confirms the import.
+MARKSCHEME: Group B | Records / Dictionaries | Structured result type for duplicate detection output
+OBJECTIVE: 2.3 - Duplicate detection result
+
+[ExcelImportService]
+PURPOSE: The main import service. It uses the file_picker package to let the user select a file, then detects the format (CSV vs Excel), parses the contents, auto-detects column headers (looking for columns containing "name", "phone", "number", etc.), extracts contacts, checks for duplicates, and uploads to Firestore. The duplicate detection normalises phone numbers to their last 9 digits (via normalizePhone from firebase_services.dart) so that +447123456789 and 07123456789 are recognised as the same contact.
+MARKSCHEME: Group A | Complex user-defined algorithms | End-to-end file import pipeline with format detection, header mapping, duplicate detection using phone normalisation, and batch Firestore upload — demonstrates file handling, string processing, and data integrity checking
+OBJECTIVE: 2.2 - Import from Excel/CSV with header detection; 2.3 - Duplicate detection
+
+[ExcelImportService.pickAndParseExcel]
+PURPOSE: Opens the device file picker, reads the selected file, detects whether it is CSV or Excel format, and parses it into a list of ExcelContact objects. For CSV, it reads the file as text and splits by comma/newline. For Excel, it uses the 'excel' Dart package to read the first sheet. In both cases, it auto-detects which columns contain name and phone data by checking header names against a list of common patterns.
+MARKSCHEME: Group B | Writing and reading from files | File selection and format-specific parsing with automatic column detection
+OBJECTIVE: 2.2a - Excel/CSV import with automatic header detection
+
+[ExcelImportService.checkForDuplicates]
+PURPOSE: Takes a list of ExcelContact objects and compares each against the user's existing Contact Directories in Firestore. Phone numbers are normalised to their last 9 digits before comparison — this handles format variations like +44, 0, or no prefix. Returns a DuplicateCheckResult separating new and duplicate contacts. The algorithm is O(n × m) where n is import contacts and m is existing contacts, but since both are typically small (hundreds), this is acceptable.
+PARAMETERS:
+- contacts (List<ExcelContact>): The imported contacts to check
+- userId (String): Firebase Auth UID to scope the existing directory lookup
+MARKSCHEME: Group A | Complex user-defined algorithms | Duplicate detection using phone number normalisation (last-9-digits extraction) and cross-collection comparison — prevents data redundancy and addresses a key user pain point identified in analysis
+OBJECTIVE: 2.3 - Duplicate detection comparing incoming contacts by normalised phone number
+
+[ExcelImportService.uploadContactsToDirectory]
+PURPOSE: Batch uploads validated contacts to the 'Contact Directories' Firestore collection. Each contact document contains the normalised phone number (as document ID), display name, original phone format, a list_memberships map (tracking which lists this contact belongs to), and timestamps. Uses batch writes for efficiency when uploading many contacts at once.
+MARKSCHEME: Group B | Writing and reading from files | Batch Firestore document creation with structured data
+OBJECTIVE: 2.2 - Contact storage in normalised directory
+
+[ExcelImportService.showDuplicateDialog]
+PURPOSE: Presents a Material dialog to the user showing the results of duplicate detection: how many contacts are new and how many are already in the directory. The user can choose to proceed (importing only new contacts), import all (including duplicates, which would overwrite), or cancel. This confirmation step prevents accidental data corruption.
+MARKSCHEME: Group B | Simple OOP model | UI dialog construction with multiple action buttons and result communication
+OBJECTIVE: 2.3 - User-facing duplicate summary before import
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== team_service.dart (Team Management) ===
+
+FILE PURPOSE: Singleton service managing team creation, membership, and access control. Teams enable multi-user enterprise features where a manager creates a team with a unique join code, and members join by entering that code. Team owners can view any member's reports, manage membership, and regenerate join codes.
+WHY THIS FILE EXISTS: Objectives 1.3 and 1.4 require team/enterprise functionality.
+ROLE IN PROJECT: Used by TeamManagementView, UserProfileEditor (join/leave), and TeamReportsView.
+
+[TeamService]
+PURPOSE: Singleton service (factory constructor returns the same instance). Provides all team-related Firestore operations. The singleton pattern ensures only one instance manages team state, preventing race conditions from concurrent Firestore operations.
+MARKSCHEME: Group A | Complex user-defined use of OOP (design patterns) | Singleton pattern implementation ensuring single-instance service for consistent Firestore team operations — demonstrates understanding of creational design patterns
+OBJECTIVE: 1.3 - Multi-level team login system; 1.4 - Team management interface
+
+[TeamService.createTeam]
+PURPOSE: Creates a new team in Firestore with a unique 6-character alphanumeric join code. Generates the code randomly, checks Firestore for collisions (regenerating if needed), creates the team document, and updates the owner's user profile with the team ID and 'teamOwner' role.
+PARAMETERS:
+- teamName (String): The display name for the team
+- ownerId (String): Firebase Auth UID of the team creator
+MARKSCHEME: Group A | Complex client-server model | Team creation with unique code generation, collision checking, and multi-document updates (team + user profile) in a cloud database
+OBJECTIVE: 1.3 - Team creation with unique join code
+
+[TeamService.joinTeam]
+PURPOSE: Allows a user to join an existing team by entering its 6-character join code. Queries Firestore for a team with that code, adds the user's UID to the team's members array, and updates the user's profile with the team ID and 'teamMember' role. Returns false if the code is invalid.
+PARAMETERS:
+- joinCode (String): The 6-character code entered by the user
+- userId (String): Firebase Auth UID of the user joining
+MARKSCHEME: Group B | Simple client-server model | Join code lookup and multi-document membership update
+OBJECTIVE: 1.3 - Join existing team using 6-character code
+
+[TeamService.removeMember]
+PURPOSE: Removes a member from a team. Removes their UID from the team's members array and clears the team-related fields from their user profile. Only callable by the team owner.
+PARAMETERS:
+- teamId (String): The team's Firestore document ID
+- memberId (String): Firebase Auth UID of the member to remove
+MARKSCHEME: Group B | Simple client-server model | Multi-document update for membership removal
+OBJECTIVE: 1.4 - Team owner can remove members
+
+[TeamService.regenerateJoinCode]
+PURPOSE: Generates a new 6-character join code for the team, invalidating the old one. This is a security feature — if a join code is leaked, the owner can regenerate it to prevent unauthorised access.
+MARKSCHEME: Group B | Simple user-defined algorithms | Random code generation with uniqueness validation
+OBJECTIVE: 1.4 - Regenerate join codes for security
+
+[TeamService.getTeamMembers]
+PURPOSE: Fetches user profile documents for all members of a team. Queries the 'user_profiles' collection for UIDs in the team's members array. Returns a list of AppUser objects that the team management view uses to display member names, roles, and avatars.
+MARKSCHEME: Group B | Calling Web service APIs and parsing JSON | Multi-document Firestore query to resolve team member profiles
+OBJECTIVE: 1.4 - View team member list
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== auth/firebase_auth_provider.dart (Firebase Authentication) ===
+
+FILE PURPOSE: Concrete implementation of the AuthProvider interface using Firebase Authentication. Handles user registration, login, logout, and email verification. Maps Firebase-specific error codes to custom exception classes for clean error handling in the UI layer.
+
+[FirebaseAuthProvider]
+PURPOSE: Implements the abstract AuthProvider interface with Firebase Auth as the backend. This separation of interface from implementation follows the Dependency Inversion Principle — the rest of the app depends on the AuthProvider abstraction rather than directly on Firebase, making it possible to swap authentication backends (e.g., for testing) without changing any UI code.
+MARKSCHEME: Group A | Complex user-defined use of OOP (interfaces, polymorphism) | Interface implementation following Dependency Inversion Principle — demonstrates understanding of SOLID principles and how abstractions enable testability and flexibility
+OBJECTIVE: 1.1 - Secure authentication via Firebase Auth
+
+[FirebaseAuthProvider.createUser]
+PURPOSE: Registers a new user with Firebase Auth using email and password. After successful creation, automatically sends a verification email. Maps Firebase error codes to custom exceptions: 'weak-password' → WeakPasswordAuthException, 'email-already-in-use' → EmailAlreadyInUseAuthException, 'invalid-email' → InvalidEmailAuthException. This mapping provides clean, testable error handling rather than relying on Firebase-specific exceptions throughout the app.
+PARAMETERS:
+- email (String): The user's email address
+- password (String): The user's chosen password
+MARKSCHEME: Group A | Complex client-server model | Cloud-based user registration with automatic email verification and structured error mapping via custom exceptions
+OBJECTIVE: 1.1 - User registration with email verification
+
+[FirebaseAuthProvider.logIn]
+PURPOSE: Authenticates a user with Firebase Auth. On success, returns an AuthUser wrapping the Firebase User object. On failure, maps error codes to custom exceptions for UI display. The method is asynchronous because the Firebase Auth call requires network communication.
+PARAMETERS:
+- email (String): The user's email address
+- password (String): The user's password
+MARKSCHEME: Group A | Complex client-server model | Cloud-based authentication with error code mapping
+OBJECTIVE: 1.1 - Secure login with Firebase Auth
+
+[FirebaseAuthProvider.logOut]
+PURPOSE: Signs the current user out of Firebase Auth. This clears the local auth token, and the AuthBloc emits AuthStateLoggedOut, which triggers the UI to navigate back to the login screen.
+MARKSCHEME: Group B | Simple client-server model | Session termination via Firebase Auth sign-out
+OBJECTIVE: 1.1 - Logout functionality
+
+[FirebaseAuthProvider.sendEmailVerification]
+PURPOSE: Sends a verification email to the currently logged-in user. Firebase handles the actual email delivery — this method just triggers it. Email verification is required before the user can access the full app, as checked in home_page.dart.
+MARKSCHEME: Group B | Simple client-server model | Email verification trigger via Firebase
+OBJECTIVE: 1.1 - Email verification upon registration
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== auth/bloc/auth_bloc.dart (Authentication BLoC) ===
+
+FILE PURPOSE: Implements the BLoC (Business Logic Component) pattern for authentication state management. The BLoC receives events (login, register, logout, etc.) and emits states (logged in, logged out, needs verification, etc.). This cleanly separates authentication logic from UI code, making both testable independently.
+
+[AuthBloc]
+PURPOSE: The authentication BLoC. Takes an AuthProvider in its constructor (dependency injection) and registers event handlers for each auth event type. When an event is dispatched (e.g., AuthEventLogIn), the corresponding handler calls the AuthProvider and emits a new state based on the result. This follows the unidirectional data flow pattern: Event → BLoC → State → UI.
+MARKSCHEME: Group A | Complex user-defined use of OOP (design patterns) | BLoC pattern implementation demonstrating event-driven architecture, dependency injection, and unidirectional data flow — a complex state management pattern used in production Flutter applications
+OBJECTIVE: 1.1 - Authentication flow management
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== cloud/firebase_cloud_storage.dart (Cloud Note Storage) ===
+
+FILE PURPOSE: Singleton service providing CRUD operations for the notes collection in Firestore. Uses real-time streams for live updates and filters all queries by user ID.
+
+[FirebaseCloudStorage]
+PURPOSE: Singleton Firestore service for notes. The singleton pattern (factory constructor + static instance) ensures only one object manages the notes collection, preventing conflicting listeners or writes. Provides create, read, update, delete, and streaming operations on the 'notes' Firestore collection.
+MARKSCHEME: Group A | Complex user-defined use of OOP (design patterns) | Singleton pattern for Firestore service with real-time streaming via snapshots — demonstrates creational design pattern and cloud data integration
+OBJECTIVE: 1.2 - Cloud data sync filtered by unique user ID
+
+[FirebaseCloudStorage.createNewNote]
+PURPOSE: Creates a new blank note document in Firestore associated with the current user's UID. Returns the created CloudNote for navigation to the editor screen.
+PARAMETERS:
+- ownerUserId (String): Firebase Auth UID to tag the note
+MARKSCHEME: Group B | Writing and reading from files | Firestore document creation with user ID association
+OBJECTIVE: 1.2 - Cloud note creation
+
+[FirebaseCloudStorage.allNotes]
+PURPOSE: Returns a Stream of CloudNote lists that updates in real-time whenever the Firestore notes collection changes. Filtered by user ID so each user only sees their own notes. The stream is consumed by NotesView via a StreamBuilder widget, providing automatic UI updates without polling.
+PARAMETERS:
+- ownerUserId (String): Firebase Auth UID to filter notes
+MARKSCHEME: Group A | Complex client-server model | Real-time Firestore stream with automatic UI updates — demonstrates reactive programming and cloud-first architecture
+OBJECTIVE: 1.2 - Real-time cloud sync across devices
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== models/app_user.dart (User Model) ===
+
+FILE PURPOSE: Defines the AppUser data model representing user profiles stored in Firestore. Includes role enum (teamMember/teamOwner) and serialisation methods.
+
+[AppUser]
+PURPOSE: Immutable data model for user profiles. Stores user identity (id, email, name), contact details (phone), profile metadata (photoUrl, about), and team association (role, teamId). Provides fromFirestore() factory for deserialisation and toFirestore() for serialisation. The copyWith() method enables creating modified copies without mutating the original — important for Flutter's rebuild-based UI model.
+MARKSCHEME: Group B | Simple OOP model | Data model with factory constructors, serialisation, and immutable copyWith — demonstrates encapsulation and data mapping between app and database layers
+OBJECTIVE: 1.3 - User profiles with team role support
+
+[AppUser.fromFirestore]
+PURPOSE: Factory constructor that creates an AppUser from a Firestore document snapshot. Handles missing fields with sensible defaults (empty strings, null for optional fields). The role field is parsed from a string ('teamOwner' or 'teamMember') into the UserRole enum using a mapping function.
+MARKSCHEME: Group B | Calling Web service APIs and parsing JSON | Firestore document deserialisation with defensive null handling and enum parsing
+OBJECTIVE: 1.2 - Cloud data deserialisation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== models/team.dart (Team Model) ===
+
+FILE PURPOSE: Defines the Team data model for Firestore team documents.
+
+[Team]
+PURPOSE: Immutable data model for teams. Stores team identity (id, teamName), ownership (ownerId), access control (joinCode, members list), and metadata (createdAt). Like AppUser, provides fromFirestore() and toFirestore() for Firestore integration.
+MARKSCHEME: Group B | Simple OOP model | Team data model with serialisation — groups related team data into a single structured type
+OBJECTIVE: 1.3 - Team data structure with join codes
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== views/dialer/dialer.dart (Auto-Dialer Core) ===
+
+FILE PURPOSE: The core auto-dialer screen — the most complex view in the application. Loads contacts from a selected list, optionally reorders them via the priority queue, and steps through each contact: places a call via url_launcher's tel:// URI, detects return to the app via WidgetsBindingObserver, shows a feedback dialog, logs call events, and persists progress to Firestore for cross-device resume.
+
+[DialerContactsView]
+PURPOSE: The main auto-dialer widget. It is a StatefulWidget because it needs to manage mutable state: the current contact index, cycle progress, feedback dialog visibility, and auto-queue toggle. The State class mixes in WidgetsBindingObserver to detect app lifecycle changes — specifically when the user returns from the native phone dialer after placing a call.
+MARKSCHEME: Group A | Complex user-defined use of OOP (composition, interfaces) | Complex widget composing URL launcher, WidgetsBindingObserver lifecycle detection, Firestore persistence, NLP summary generation, and priority queue reordering — the most integration-heavy component in the app
+OBJECTIVE: 3.1 - Auto-dialer with sequential dialling; 3.5 - WidgetsBindingObserver for dialer return detection; 3.6 - Visual highlighting and progress indicators
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== views/list/firebase_services.dart (Firestore Service Layer) ===
+
+FILE PURPOSE: Central Firestore service layer used across the app. Contains phone number normalisation, all Contact Directory CRUD operations, list management, data migration from legacy structures, and the shared bottom navigation bar widget. This is the largest utility file in the project.
+
+[normalizePhone]
+PURPOSE: Normalises a phone number to its last 9 digits by stripping all non-numeric characters first, then taking the rightmost 9 digits. This handles format variations like +447123456789, 07123456789, 447123456789, and 7123456789 — they all normalise to 123456789. This function is critical for duplicate detection, contact lookups, and call history matching.
+MARKSCHEME: Group B | Simple user-defined algorithms (string processing) | Phone number normalisation using character stripping and substring extraction — addresses real-world data inconsistency
+OBJECTIVE: 2.3 - Normalised phone number comparison for duplicates
+
+[fetchContactsForList]
+PURPOSE: Queries the Contact Directories Firestore collection for all contacts whose list_memberships map contains the specified list name. Returns a list of document snapshots that the dialer and list views consume.
+MARKSCHEME: Group B | Calling Web service APIs and parsing JSON | Firestore query with map field filtering
+OBJECTIVE: 2.1 - List-based contact retrieval
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== views/list/list_view_visible.dart (List Management View) ===
+
+FILE PURPOSE: Main list display screen showing all of the user's contact lists as expandable tiles in a ReorderableListView. Supports drag-to-reorder (persisted to Firestore), inline description editing, stats display (contact count, last-dialed), and navigation into the dialer.
+
+[list_view_visible]
+PURPOSE: The primary list management widget. Uses a ReorderableListView to enable drag-and-drop reordering of lists, with the new order persisted to Firestore via a manual_order field. Each list tile expands to show description and stats. Tapping a list navigates to the DialerContactsView for that list.
+MARKSCHEME: Group A | Complex user-defined use of OOP | Complex stateful widget with drag-and-drop reordering, Firestore persistence, inline editing, and navigation composition
+OBJECTIVE: 2.1 - Create/rename/delete lists synced to Firestore; 2.5 - List reordering via drag-and-drop persisted to Firestore
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== views/notes/contact_notes_view.dart (Contact Notes View) ===
+
+FILE PURPOSE: Per-contact notes screen displaying all call notes/feedback for a single contact. Features a Trie-powered search bar for O(k) autocomplete across note text, add/edit/delete functionality, and chronological ordering.
+
+[ContactNotesView]
+PURPOSE: Displays all historical call notes for a specific contact from the contact_notes Firestore collection. Builds a Trie from all note text on load, enabling real-time autocomplete search. Users can add new notes (with star ratings), edit existing notes, and delete notes.
+MARKSCHEME: Group A | Complex user-defined use of OOP | Integrates Trie search, Firestore CRUD, and NLP analysis into a single cohesive view — demonstrates complex widget composition
+OBJECTIVE: 4.2 - Contact notes stored per-contact; 4.3 - Chronological note history; 6.7 - Trie-powered search
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== views/reports/reports_view_clean.dart (Reports Dashboard) ===
+
+FILE PURPOSE: Main reports dashboard with 6 tabs: Call Heatmap, Weekly Calls, Call Duration, List Performance, Call Outcomes (donut), and ML Stats. Each tab receives time-range and filter parameters. Settings are persisted to Firestore.
+
+[ReportsView]
+PURPOSE: The multi-tab reports dashboard. Uses a TabController with 6 tabs, each delegating to a specialised chart widget. Supports configurable time ranges, list-level filtering, and settings persistence. For team owners, navigating to TeamReportsView allows viewing any member's data.
+MARKSCHEME: Group A | Complex user-defined use of OOP (composition) | Dashboard composing 6 independent chart widgets with shared filtering state and persistence — demonstrates complex UI architecture
+OBJECTIVE: 5.1 - Multi-tab reports dashboard with 6 categories
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== views/reports/linear_regression_stats_view.dart (ML Stats View) ===
+
+FILE PURPOSE: ML analytics tab combining three statistical models: Linear Regression (with R²), Wilson Score (confidence intervals), and Kaplan-Meier (survival analysis). Each section is expandable with algorithm explanations and visualisations.
+
+[LinearRegressionStatsView]
+PURPOSE: Composite ML analytics view. Trains the LinearRegressionModel on the user's call data, displays predictions with R² accuracy, shows WilsonScoreCalculator results ranked by confidence, and renders KaplanMeierEstimator survival curves. Each section includes layperson-accessible algorithm explanations alongside the technical output.
+MARKSCHEME: Group A | Complex user-defined algorithms | Integrates three ML/statistical models into a single analytics view with data visualisation — demonstrates ability to compose complex algorithmic outputs into accessible UI
+OBJECTIVE: 6.2, 6.3, 6.4 - Linear regression, Wilson Score, Kaplan-Meier display
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== views/contact_directory/call_prediction_view.dart (Call Predictions) ===
+
+FILE PURPOSE: Displays Naive Bayes predictions for the best time to call a specific contact. Shows current-time recommendation, top-5 ranked time slots, and a day-by-day heatmap grid.
+
+[CallPredictionView]
+PURPOSE: Visualisation of NaiveBayesCallPredictor output. Displays three sections: (1) current time recommendation with probability, (2) top 5 ranked slots with day/hour and probability, (3) 7-day × 24-hour heatmap grid colour-coded by answer probability. Each prediction cell is tappable to show details.
+MARKSCHEME: Group A | Complex user-defined algorithms | ML prediction visualisation with heatmap grid — demonstrates translating statistical model output into actionable UI
+OBJECTIVE: 6.1 - Naive Bayes predictions displayed with top-5 and heatmap
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== views/team/team_management_view.dart (Team Management) ===
+
+FILE PURPOSE: Team management page for team owners. Provides team creation, join code display (copy/regenerate), and member list management (view/remove).
+
+[TeamManagementView]
+PURPOSE: Team admin interface. If no team exists, shows a create-team form. If a team exists, displays the join code (with copy-to-clipboard and regenerate buttons) and lists all members with avatars and remove buttons. Uses TeamService for all Firestore operations.
+MARKSCHEME: Group B | Simple OOP model | Team management UI with CRUD operations — demonstrates form handling and list widgets
+OBJECTIVE: 1.3, 1.4 - Team creation, join codes, member management
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== views/profile/user_profile_editor.dart (Profile Editor) ===
+
+FILE PURPOSE: User profile editing screen. Allows editing name, phone, about text, and profile photo. Handles team join/leave functionality and theme mode toggling.
+
+[UserProfileEditor]
+PURPOSE: Comprehensive profile editing view. Uses Navigator.push to sub-pages for each field edit. Profile photo flow: camera/gallery → DKImagePickerController → crop → Firebase Storage upload → URL saved to Firestore. Also integrates TeamService for join/leave operations and ThemeProvider for theme toggling.
+MARKSCHEME: Group B | Simple OOP model | Multi-screen profile editor with image upload and cloud persistence
+OBJECTIVE: 2.6 - Profile picture upload and storage; 1.3 - Team join via code
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== auth/auth_provider.dart (Auth Provider Interface) ===
+
+FILE PURPOSE: Abstract interface defining all authentication operations.
+
+[AuthProvider]
+PURPOSE: Abstract class (Dart's equivalent of an interface) defining the contract that any authentication implementation must fulfil: initialize(), currentUser, logIn(), createUser(), logOut(), sendEmailVerification(). By depending on this abstraction rather than FirebaseAuthProvider directly, the app supports dependency injection and is testable with mock implementations.
+MARKSCHEME: Group A | Complex user-defined use of OOP (interfaces) | Abstract interface following Dependency Inversion Principle — enables swapping authentication backends without modifying dependent code
+OBJECTIVE: 1.1 - Authentication abstraction layer
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== auth/auth_service.dart (Auth Service Facade) ===
+
+FILE PURPOSE: Thin wrapper/facade around AuthProvider for simplified usage.
+
+[AuthService]
+PURPOSE: Provides a simpler API for auth operations by wrapping an AuthProvider. The factory constructor AuthService.firebase() creates an instance with FirebaseAuthProvider, making it the default choice. All methods delegate to the underlying provider — this follows the Facade pattern, simplifying the AuthProvider interface for common use cases.
+MARKSCHEME: Group A | Complex user-defined use of OOP (design patterns) | Facade pattern wrapping the AuthProvider interface — demonstrates understanding of structural design patterns
+OBJECTIVE: 1.1 - Simplified authentication API
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== auth/auth_user.dart (Auth User Model) ===
+
+[AuthUser]
+PURPOSE: Immutable data class wrapping Firebase's User object with only the fields the app needs: id, email, and isEmailVerified. The factory constructor AuthUser.fromFirebase(User) ensures that the app never directly handles Firebase User objects outside the auth layer — maintaining the abstraction boundary.
+MARKSCHEME: Group B | Simple OOP model | Immutable user model with factory constructor maintaining auth layer abstraction
+OBJECTIVE: 1.1 - User representation with email verification status
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== auth/auth_exceptions.dart (Custom Auth Exceptions) ===
+
+FILE PURPOSE: Defines custom exception classes for authentication errors. Each maps to a specific Firebase error code.
+
+[UserNotFoundAuthException]
+PURPOSE: Thrown when login fails because no account exists for the given email. Maps to Firebase error code 'user-not-found'. Having specific exception classes means the UI can show targeted error messages rather than generic "login failed" text.
+MARKSCHEME: Group B | Simple OOP model | Custom exception hierarchy for structured error handling — each class maps to a specific error scenario
+OBJECTIVE: 1.1 - Clear authentication error messages
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== utilities/dialogs/call_feedback_dialog.dart (Post-Call Feedback) ===
+
+FILE PURPOSE: Post-call feedback dialog shown after each dialer call. Collects star rating and notes, displays NLP summary.
+
+[CallFeedbackDialog]
+PURPOSE: StatefulWidget showing a star rating bar, notes text field, and an NLP-generated summary of previous notes for this contact (via NLPService.generateNoteSummary). The summary shows keywords, common phrases, and total word count to help the user recall previous conversations before writing new notes.
+MARKSCHEME: Group A | Complex user-defined use of OOP (composition) | Feedback dialog integrating NLP summary generation with user input collection — demonstrates composing ML outputs into interactive UI components
+OBJECTIVE: 4.1 - Post-call feedback dialog with star rating and notes; 4.4 - NLP summary of previous notes
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== main.dart (Application Entry Point) ===
+
+FILE PURPOSE: App entry point initialising Flutter bindings, Firebase, theming (ChangeNotifierProvider), and authentication (BlocProvider<AuthBloc>). Registers all named routes.
+
+[main]
+PURPOSE: The application entry point. Calls WidgetsFlutterBinding.ensureInitialized() to set up the Flutter framework, then runs the app wrapped in ChangeNotifierProvider (for ThemeProvider) and BlocProvider (for AuthBloc). Registers all named routes for push navigation. The MaterialApp's home is BlocBuilder-driven: it checks the current AuthState and renders the appropriate screen.
+MARKSCHEME: Group B | Simple OOP model | App initialisation with provider pattern and route registration
+OBJECTIVE: 1.1 - App initialisation with Firebase and BLoC setup
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== home_page.dart (Entry Screen Router) ===
+
+[HomePage]
+PURPOSE: FutureBuilder-based screen that initialises Firebase and checks the current user's auth state. If logged in, navigates to the main slider screen; if not, shows the login screen. Also handles the isEmailVerified check.
+MARKSCHEME: Group B | Simple client-server model | Firebase-aware routing based on authentication state
+OBJECTIVE: 1.1 - Entry point routing based on auth status

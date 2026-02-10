@@ -1,0 +1,107 @@
+Category 1 — User Authentication & Multi-Device Synchronisation
+1.1	The app must allow users to register and log in using an email address and password, with authentication handled securely through Firebase Authentication. Users must receive email verification upon registration.
+1.1.1	Justification: Secure authentication is essential because the system stores personal and potentially sensitive contact information. UK GDPR requires that access to personal data be restricted to authorised users, meaning that accounts must be protected by validated email addresses and sufficiently strong passwords. My client also reported concerns about data security when using personal devices, emphasising the need for verified accounts and protected access.
+1.2	All user data — including contact lists, call history, notes, and settings — must be stored in a cloud database (Firebase Firestore) and filtered by a unique user ID, so that data automatically synchronises across any device the user logs into.
+1.2.1	Justification: Survey findings showed that 60% of respondents were frustrated by slow or unreliable syncing across their CRM and dialer tools. My client specifically highlighted that HubSpot frequently failed to sync across devices, causing duplicated work. Real time cloud-based syncing ensures that data from one device appears consistently on all others, directly addressing this problem and preventing the fragmented workflow identified in the analysis.
+1.3	The app must support a multi-level team/enterprise login system, where a user can create a team (as an owner/manager) or join an existing team using a unique 6-character join code. Team owners must be able to view dashboards and statistics for all team members, while team members retain access to their own individual data.
+1.3.1	Justification: Team based visibility was a requirement identified during the client interview, where managers need access to performance dashboards without needing manual exports or screenshots. Survey responses also showed strong interest in collaborative reporting and oversight in multi user environments. A structured team/enterprise login supports realistic business workflows and improves organisational scalability.
+1.4	Team owners must be able to manage their team through a dedicated interface: viewing members, removing members, regenerating join codes, and accessing any member's reports dashboard via a targetUserId parameter.
+1.4.1	Justification: Managers require operational control over their teams for privacy, security, and workflow consistency. The ability to view members, remove employees who leave the organisation, and regenerate join codes reflects common business practices and prevents unauthorised access. This feature also supports the GDPR requirement for controlled access to personal data within organisations.
+ 
+Category 2 — Contact & List Management
+2.1 The app must allow users to create, rename, and delete named contact lists, with all list data persisted to Firestore and accessible across devices.
+	Justification: Both my client and survey respondents stated that flexible organisation of leads is essential for managing high volume calling. Being able to create, rename, delete, and sync lists across devices supports campaign workflows and prevents manual reorganisation, which was a known issue with existing tools.
+
+2.2 Users must be able to import contacts into the app from three sources:
+•	(a) An Excel spreadsheet (.xlsx, .xls) or CSV file (.csv), with automatic header detection and column mapping for name and phone number fields.
+•	(b) The device's native phone contact book, with permission handling.
+•	(c) Manual entry of individual contacts.
+o	Justification: Survey data showed that many users import contacts from spreadsheets, while others primarily store details in their phonebook. Supporting all three entry methods (CSV/Excel import, phonebook import, and manual entry) significantly lowers the barrier to adoption and reflects real world workflows. Existing CRM tools often require desktop access for CSV imports — a pain point specifically mentioned by my client.
+o	
+2.3 The Excel/CSV import must include duplicate detection — comparing incoming contacts against existing contacts by normalised phone number — and must present the user with a summary of new vs. duplicate contacts before importing.
+	Justification: Both the competitor analysis and survey results highlighted duplication as a recurring issue when importing contact lists. Automatic duplicate detection (via normalised phone numbers) prevents confusion, reduces human error, and avoids wasted calling time caused by repeated calls to the same lead.
+
+2.4 Users must be able to reorder contacts within a list via drag-and-drop, with the new ordering persisted to Firestore (via a contact_index/manual_order field) so that the order is preserved across sessions and devices.
+	Justification: Both the competitor analysis and survey results highlighted duplication as a recurring issue when importing contact lists. Automatic duplicate detection (via normalised phone numbers) prevents confusion, reduces human error, and avoids wasted calling time caused by repeated calls to the same lead.
+2.5 Users must be able to reorder lists themselves via drag-and-drop in the Lists view, with ordering persisted to Firestore.
+	Justification: Just as with contacts, list level organisation needs to remain flexible so users can prioritise campaigns. Persisting ordering ensures consistency across devices and prevents the cognitive load caused by re arranging lists manually.
+
+2.6 Users must be able to upload and crop a profile picture for their own account, stored in Firebase Storage, with the URL saved to their user profile document.
+	Justification: Allowing users to add profile pictures increases personalisation and improves contact recognition during calling sessions. Storing images in Firebase Storage is scalable and aligns with industry standard mobile UX patterns.
+ 
+Category 3 — Auto-Dialer & Call Cycle Tracking
+3.1 The app must provide an auto-dialer feature that sequentially dials contacts from a selected list, launching the native phone dialer via a tel:// URI scheme for each contact.
+	Justification: A key pain point from the client interview was the time wasted manually dialling numbers and switching between apps. No competitor examined (RingCentral, HubSpot, CallOnTheGo) offered a fully integrated mobile native auto dialer with CRM functionality. This makes the feature a core differentiator.
+3.2 The app must track progress through a call cycle — recording the current contact index, total contacts, completion percentage, and call durations — in a Firestore list_cycles collection, so that if a user closes the app mid-cycle and reopens it (even on a different device), they are prompted to resume from where they left off.
+	Justification: If a user is interrupted mid call cycle, losing progress leads to wasted time and inconsistent workflows. The client specifically requested the ability to resume from where he left off, even on a different device, making this objective essential.
+3.3 Each call cycle event must be recorded in a Firestore subcollection (cycle_events) containing the contact name, phone number, timestamp, call type (outgoing/missed/cancelled), duration, and whether it was answered.
+	Justification: Detailed call cycle event logging enables analytics, follow up scheduling, and accurate reporting. Automatic metadata capture ensures consistent data quality and reduces user burden.
+3.4 A reconciliation algorithm must match native call history entries against cycle events using a weighted multi-factor scoring system (phone number match, time proximity, call direction) to accurately attribute call outcomes to the correct contact.
+	Justification: Because iOS does not allow direct programmatic access to call states, a reconciliation algorithm is required to correctly match actual call history data with intended dials. Without this, analytics such as success rate or duration would be inaccurate or unusable. Therefore another companion app will need to be made to run on the Mac to scrape the call database and import it to firebase while parsing data. 
+3.5 The app must use WidgetsBindingObserver to detect when the user returns from the native phone dialer, and must automatically advance to the next contact in the cycle after a short delay, ensuring the app remains in the foreground throughout the calling session.
+	Justification: WidgetsBindingObserver provides the only reliable method to detect when the user returns from the dialer due to iOS limitations. Automatic advancement makes the call cycle smooth, efficient, and aligned with the client’s requirement for low friction workflows.
+3.6 The current contact being called must be visually highlighted in the list (e.g., with a distinct border and shadow), and progress indicators (e.g., "Contact 3 of 10") must be displayed during an active cycle.
+	Justification: Visual feedback is crucial for usability during high volume calling. Highlighting the active contact and showing progress indicators reduces cognitive load and helps the user track progress naturally.
+3.7 Confirmation prompts must be displayed before any destructive action, including deleting contacts, deleting lists, deleting notes, and removing team members.
+	Justification: The system manages personal and business-critical data. Confirmation prompts help prevent accidental data loss, aligning with usability and data protection best practices.
+ 
+Category 4 — Call Data Collection & Contact Notes
+4.1 After each call, the app must present a feedback dialog that collects:
+•	(a) A star rating (1–5) for how successful the call was.
+•	(b) Free-text notes about the conversation.
+•	(c) Automatically captured data: call duration in seconds, timestamp, and the contact's name and phone number.
+Justification: My client explained that HubSpot's note‑taking interface is slow and disrupts workflow. A structured, fast post‑call interface reduces friction and supports consistent logging. Automatically capturing metadata avoids omissions and ensures high‑quality data for analytics and ML models.
+4.2 All call feedback and notes must be stored in Firestore (contact_notes collection), tagged to the specific contact (by name and phone number) and the specific call (by timestamp), enabling per-contact note history.
+	Justification: Per contact note history is essential for providing context before making follow up calls. Survey responses strongly emphasised the importance of tracking what was said in previous calls, and the lack of this feature in mobile CRMs was identified as a pain point.
+4.3 A dedicated Contact Notes view must display all historical notes for a selected contact, ordered chronologically, including the star rating, duration, and any text entered by the user.
+	Justification: Chronological notes enable users to quickly review lead progress and conversation history. This supports better sales performance and reduces time wasted navigating disjointed records.
+4.4 Before each call, the app must display an NLP-generated summary of previous notes for that contact (see Objective 6.5), providing the user with a recap of prior conversations.
+	Justification: Chronological notes enable users to quickly review lead progress and conversation history. This supports better sales performance and reduces time wasted navigating disjointed records.
+ 
+Category 5 — Reports Dashboard & Data Visualisation
+5.1 The app must provide a multi tab reports dashboard displaying at least six categories of analytics, each in a dedicated chart or visualisation widget.
+Justification: Users repeatedly requested built in analytics without needing desktop dashboards or exports. A multi tab dashboard consolidates all important metrics in one place and meets both client and survey demands.
+5.2 An activity heatmap must display calling activity over time (similar to a GitHub contribution graph), with colour coded intensity indicating call volume per day. The heatmap must support configurable time ranges (last 7 days, current week, last 30 days, or a custom range) and must allow filtering by specific contact list.
+Justification: Activity heatmaps provide a clear visual representation of work patterns, similar to GitHub’s contribution visualisation. The client prefers highly visual reporting and specifically mentioned liking heatmap style views.
+5.3 A weekly trends chart must show the number of calls made per day over time, using a line or bar chart, enabling users to identify patterns in their calling activity.
+Justification: Weekly trends help identify behavioural patterns in call activity, enabling users to adjust calling strategies. This was important for both performance review and team manager oversight.
+5.4 A call duration chart must display distribution statistics for call durations, including the 25th, 50th (median), and 75th percentile values.
+Justification: Percentile based call duration statistics give insight into user performance and lead quality. Existing tools often lack mobile friendly visualisation of call duration patterns, making this a useful addition.
+5.5 A call outcome chart (donut/pie chart) must break down calls by outcome: connected, no answer, busy, and voicemail, showing both counts and percentages.
+Justification: Outcome breakdown charts are essential for understanding success patterns and evaluating lead lists. These metrics were specifically requested in the client interview.
+5.6 A list performance chart must compare calling metrics across different contact lists, enabling users to identify which lists are yielding the best results.
+Justification: Comparing list performance helps users allocate time to the most effective lead sources. This aligns with the client’s desire to understand which lead lists produce the highest engagement.
+5.7 For team owners, the reports dashboard must be viewable for any team member, allowing managers to monitor the performance and activity of their sales team.
+Justification: Managers require visibility into team member performance without manual reporting. This supports enterprise use cases and reflects real business workflows.
+---
+Category 6 — Machine Learning, Statistical Analysis & NLP
+6.1 The app must implement a Naive Bayes classifier that analyses a contact’s call history to predict the optimal day of week and hour of day to call them, applying Laplace smoothing to handle sparse data. The top 5 predicted best time slots must be displayed in a dedicated Call Prediction view.
+Justification: Predicting optimal calling times directly supports efficiency and higher answer rates. The idea was strongly supported in both the client interview and survey data, where users emphasised the difficulty of knowing when to call.
+6.2 The app must implement a Linear Regression model (using the Least Squares method with matrix algebra: β=(XᵀX)⁻¹Xᵀy) to predict lead conversion likelihood based on multiple features: number of calls, total call duration, and days since first contact. The model must calculate and display an R² coefficient of determination to indicate prediction accuracy.
+Justification: Linear regression provides a quantitative method for prioritising high value leads. Users expressed interest in automated lead scoring during the survey and interview. Including R² strengthens reliability by showing how accurate the model is.
+6.3 The app must implement a Wilson Score Interval calculator to provide statistically robust confidence intervals for each contact’s call success rate, accounting for sample size. Contacts with few calls must receive wider confidence intervals (indicating less certainty), displayed alongside a confidence score (0–100).
+Justification: Simple success rates are misleading when sample sizes are small. The Wilson Score ensures that contacts with only one or two calls don’t appear artificially high priority, producing trustworthy analytics.
+6.4 The app must implement a Kaplan Meier survival analysis estimator to model lead conversion timing, calculating the probability of conversion at key time points (1, 3, 7, 14, and 30 days), correctly handling censored data (leads who have not yet converted), and computing the median time to conversion.
+Justification: Kaplan Meier survival analysis allows modelling of conversion timing — an advanced technique that gives insights unavailable in existing tools. This supports the client’s desire to understand how long leads typically take to convert.
+6.5 The app must implement an NLP pipeline for analysing contact notes, comprising:
+(a) Tokenisation
+(b) Stop word removal
+(c) Stemming
+(d) TF IDF scoring
+(e) N gram analysis
+(f) Summary generation combining TF IDF keywords, common phrases, and word frequency
+Justification: NLP enhances productivity by summarising important past conversations. Survey respondents highlighted the difficulty of reviewing long histories before calling. This pipeline automates the process and delivers consistent pre call summaries.
+6.6 The app must implement a contact priority queue using a min heap data structure, which automatically ranks contacts by calling urgency based on a weighted scoring formula considering: days since last call, call success rate, average call rating, total call attempts, and days since last successful call. Users must be able to toggle this “Auto Queue” ordering in the dialer view.
+Justification: A priority queue dynamically orders contacts based on urgency and behavioural patterns. The client specifically said he currently calls leads “top to bottom with no strategy,” making this feature directly aligned with his needs.
+6.7 The app must implement a Trie (prefix tree) data structure for efficient autocomplete search across contact notes. Inserting all words from all notes into the Trie must enable O(k) prefix lookups (where k = prefix length), returning matching document IDs and autocomplete suggestions in real time as the user types.
+Justification: Fast autocomplete improves search efficiency across large note histories. This aligns with the client’s requirement to quickly find specific past details before calls.
+6.8 Statistical metrics displayed in the reports dashboard must include: mean and median call durations, percentile breakdowns (25th/50th/75th), success rate confidence intervals (via Wilson Score), and R² goodness of fit (via Linear Regression).
+Justification: Including statistical metrics enhances the dashboard’s usefulness and supports evidence based decision making. R² and confidence intervals improve trust in predictions.
+---
+Category 7 — Call Success Metrics & Time Based Analysis
+7.1 The app must calculate and display call success rate metrics for each contact, including: the ratio of successful (answered) calls to total calls, and the conversion rate (proportion of leads that have had at least one successful call).
+Justification: Success rate tracking is core to understanding lead effectiveness and personal performance. The client emphasised these statistics as essential for daily optimisation.
+7.2 The app must perform time based analysis, identifying peak calling hours by computing the probability of a call being answered for each day of week and hour of day combination, enabling users to focus their calling during the most effective time windows.
+Justification: Peak call hour analysis allows users to adjust their strategy to when leads are most likely to answer. This functionality was requested by both the client and multiple survey respondents.
+7.3 The app must calculate the average time between a lead’s first contact and their first successful call (time to conversion), using the Kaplan Meier estimator to model this across all contacts and display conversion probability curves.
+Justification: Understanding how long leads typically take to convert supports follow up planning and prevents premature abandonment of leads. This aligns with the client’s stated need to optimise follow up timing.

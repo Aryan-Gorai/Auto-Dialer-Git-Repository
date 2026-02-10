@@ -1,0 +1,106 @@
+{
+    "test_scenarios": {
+        "authentication": [
+            {
+                "test": "User registration with valid email and password",
+                "input": "email: test@example.com, password: SecurePass123!",
+                "expected": "Account created, verification email sent, AuthStateNeedsVerification emitted",
+                "aqa_skill": "Client-server model with authentication"
+            },
+            {
+                "test": "Login with unverified email",
+                "input": "email: unverified@example.com, password: ValidPass1!",
+                "expected": "Login succeeds but app redirects to email verification screen",
+                "aqa_skill": "Input validation and error handling"
+            },
+            {
+                "test": "Login with wrong password",
+                "input": "email: test@example.com, password: WrongPass",
+                "expected": "WrongPasswordAuthException thrown, user sees error message",
+                "aqa_skill": "Exception handling"
+            }
+        ],
+        "excel_import": [
+            {
+                "test": "Import CSV with header detection",
+                "input": "CSV file: Name,Phone\\nJohn,07123456789\\nJane,07987654321",
+                "expected": "2 contacts detected, headers auto-mapped, contacts uploaded to Contact Directories",
+                "aqa_skill": "File parsing and data processing"
+            },
+            {
+                "test": "Duplicate detection during import",
+                "input": "Import 07123456789 when 7123456789 already exists in directory",
+                "expected": "Normalised comparison catches duplicate, counted as 'existing' not 'new'",
+                "aqa_skill": "String normalisation and comparison algorithms"
+            }
+        ],
+        "naive_bayes": [
+            {
+                "test": "Prediction with sparse call history",
+                "input": "Contact with only 2 calls (Monday 10am, Wednesday 2pm)",
+                "expected": "Laplace smoothing prevents zero probabilities, predictions cover all days/hours",
+                "aqa_skill": "Statistical calculations with smoothing"
+            },
+            {
+                "test": "Top 5 predictions ordering",
+                "input": "Contact with 20 calls across various days and times",
+                "expected": "Top 5 slots ranked by P(answered|day,hour) in descending order",
+                "aqa_skill": "Sorting by computed probability"
+            }
+        ],
+        "linear_regression": [
+            {
+                "test": "R² calculation accuracy",
+                "input": "5 leads with known call counts, durations, and conversion outcomes",
+                "expected": "R² between 0 and 1, higher when data fits linear model well",
+                "aqa_skill": "Matrix algebra and statistical modelling"
+            }
+        ],
+        "wilson_score": [
+            {
+                "test": "Confidence interval width with small sample",
+                "input": "1 successful call out of 1 total (100% naive rate)",
+                "expected": "Wide confidence interval (e.g., 0.03–0.98) reflecting sample uncertainty",
+                "aqa_skill": "Statistical confidence intervals"
+            },
+            {
+                "test": "Confidence interval with large sample",
+                "input": "80 successful calls out of 100 total (80% rate)",
+                "expected": "Narrow interval (e.g., 0.71–0.87) reflecting higher certainty",
+                "aqa_skill": "Statistical confidence intervals"
+            }
+        ],
+        "kaplan_meier": [
+            {
+                "test": "Survival curve with censored data",
+                "input": "10 leads: 6 converted at known times, 4 still active (censored)",
+                "expected": "Survival probability decreases at conversion events, censored leads reduce risk set without event",
+                "aqa_skill": "Survival analysis with censoring"
+            }
+        ],
+        "priority_queue": [
+            {
+                "test": "Heap property maintenance after insertions",
+                "input": "Insert contacts with priorities: 0.8, 0.3, 0.5, 0.1, 0.9",
+                "expected": "extractMin returns 0.1, then 0.3, then 0.5, etc. Heap property maintained",
+                "aqa_skill": "Min-heap data structure operations"
+            }
+        ],
+        "trie": [
+            {
+                "test": "Autocomplete prefix search",
+                "input": "Insert 'interested', 'interview', 'internal'; search prefix 'inter'",
+                "expected": "Returns all 3 words as suggestions with correct document IDs",
+                "aqa_skill": "Trie prefix traversal"
+            }
+        ],
+        "call_cycle": [
+            {
+                "test": "Reconciliation scoring",
+                "input": "Cycle event for +447123456789 at 14:00; call history shows outgoing to 7123456789 at 14:01",
+                "expected": "Score > 0.6 threshold (phone match: 0.65, time proximity: ~0.19, direction: 0.05 = 0.89)",
+                "aqa_skill": "Weighted scoring algorithm"
+            }
+        ]
+    }
+}

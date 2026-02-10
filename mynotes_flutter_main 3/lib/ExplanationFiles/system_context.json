@@ -1,0 +1,47 @@
+{
+    "project_name": "Auto-Dialer Mobile Application",
+    "technology_stack": {
+        "frontend": "Flutter (Dart)",
+        "backend": "Firebase (Firestore, Auth, Storage, Analytics)",
+        "state_management": "BLoC pattern (flutter_bloc)",
+        "platform": "iOS and Android (cross-platform)",
+        "charts": "fl_chart package",
+        "contacts": "flutter_contacts, fast_contacts, fluttercontactpicker",
+        "file_handling": "file_picker, excel (for .xlsx parsing)"
+    },
+    "architecture_overview": "The application follows a layered architecture: UI views sit at the top, communicating with service classes that handle business logic and Firebase interactions. Machine learning models and data structures operate as independent modules consumed by both views and services. The BLoC pattern is used specifically for authentication state management, whilst most other state is handled through StatefulWidgets with direct Firestore queries. All user data is keyed by a unique Firebase Auth UID, enabling seamless cross-device synchronisation through Firestore's real-time listeners.",
+    "key_design_decisions": {
+        "why_flutter": "Flutter was chosen because it allows building a single codebase for both iOS and Android, which aligns with the client requirement for cross-platform accessibility. Dart's strong typing and async/await support make it well-suited for handling Firebase's stream-based data model.",
+        "why_firebase": "Firebase was selected as the backend because it provides real-time data synchronisation out of the box — directly addressing the survey finding that 60% of users were frustrated by slow syncing. Its NoSQL document model (Firestore) maps naturally to the app's data structures, and Firebase Auth provides production-grade security with minimal configuration.",
+        "why_bloc_for_auth": "The BLoC (Business Logic Component) pattern was chosen specifically for authentication because auth state affects the entire app navigation. BLoC cleanly separates the auth logic from UI code, making it testable and maintainable. Other parts of the app use simpler StatefulWidget state management where the additional complexity of BLoC is not warranted.",
+        "why_on_device_ml": "Machine learning models run entirely on-device rather than calling external APIs. This ensures predictions are instant (no network latency), work offline, and keep sensitive call data private. The mathematical implementations (matrix algebra, Bayesian probability, survival analysis) also demonstrate advanced algorithmic skills for the NEA markscheme.",
+        "why_custom_data_structures": "Custom implementations of Trie and Min-Heap were built from scratch rather than using library implementations. This demonstrates understanding of the underlying algorithms (O(k) prefix search, O(log n) heap operations) and satisfies the AQA requirement for complex user-defined data structures."
+    },
+    "data_flow": {
+        "contact_lifecycle": "Contacts enter the system via Excel/CSV import, phone book import, or manual entry → stored in 'Contact Directories' collection (normalised by phone number) → assigned to lists via 'list_memberships' map → dialled through the auto-dialer → call events logged to 'call_history' and 'list_cycles' → notes/feedback stored in 'contact_notes' → ML models analyse the accumulated data for predictions",
+        "authentication_flow": "App launch → AuthBloc dispatches AuthEventInitialize → FirebaseAuthProvider checks current user → If logged in: emit AuthStateLoggedIn → If not: emit AuthStateLoggedOut → Login/Register screens dispatch AuthEventLogIn/AuthEventRegister → Success emits AuthStateLoggedIn → Email verification checked before full access",
+        "call_cycle_flow": "User selects list and starts cycle → CallCycleService.startCycle() creates Firestore document → For each contact: dialer.dart launches tel:// URI → WidgetsBindingObserver detects return to app → Optional feedback dialog collects rating/notes → NLPService generates summary from previous notes → Progress saved to Firestore → Cycle ends → CallCycleService.reconcileCycle() matches cycle events with native call history using weighted scoring"
+    },
+    "annotations": [
+        {
+            "reference": "Firebase Normalisation Strategy",
+            "text": "Phone numbers are normalised to their last 9 digits before storage and comparison. This handles inconsistencies between formats like +447123456789, 07123456789, and 7123456789 — ensuring duplicate detection works regardless of how the number was originally entered. This is implemented in normalizePhone() in firebase_services.dart."
+        },
+        {
+            "reference": "Priority Queue Weighting Formula",
+            "text": "The contact priority score uses a weighted formula: daysSinceLastCall (30%) + successRate (25%) + avgRating (20%) + totalAttempts (15%) + daysSinceSuccess (10%). Lower scores indicate higher priority. The weights were chosen based on the client interview findings: recency of contact was ranked most important, followed by likelihood of answer, then quality of previous interactions."
+        },
+        {
+            "reference": "Reconciliation Algorithm Design",
+            "text": "Because iOS does not expose call state programmatically, the reconciliation algorithm uses a weighted multi-factor scoring system to match native call history entries to cycle events: phone number match (65%), time proximity (20%), call order (10%), and direction (5%). A match threshold of 0.6 prevents false positives. This approach was necessary because no direct API exists to detect whether a specific outgoing call was answered."
+        },
+        {
+            "reference": "NLP Pipeline Architecture",
+            "text": "The NLP pipeline processes contact notes through five stages: (1) Tokenisation splits text into individual words, (2) Stop word removal filters out common English words ('the', 'is', 'at'), (3) Stemming reduces words to root forms using suffix stripping, (4) TF-IDF scoring identifies statistically important terms, (5) N-gram analysis finds common multi-word phrases. The final summary combines TF-IDF keywords with frequent n-grams to produce a concise recap of previous conversations."
+        },
+        {
+            "reference": "Kaplan-Meier Censoring",
+            "text": "The Kaplan-Meier estimator correctly handles censored data — leads that have not yet converted are not counted as failures but as censored observations. This is critical because without censoring, leads that simply haven't been called recently would artificially deflate the survival curve, producing misleading conversion probability estimates."
+        }
+    ]
+}

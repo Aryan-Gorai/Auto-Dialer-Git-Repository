@@ -1,0 +1,134 @@
+Level	Mark Range	Description	Additional information
+3	19-27	
+The techniques used are appropriate and demonstrate a level of technical skill equivalent to those listed in Group A in Table 1.
+
+Program(s) demonstrate(s) that the skill required for this level has been applied sufficiently to demonstrate proficiency.
+
+Above average performance: Group A equivalent algorithms and model programmed more than well to excellent; all or almost all excellent coding style characteristics; more than to highly effective solution.
+
+Average performance: Group A equivalent algorithms and/or model programmed well; majority of excellent coding style characteristics; an effective solution.
+
+Below average performance: Group A equivalent algorithms and/or model programmed just adequately to fully adequate; some excellent coding style characteristics; less than effective to fairly effective solution.
+
+2	10-18	
+The techniques used are appropriate and demonstrate a level of technical skill equivalent to those listed in Group B in Table 1.
+
+Program(s) demonstrate(s) that the skill required for this level has been applied sufficiently to demonstrate proficiency.
+
+Above average performance: Group B equivalent algorithms and model programmed more than well to excellent; majority of excellent coding style characteristics; more than to highly effective solution.
+
+Average performance: Group B equivalent algorithms and/or model programmed well; some excellent coding style characteristics; effective solution.
+
+Below average performance: Group B equivalent algorithms and/or model programmed just adequately to fully adequate; all or almost all relevant good coding style characteristics but possibly one example at most of excellent characteristics; less than effective to fairly effective solution.
+
+1	1-9	
+The techniques used demonstrate a level of technical skill equivalent to those listed in Group C in Table 1.
+
+Program(s) demonstrate(s) that the skill required for this level has been applied sufficiently to demonstrate proficiency.
+
+Above average performance: Group C equivalent model and algorithms programmed more than well to excellent; almost all relevant good coding style characteristics; more than to highly effective simple solution.
+
+Average performance: Group C equivalent model and algorithms programmed well; some relevant good coding style characteristics; effective simple solution.
+
+Below average performance: Group C equivalent algorithms and/or model programmed in a severely limited to limited way; basic coding style characteristics; trivial to lacking in effectiveness simple solution.
+
+Select the band, 1, 2 or 3 with level of demand description that best matches the techniques and skill that the student’s program attempts to cover. The emphasis is on what the student has actually achieved that demonstrates proficiency at this level rather than what the student has set out to use and do but failed to demonstrate, eg because of poor execution. Check the proficiency demonstrated in the program. If the student fails to demonstrate proficiency at the initial level of choice, drop down a level to see if what the student has done demonstrates proficiency at this level for the lower demand until a match is obtained. Table 1 is indicative of the standard required and is not to be treated as just a list of things for students to select from and to be automatically credited for including in their work.
+
+As indicated above, having selected the appropriate level for techniques used and proficiency in their use, the exact mark to award should be determined based upon:
+
+the extent to which the criteria for the mark band have been achieved
+the quality of the coding style that the student has demonstrated (see Table 2 for exemplification of what is expected)
+the effectiveness of the solution.
+4.14.3.4 Example technical skills
+4.14.3.4.1 Table 1: Example technical skills
+Group	Model (including data model/structure)	Algorithms
+A	
+Complex data model in database (eg several interlinked tables)
+
+Hash tables, lists, stacks, queues, graphs, trees or structures of equivalent standard
+
+Files(s) organised for direct access
+
+Complex scientific/mathematical/robotics/control/business model
+
+Complex user-defined use of object-orientated programming (OOP) model, eg classes, inheritance, composition, polymorphism, interfaces
+
+Complex client-server model
+
+Cross-table parameterised SQL
+
+Aggregate SQL functions
+
+User/CASE-generated DDL script
+
+Graph/Tree Traversal
+
+List operations
+
+Linked list maintenance
+
+Stack/Queue Operations
+
+Hashing
+
+Advanced matrix operations
+
+Recursive algorithms
+
+Complex user-defined algorithms (eg optimisation, minimisation, scheduling, pattern matching) or equivalent difficulty
+
+Mergesort or similarly efficient sort
+
+Dynamic generation of objects based on complex user-defined use of OOP model
+
+Server-side scripting using request and response objects and server-side extensions for a complex client-server model
+
+Calling parameterised Web service APIs and parsing JSON/XML to service a complex client-server model
+
+B	
+Simple data model in database (eg two or three interlinked tables)
+
+Multi-dimensional arrays
+
+Dictionaries
+
+Records
+
+Text files
+
+File(s) organised for sequential access
+
+Simple scientific/mathematical /robotics/control/business model
+
+Simple OOP model
+
+Simple client-server model
+
+Single table or non-parameterised SQL
+
+Bubble sort
+
+Binary search
+
+Writing and reading from files
+
+Simple user defined algorithms (eg a range of mathematical/statistical calculations)
+
+Generation of objects based on simple OOP model
+
+Server-side scripting using request and response objects and server-side extensions for a simple client-server model
+
+Calling Web service APIs and parsing JSON/XML to service a simple client-server model
+
+C	
+Single-dimensional arrays
+
+Appropriate choice of simple data types
+
+Single table database
+
+Linear search
+
+Simple mathematical calculations (eg average)
+
+Non-SQL table access
