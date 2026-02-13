@@ -806,3 +806,1162 @@ OBJECTIVE: 1.1 - App initialisation with Firebase and BLoC setup
 PURPOSE: FutureBuilder-based screen that initialises Firebase and checks the current user's auth state. If logged in, navigates to the main slider screen; if not, shows the login screen. Also handles the isEmailVerified check.
 MARKSCHEME: Group B | Simple client-server model | Firebase-aware routing based on authentication state
 OBJECTIVE: 1.1 - Entry point routing based on auth status
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== contact_graph.dart (Contact Relationship Graph) ===
+
+FILE PURPOSE: Implements a weighted undirected graph where contacts are nodes and edges connect contacts that share at least one list. Edge weight equals the number of shared lists. The graph supports BFS traversal, connected component detection, and Dijkstra's shortest path algorithm — enabling analytics such as "which contacts are most connected?" and "what is the shortest relationship path between two contacts?"
+WHY THIS FILE EXISTS: Demonstrates Group A graph algorithms (BFS, Dijkstra's) applied to a real-world domain.
+ROLE IN PROJECT: Built from Firestore data in ContactDirectoryView, providing graph analytics and relationship insights.
+
+IMPORTS EXPLAINED:
+- dart:collection: Provides the Queue class used by the BFS traversal
+- cloud_firestore: Firestore access for building the graph from the Contact Directories collection
+
+[GraphNode]
+PURPOSE: Represents a single contact as a node in a weighted undirected graph. Stores the contact's identity (ID, name, phone) and an adjacency list as a Map<String, double> where keys are neighbour contact IDs and values are edge weights (number of shared lists). The degree getter returns the number of direct neighbours.
+MARKSCHEME: Group A | Complex user-defined data structures (graph) | Graph node with adjacency list representation — each node stores weighted edges to all neighbours
+OBJECTIVE: 6.6 - Contact relationship modelling
+
+[GraphNode.get degree]
+PURPOSE: Returns the number of direct neighbours (edges) for this contact in the graph. Simply returns the length of the edges map.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Simple getter returning adjacency list size
+OBJECTIVE: 6.6 - Node degree calculation
+
+[GraphNode.toString]
+PURPOSE: Human-readable string representation showing the contact name and their degree (number of connections). Used for debugging and analytics display.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Override of toString for debugging output
+OBJECTIVE: 6.6 - Graph node display
+
+[ContactGraph]
+PURPOSE: A weighted undirected graph of contacts. Two contacts are connected if they share at least one list; the edge weight is the number of shared lists. Implements BFS (breadth-first search) for connected components, Dijkstra's shortest-path algorithm for finding relationship paths, and Firestore integration for building the graph from live data and persisting analytics.
+MARKSCHEME: Group A | Graph/Tree Traversal | Complete weighted undirected graph implementation with BFS, connected components, and Dijkstra's algorithm — demonstrates three distinct graph algorithms applied to contact relationship analysis
+OBJECTIVE: 6.6 - Contact relationship graph with BFS and Dijkstra's
+
+[ContactGraph.get nodeCount]
+PURPOSE: Returns the total number of nodes (contacts) in the graph.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Simple getter returning internal map size
+OBJECTIVE: 6.6 - Graph statistics
+
+[ContactGraph.get edgeCount]
+PURPOSE: Returns the total number of undirected edges. Since each edge is stored twice (once per endpoint), divides the sum of all adjacency list lengths by 2.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Edge counting with undirected correction
+OBJECTIVE: 6.6 - Graph statistics
+
+[ContactGraph.get nodes]
+PURPOSE: Returns an unmodifiable view of the internal nodes map, preventing external mutation of the graph structure.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Encapsulation via unmodifiable view
+OBJECTIVE: 6.6 - Graph encapsulation
+
+[ContactGraph.getNode]
+PURPOSE: Retrieves a graph node by its contact ID, or null if not present. Simple map lookup.
+PARAMETERS:
+- contactId (String): The unique identifier of the contact to find
+MARKSCHEME: Group C | Appropriate choice of simple data types | Hash map lookup for node retrieval
+OBJECTIVE: 6.6 - Node access
+
+[ContactGraph.addNode]
+PURPOSE: Adds a new GraphNode to the graph. Uses putIfAbsent to prevent duplicate nodes — if a node with the same ID already exists, it is silently ignored.
+PARAMETERS:
+- node (GraphNode): The node to add to the graph
+MARKSCHEME: Group B | Simple user-defined algorithms | Graph node insertion with duplicate prevention
+OBJECTIVE: 6.6 - Graph construction
+
+[ContactGraph.addEdge]
+PURPOSE: Adds a weighted undirected edge between two existing nodes. Stores the edge in both directions (from→to and to→from) since the graph is undirected. No-op if either node does not exist.
+PARAMETERS:
+- fromId (String): Source node contact ID
+- toId (String): Destination node contact ID
+- weight (double): Edge weight (number of shared lists)
+MARKSCHEME: Group B | Simple user-defined algorithms | Undirected edge insertion maintaining bidirectional adjacency
+OBJECTIVE: 6.6 - Graph edge construction
+
+[ContactGraph.removeNode]
+PURPOSE: Removes a node from the graph and cleans up all references in neighbouring nodes' adjacency lists. Without this cleanup, removed nodes would leave dangling edge references.
+PARAMETERS:
+- contactId (String): The ID of the node to remove
+MARKSCHEME: Group B | Simple user-defined algorithms | Node removal with reverse-edge cleanup
+OBJECTIVE: 6.6 - Graph maintenance
+
+[ContactGraph.bfs]
+PURPOSE: Breadth-first search traversal from a start node. Uses a FIFO Queue and a visited Set to explore all reachable nodes level by level. Returns contact IDs in visit order. This is used to find connected components — all contacts reachable from a given starting contact.
+PARAMETERS:
+- startId (String): The contact ID to start the traversal from
+MARKSCHEME: Group A | Graph/Tree Traversal | BFS implementation using a queue and visited set — O(V+E) time complexity where V is vertices and E is edges
+OBJECTIVE: 6.6 - Breadth-first search for connected component discovery
+
+[ContactGraph.getConnectedComponents]
+PURPOSE: Finds all connected components in the graph by running BFS from each unvisited node. A connected component is a maximal set of contacts that are all reachable from each other. Returns a list of lists, where each inner list contains the contact IDs in one component.
+MARKSCHEME: Group A | Graph/Tree Traversal | Connected component detection via repeated BFS — identifies clusters of related contacts
+OBJECTIVE: 6.6 - Contact clustering via connected components
+
+[ContactGraph.dijkstra]
+PURPOSE: Dijkstra's shortest-path algorithm finding the cheapest path between two contacts. Edge cost is 1/weight, so contacts sharing more lists have shorter (cheaper) paths. Uses a distance table, previous-node table, and linear scan for minimum extraction. Returns the ordered path of contact IDs from start to end, or empty list if no path exists.
+PARAMETERS:
+- startId (String): Source contact ID
+- endId (String): Destination contact ID
+MARKSCHEME: Group A | Complex user-defined algorithms (optimisation) | Dijkstra's shortest path algorithm with inverse-weight cost function — O(V²) implementation demonstrating greedy optimisation and graph pathfinding
+OBJECTIVE: 6.6 - Shortest relationship path between contacts
+
+[ContactGraph.pathCost]
+PURPOSE: Calculates the total cost of a path returned by dijkstra(). Sums the inverse-weight costs along each edge. Returns double.infinity if any edge has zero weight.
+PARAMETERS:
+- path (List<String>): Ordered list of contact IDs forming a path
+MARKSCHEME: Group B | Simple user-defined algorithms | Path cost summation along graph edges
+OBJECTIVE: 6.6 - Path cost calculation
+
+[ContactGraph.get averageDegree]
+PURPOSE: Computes the average number of connections per contact across the entire graph. Useful for understanding how interconnected the contact network is.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Statistical average across graph nodes
+OBJECTIVE: 6.6 - Graph analytics
+
+[ContactGraph.getMostConnectedContacts]
+PURPOSE: Returns the top-N most connected contacts sorted by degree (number of connections) in descending order. Used to identify key contacts in the network.
+PARAMETERS:
+- limit (int): How many top contacts to return (default 5)
+MARKSCHEME: Group B | Simple user-defined algorithms (sorting) | Sorts nodes by degree to find most connected contacts
+OBJECTIVE: 6.6 - Contact importance ranking
+
+[ContactGraph.toAnalyticsMap]
+PURPOSE: Produces a structured Map<String, dynamic> containing graph statistics: node count, edge count, component count, average degree, largest component size, and most connected contacts. This map is suitable for saving to Firestore.
+MARKSCHEME: Group B | Records / Dictionaries | Graph analytics serialisation for Firestore persistence
+OBJECTIVE: 6.6 - Graph analytics export
+
+[ContactGraph.buildFromFirestore]
+PURPOSE: Static factory method that builds the entire graph from Firestore data. Fetches all contacts from Contact Directories, creates nodes, builds an inverted index mapping each list to its member contacts, then creates weighted edges for every pair of contacts sharing a list. The edge weight equals the number of co-occurring lists.
+PARAMETERS:
+- userId (String): Firebase Auth UID to scope the query
+MARKSCHEME: Group A | Complex user-defined algorithms | Graph construction from Firestore data using inverted index — builds the adjacency structure by iterating through list memberships and creating edges for all contact pairs sharing lists
+OBJECTIVE: 6.6 - Automated graph construction from live data
+
+[ContactGraph.saveAnalyticsToFirestore]
+PURPOSE: Persists the graph analytics map to the user's settings document in Firestore using set with merge, so it does not overwrite other settings.
+PARAMETERS:
+- userId (String): Firebase Auth UID
+MARKSCHEME: Group B | Writing and reading from files | Firestore document merge for analytics persistence
+OBJECTIVE: 6.6 - Graph analytics persistence
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== call_history_linked_list.dart (Doubly-Linked List) ===
+
+FILE PURPOSE: Implements a doubly-linked list for call history records. Each node holds a call data map and has pointers to both the previous and next nodes. The list provides O(1) insertion and deletion at head/tail, O(n) search, and forward/reverse traversal. Integrates with Firestore for building the list from cloud data and persisting order changes.
+WHY THIS FILE EXISTS: Demonstrates Group A linked list operations — a fundamental data structure not covered by Dart's built-in List type.
+ROLE IN PROJECT: Used by CallHistoryView to display and traverse call records efficiently.
+
+IMPORTS EXPLAINED:
+- cloud_firestore: Firestore access for building the list from call_history and persisting order changes
+
+[CallHistoryNode]
+PURPOSE: A single node in the doubly-linked list. Holds a Map of call data (phone number, contact name, duration, timestamp, answered status) plus prev and next pointers to adjacent nodes. Provides getters that extract specific fields from the call data map.
+MARKSCHEME: Group A | Complex user-defined data structures | Doubly-linked list node with bidirectional pointers — the fundamental building block of the linked list
+OBJECTIVE: 5.1 - Call history data representation
+
+[CallHistoryNode.get phoneNumber]
+PURPOSE: Extracts the phone number (stored as 'address') from the node's call data map.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Field extraction from map
+OBJECTIVE: 5.1 - Call record field access
+
+[CallHistoryNode.get contactName]
+PURPOSE: Extracts the contact name from the node's call data map, defaulting to 'Unknown' if not present.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Field extraction with default
+OBJECTIVE: 5.1 - Call record field access
+
+[CallHistoryNode.get duration]
+PURPOSE: Extracts the call duration as an integer from the node's call data map, defaulting to 0.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Numeric field extraction
+OBJECTIVE: 5.1 - Call record field access
+
+[CallHistoryNode.get answered]
+PURPOSE: Extracts the answered flag as a boolean from the node's call data map, defaulting to false.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Boolean field extraction
+OBJECTIVE: 5.1 - Call record field access
+
+[CallHistoryNode.toString]
+PURPOSE: Human-readable string showing the phone number and ISO-formatted timestamp. Used for debugging.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Override of toString
+OBJECTIVE: 5.1 - Node display
+
+[CallHistoryLinkedList]
+PURPOSE: A complete doubly-linked list implementation with head and tail pointers. Supports O(1) insertion at head and tail, O(1) deletion of any node (given a reference), O(n) search by phone number, forward and reverse traversal, and Firestore integration for building from cloud data and persisting order. The list maintains a length counter that is updated on every insert/delete.
+MARKSCHEME: Group A | Complex user-defined data structures | Full doubly-linked list with head/tail pointers, O(1) insert/delete, bidirectional traversal, and cloud persistence — a comprehensive implementation going well beyond the curriculum
+OBJECTIVE: 5.1 - Efficient call history storage and traversal
+
+[CallHistoryLinkedList.get length]
+PURPOSE: Returns the current number of nodes in the list. Maintained as a counter for O(1) access rather than traversing.
+MARKSCHEME: Group C | Appropriate choice of simple data types | O(1) length via maintained counter
+OBJECTIVE: 5.1 - List size
+
+[CallHistoryLinkedList.get isEmpty]
+PURPOSE: Returns whether the list has zero nodes.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Empty check via head pointer
+OBJECTIVE: 5.1 - List state
+
+[CallHistoryLinkedList.insertAtHead]
+PURPOSE: Creates a new node from call data and inserts it at the front of the list in O(1) time. Updates the old head's prev pointer and the list's head pointer. Handles the empty-list case by setting both head and tail to the new node.
+PARAMETERS:
+- callData (Map<String, dynamic>): The call record data for the new node
+MARKSCHEME: Group A | Stack/Queue Operations | Linked list head insertion with pointer rewiring — O(1) time complexity demonstrating understanding of reference-based data structures
+OBJECTIVE: 5.1 - Efficient record insertion
+
+[CallHistoryLinkedList.insertAtTail]
+PURPOSE: Creates a new node and inserts it at the end of the list in O(1) time. Updates the old tail's next pointer and the list's tail pointer.
+PARAMETERS:
+- callData (Map<String, dynamic>): The call record data for the new node
+MARKSCHEME: Group A | Stack/Queue Operations | Linked list tail insertion with pointer rewiring — O(1) via maintained tail pointer
+OBJECTIVE: 5.1 - Efficient record insertion
+
+[CallHistoryLinkedList.deleteNode]
+PURPOSE: Removes a specific node from the list by rewiring its neighbours' prev/next pointers around it, bypassing the deleted node. O(1) given a reference to the node. Updates head and tail if the deleted node was at either end.
+PARAMETERS:
+- node (CallHistoryNode): The node to remove
+MARKSCHEME: Group A | Stack/Queue Operations | Linked list node deletion by pointer rewiring — O(1) demonstrating the advantage of doubly-linked over singly-linked lists
+OBJECTIVE: 5.1 - Record removal
+
+[CallHistoryLinkedList.removeHead]
+PURPOSE: Removes and returns the head node. Updates the head pointer to the next node and clears the new head's prev pointer.
+MARKSCHEME: Group A | Stack/Queue Operations | Head removal with pointer update — O(1)
+OBJECTIVE: 5.1 - Front removal
+
+[CallHistoryLinkedList.removeTail]
+PURPOSE: Removes and returns the tail node. Updates the tail pointer to the previous node and clears the new tail's next pointer.
+MARKSCHEME: Group A | Stack/Queue Operations | Tail removal with pointer update — O(1)
+OBJECTIVE: 5.1 - End removal
+
+[CallHistoryLinkedList.traverse]
+PURPOSE: Forward traversal from head to tail, collecting each node's call data map into a list. O(n) where n is the number of nodes.
+MARKSCHEME: Group B | Simple user-defined algorithms | Linear forward traversal following next pointers
+OBJECTIVE: 5.1 - Call history display
+
+[CallHistoryLinkedList.reverseTraverse]
+PURPOSE: Reverse traversal from tail to head, collecting each node's call data map. O(n). Used for displaying calls in reverse chronological order.
+MARKSCHEME: Group B | Simple user-defined algorithms | Linear reverse traversal following prev pointers — demonstrates advantage of doubly-linked structure
+OBJECTIVE: 5.1 - Reverse chronological display
+
+[CallHistoryLinkedList.search]
+PURPOSE: Linear search for the first node matching a normalised phone number. O(n). Returns the matching node or null.
+PARAMETERS:
+- phoneNumber (String): The phone number to search for (normalised automatically)
+MARKSCHEME: Group B | Simple user-defined algorithms | Linear search through linked list with phone number normalisation
+OBJECTIVE: 5.1 - Call record lookup
+
+[CallHistoryLinkedList.searchAll]
+PURPOSE: Finds all nodes matching a normalised phone number. O(n). Returns a list of all matching nodes.
+PARAMETERS:
+- phoneNumber (String): The phone number to search for
+MARKSCHEME: Group B | Simple user-defined algorithms | Full linear scan collecting all matches
+OBJECTIVE: 5.1 - Multi-match search
+
+[CallHistoryLinkedList.toList]
+PURPOSE: Serialises the entire linked list to a flat List of Maps by calling traverse(). Used when the linked list needs to interface with APIs expecting standard Dart Lists.
+MARKSCHEME: Group C | Appropriate choice of simple data types | List serialisation via traversal
+OBJECTIVE: 5.1 - Data export
+
+[CallHistoryLinkedList.getAtIndex]
+PURPOSE: Returns the node at a zero-based index by walking from the head. O(n) since linked lists do not support random access.
+PARAMETERS:
+- index (int): The zero-based position to retrieve
+MARKSCHEME: Group B | Simple user-defined algorithms | Index-based access via linear traversal — demonstrates the trade-off of linked lists (no random access)
+OBJECTIVE: 5.1 - Positional access
+
+[CallHistoryLinkedList.countCallsForPhone]
+PURPOSE: Counts how many nodes in the list match a given (normalised) phone number. O(n) full scan.
+PARAMETERS:
+- phoneNumber (String): The phone number to count calls for
+MARKSCHEME: Group B | Simple user-defined algorithms | Counting traversal with phone normalisation
+OBJECTIVE: 5.1 - Per-contact call counting
+
+[CallHistoryLinkedList.get totalDuration]
+PURPOSE: Sums the duration of all calls in the list by traversing from head to tail. O(n).
+MARKSCHEME: Group B | Simple user-defined algorithms | Aggregation traversal summing a field across all nodes
+OBJECTIVE: 5.1 - Total call duration
+
+[CallHistoryLinkedList.clear]
+PURPOSE: Resets the list by nulling head and tail and setting length to 0. Existing nodes become eligible for garbage collection.
+MARKSCHEME: Group C | Appropriate choice of simple data types | List reset
+OBJECTIVE: 5.1 - List cleanup
+
+[CallHistoryLinkedList._normalizePhone]
+PURPOSE: Static helper that strips all non-digit characters from a phone string and returns the last 9 digits. Used internally by search methods for consistent phone matching.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Phone normalisation helper
+OBJECTIVE: 2.3 - Normalised phone comparison
+
+[CallHistoryLinkedList.toString]
+PURPOSE: Returns a string showing list length, head phone number, and tail phone number. Used for debugging.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Debug string representation
+OBJECTIVE: 5.1 - List debug display
+
+[CallHistoryLinkedList.persistOrderToFirestore]
+PURPOSE: Batch-updates an order_index field on each call_history document in Firestore, reflecting the current linked list order. This allows the order to survive app restarts. Uses Firestore batch writes for efficiency.
+MARKSCHEME: Group B | Writing and reading from files | Batch Firestore update persisting linked list order to cloud storage
+OBJECTIVE: 5.1 - Order persistence
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== undo_redo_stack.dart (Undo/Redo Stack) ===
+
+FILE PURPOSE: Implements a generic undo/redo stack using two array-backed stacks. Pushing a new state clears the redo stack. Optional maxDepth enforces bounded memory. Also defines NoteEditSnapshot (immutable edit state) and NoteEditHistoryService (Firestore persistence for edit audit trails).
+WHY THIS FILE EXISTS: Demonstrates Group A stack operations (push, pop, peek) applied to a real undo/redo use case.
+ROLE IN PROJECT: Used in CreateUpdateNoteView for note editing with undo/redo capability.
+
+[UndoRedoStack]
+PURPOSE: Generic undo/redo stack using two internal lists as stacks. When a new item is pushed, the redo stack is cleared (you cannot redo after making a new change). Optional maxDepth limits the undo history by removing the oldest entry when the limit is exceeded. Provides push, undo (pop from undo → push to redo), redo (pop from redo → push to undo), peek, and clear operations.
+MARKSCHEME: Group A | Stack/Queue Operations | Dual-stack undo/redo implementation with push O(1), pop O(1), peek O(1), and optional bounded depth — demonstrates stack-based state management
+OBJECTIVE: 4.2 - Note editing with undo/redo
+
+[NoteEditSnapshot]
+PURPOSE: Immutable data class capturing the state of a note at a point in time: the full text content, a timestamp, and optionally the cursor position. These snapshots are stored on the UndoRedoStack and can optionally be persisted to Firestore for an edit audit trail.
+MARKSCHEME: Group B | Records / Dictionaries | Immutable snapshot data class with Firestore serialisation
+OBJECTIVE: 4.2 - Note state capture for undo/redo
+
+[NoteEditSnapshot.toFirestore]
+PURPOSE: Serialises the snapshot to a Firestore-compatible map with text, timestamp (as FieldValue.serverTimestamp), and cursorPosition.
+MARKSCHEME: Group B | Writing and reading from files | Firestore serialisation of note state
+OBJECTIVE: 4.2 - Edit history persistence
+
+[NoteEditSnapshot.fromFirestore]
+PURPOSE: Factory constructor that deserialises a Firestore map back into a NoteEditSnapshot. Handles the Timestamp type conversion.
+MARKSCHEME: Group B | Calling Web service APIs and parsing JSON | Firestore deserialisation of note state
+OBJECTIVE: 4.2 - Edit history loading
+
+[NoteEditSnapshot.toString]
+PURPOSE: Returns a string showing truncated text and timestamp for debugging.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Debug string representation
+OBJECTIVE: 4.2 - Snapshot display
+
+[NoteEditHistoryService.loadHistory]
+PURPOSE: Static method that loads all edit history snapshots for a given note from the edit_history subcollection underneath the contact_notes document. Returns them chronologically sorted.
+PARAMETERS:
+- noteDocId (String): The Firestore document ID of the note whose history to load
+MARKSCHEME: Group B | Calling Web service APIs and parsing JSON | Subcollection query with chronological ordering
+OBJECTIVE: 4.2 - Edit history retrieval
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== merge_sort.dart (Merge Sort) ===
+
+FILE PURPOSE: Implements a generic merge sort algorithm and several convenience wrappers for sorting contacts, maps, and other data structures. The core mergeSort function is recursive, divides at the midpoint, and merges sorted halves using a two-pointer technique. O(n log n) time, O(n) space, stable sort.
+WHY THIS FILE EXISTS: AQA Group A requires "mergesort or similarly efficient sort". This is a standalone, reusable implementation.
+ROLE IN PROJECT: Used by CallHistoryView to sort records by timestamp, and by ContactDirectoryView for alphabetical sorting.
+
+[mergeSort]
+PURPOSE: Generic merge sort implementation. Recursively splits the input list at the midpoint until sublists have 0 or 1 elements, then merges them back together using a comparison function. Returns a new sorted list without modifying the original. Time complexity O(n log n), space O(n) for the temporary lists created during merging.
+PARAMETERS:
+- list (List<T>): The list to sort
+- compare (int Function(T, T)): Comparison function returning negative, zero, or positive
+MARKSCHEME: Group A | Mergesort or similarly efficient sort | Complete recursive merge sort implementation with generic type parameter and custom comparator — demonstrates divide-and-conquer algorithm design
+OBJECTIVE: 5.1 - Efficient sorting of call records
+
+[_merge]
+PURPOSE: The merge step of merge sort. Takes two sorted sublists and combines them into one sorted list using a two-pointer technique. Iterates through both lists simultaneously, always taking the smaller element, then appends any remaining elements.
+PARAMETERS:
+- left (List<T>): First sorted sublist
+- right (List<T>): Second sorted sublist
+- compare (int Function(T, T)): Comparison function
+MARKSCHEME: Group A | Mergesort or similarly efficient sort | Two-pointer merge of sorted sublists — the O(n) combining step of merge sort
+OBJECTIVE: 5.1 - Merge step of divide-and-conquer sort
+
+[mergeSortContacts]
+PURPOSE: Convenience wrapper that sorts a list of PrioritizedContact objects by their priority score in ascending order using mergeSort.
+PARAMETERS:
+- contacts (List<PrioritizedContact>): The contacts to sort by priority
+MARKSCHEME: Group A | Mergesort or similarly efficient sort | Merge sort applied to priority queue output for contact ordering
+OBJECTIVE: 6.6 - Priority-based contact sorting
+
+[mergeSortContactsByName]
+PURPOSE: Convenience wrapper that sorts PrioritizedContact objects alphabetically by name using mergeSort.
+PARAMETERS:
+- contacts (List<PrioritizedContact>): The contacts to sort alphabetically
+MARKSCHEME: Group A | Mergesort or similarly efficient sort | Merge sort applied to alphabetical contact ordering
+OBJECTIVE: 2.1 - Alphabetical contact display
+
+[mergeSortMaps]
+PURPOSE: Sorts a list of Maps by a string-valued key using mergeSort. Supports ascending and descending order.
+PARAMETERS:
+- maps (List<Map<String, dynamic>>): The maps to sort
+- key (String): The map key to sort by
+- descending (bool): Whether to reverse the order (default false)
+MARKSCHEME: Group B | Simple user-defined algorithms | Merge sort wrapper for map-based data
+OBJECTIVE: 5.1 - Flexible data sorting
+
+[mergeSortMapsByNumber]
+PURPOSE: Sorts a list of Maps by a numeric-valued key using mergeSort. Supports ascending and descending order.
+PARAMETERS:
+- maps (List<Map<String, dynamic>>): The maps to sort
+- key (String): The numeric map key to sort by
+- descending (bool): Whether to reverse the order (default false)
+MARKSCHEME: Group B | Simple user-defined algorithms | Merge sort wrapper for numeric map keys
+OBJECTIVE: 5.1 - Numeric data sorting
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== list_state_manager.dart (Centralised State Manager) ===
+
+FILE PURPOSE: Singleton class that encapsulates all mutable state previously scattered as top-level global variables. Provides centralised access to the selected list, call cycle index, call timer, picked contacts, and document cache for the list/dialer flow. The singleton pattern ensures exactly one instance manages all shared state.
+WHY THIS FILE EXISTS: Refactored from global variables to follow clean architecture principles and demonstrate the singleton design pattern.
+ROLE IN PROJECT: Accessed by dialer.dart, firebase_services.dart, and list views for shared state.
+
+[ListStateManager.factory ListStateManager]
+PURPOSE: Factory constructor implementing the singleton pattern. Returns the same static _instance every time, ensuring all parts of the app share the same state object. This prevents inconsistencies that would arise from multiple instances managing the same global state.
+MARKSCHEME: Group A | Complex user-defined use of OOP (design patterns) | Singleton pattern via factory constructor — ensures single-instance state management across the application
+OBJECTIVE: 3.1 - Centralised dialer state management
+
+[ListStateManager._internal]
+PURPOSE: Private named constructor that the factory delegates to on first call. Private constructors in Dart prevent external instantiation, enforcing the singleton guarantee.
+MARKSCHEME: Group A | Complex user-defined use of OOP (design patterns) | Private constructor preventing external instantiation — part of the singleton pattern implementation
+OBJECTIVE: 3.1 - Singleton enforcement
+
+[ListStateManager.stopCallTimer]
+PURPOSE: Cancels the periodic call timer and resets elapsedSeconds to 0. Called when exiting the dialer or when a call cycle completes to clean up resources.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Timer cancellation and state reset
+OBJECTIVE: 3.1 - Call timer cleanup
+
+[ListStateManager.toString]
+PURPOSE: Returns a debug string showing the current selected list, call cycle index, and total documents. Useful for logging during development.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Debug string representation of state
+OBJECTIVE: 3.1 - State debugging
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== firebase_services.dart (Firestore Service Layer — Additional Entries) ===
+
+FILE PURPOSE: (continued) Additional top-level functions and utility classes in the central Firestore service layer.
+
+[ListBloc]
+PURPOSE: A simple BLoC (extends Cubit<List<String>>) that loads list names from the lists_collection and emits them as state. Used by dropdown widgets that need to show available lists. The Cubit pattern provides a lightweight reactive state container without the full event/state complexity of a Bloc.
+MARKSCHEME: Group B | Simple OOP model | Cubit-based state management for list name loading — lightweight reactive pattern
+OBJECTIVE: 2.1 - List name loading for dropdowns
+
+[SimpleContact]
+PURPOSE: Lightweight data class holding just id, displayName, and phoneNumber. Used during bulk upload from the device phonebook to avoid holding heavy Contact objects in memory. Only the essential fields are retained.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Minimal data class to reduce memory footprint during bulk operations
+OBJECTIVE: 2.2 - Memory-efficient contact representation
+
+[MultiContactSelectDialog]
+PURPOSE: Full-screen StatefulWidget dialog with a search bar, select-all/deselect-all buttons, and a scrollable checkbox list of contacts. Lets users pick multiple contacts from their device phonebook before bulk-uploading to a list. Returns the set of selected SimpleContact objects.
+MARKSCHEME: Group B | Simple OOP model | Multi-select dialog with search filtering and batch selection — demonstrates complex UI state management
+OBJECTIVE: 2.2 - Bulk contact selection interface
+
+[_MultiContactSelectDialogState]
+PURPOSE: State class managing the filtered contact list, search query, and set of selected contacts. The _filteredContacts getter filters contacts by name or phone number against the search query for real-time search-as-you-type.
+MARKSCHEME: Group B | Simple user-defined algorithms | Real-time search filtering across name and phone fields
+OBJECTIVE: 2.2 - Contact search during import
+
+[Gbar]
+PURPOSE: Legacy bottom navigation bar using the GNav (Google Nav Bar) package. Provides List and Reports tabs for navigating between the main views. Retained for backwards compatibility but superseded by the curved navigation bar.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Navigation bar widget with tab routing
+OBJECTIVE: 2.1 - Bottom navigation
+
+[_GbarState]
+PURPOSE: State class for the Gbar widget managing the selected tab index. Builds the GNav bar with icons and labels.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Tab state management
+OBJECTIVE: 2.1 - Tab navigation state
+
+[firebase_services.getContactDocId]
+PURPOSE: Generates a Firestore document ID for a contact by combining the current user's UID with the normalised phone number: "{userId}_{normalizedPhone}". This ensures globally unique IDs scoped to each user.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Document ID generation from user ID and normalised phone
+OBJECTIVE: 2.3 - Unique contact identification
+
+[firebase_services.getNextContactIndexForList]
+PURPOSE: Scans all contacts for a given list and returns the next available index (maxIndex + 1). Used when adding a new contact to maintain ordered positioning within a list.
+PARAMETERS:
+- listName (String): The list to get the next index for
+MARKSCHEME: Group B | Simple user-defined algorithms | Maximum index scan for ordered insertion
+OBJECTIVE: 2.1 - Contact ordering within lists
+
+[firebase_services.fetchContactNamesForList]
+PURPOSE: Returns an array of contact names for a given list by calling fetchContactsForList and extracting the contact_name field from each document.
+PARAMETERS:
+- listName (String): The list to fetch names for
+MARKSCHEME: Group C | Appropriate choice of simple data types | Name extraction from document snapshots
+OBJECTIVE: 2.1 - Contact name retrieval
+
+[firebase_services.updateContactIndicesForList]
+PURPOSE: Batch-updates the contact_index field in Firestore for all contacts in a list after reordering. Each contact's index is set to its position in the orderedContactNames array.
+PARAMETERS:
+- listName (String): The list being reordered
+- orderedContactNames (List<String>): The new order of contact names
+MARKSCHEME: Group B | Writing and reading from files | Batch Firestore update for order persistence
+OBJECTIVE: 2.5 - List reordering persistence
+
+[firebase_services.getContactCountForList]
+PURPOSE: Returns the count of contacts belonging to a specific list by querying Contact Directories with a list membership filter.
+PARAMETERS:
+- listName (String): The list to count contacts for
+MARKSCHEME: Group C | Appropriate choice of simple data types | Count query against Firestore
+OBJECTIVE: 2.1 - Contact count display
+
+[firebase_services.deleteAllContactsFromList]
+PURPOSE: Batch-removes list membership from all contacts in a given list. The contacts themselves remain in the Contact Directories collection but lose their association with the deleted list.
+PARAMETERS:
+- listName (String): The list whose memberships to remove
+MARKSCHEME: Group B | Writing and reading from files | Batch Firestore field removal for list deletion cleanup
+OBJECTIVE: 2.1 - List deletion with contact preservation
+
+[firebase_services.migrateListsToContactDirectories]
+PURPOSE: One-time data migration from the old 'lists' collection structure (separate documents per list-contact pair) to the new 'Contact Directories' structure (one document per contact with a list_memberships map). Groups contacts by normalised phone number, merges their list memberships, and batch-writes to the new collection.
+MARKSCHEME: Group A | Complex user-defined algorithms | Data migration algorithm with phone normalisation, grouping, and multi-list membership merging — demonstrates database restructuring and legacy data handling
+OBJECTIVE: 2.1 - Data structure migration
+
+[firebase_services.needsMigration]
+PURPOSE: Checks whether old-format data exists (documents in 'lists' without 'list_memberships' field). Returns true if migration is needed.
+MARKSCHEME: Group B | Simple user-defined algorithms | Migration check via document field inspection
+OBJECTIVE: 2.1 - Migration detection
+
+[firebase_services.addNewContactData]
+PURPOSE: Wrapper that saves the globally-picked contact (from ListStateManager.pickedName/pickedNumber) into Contact Directories under the currently selected list name.
+MARKSCHEME: Group C | Appropriate choice of simple data types | State-based contact save wrapper
+OBJECTIVE: 2.2 - Manual contact addition
+
+[firebase_services.fetchDataFromFirestore]
+PURPOSE: Refreshes the list of available list names from the lists_collection in Firestore and stores them in ListStateManager.listNames.
+MARKSCHEME: Group B | Calling Web service APIs and parsing JSON | Firestore collection query for list name refresh
+OBJECTIVE: 2.1 - List data refresh
+
+[firebase_services.addNewList]
+PURPOSE: Creates a new list document in lists_collection with the list name, user_id, timestamps (created and last_modified), and an empty description field.
+PARAMETERS:
+- listName (String): The name of the new list to create
+MARKSCHEME: Group B | Writing and reading from files | Firestore document creation for new list
+OBJECTIVE: 2.1 - List creation
+
+[firebase_services.upload_button_on_dialer_contacts_view]
+PURPOSE: Handles single-contact upload from the device phonebook. Requests contact permission, opens the native contact picker, validates the result, checks for duplicates by normalised phone, and writes to Contact Directories.
+PARAMETERS:
+- context (BuildContext): For showing dialogs
+- selectedList (String): The target list to add the contact to
+MARKSCHEME: Group B | Writing and reading from files | Native contact picker integration with permission handling and duplicate checking
+OBJECTIVE: 2.2 - Single contact import from device
+
+[firebase_services.uploadMultipleContacts]
+PURPOSE: Bulk contact upload. Loads all device contacts in batches of 50 (to avoid memory issues), wraps them in SimpleContact objects, shows MultiContactSelectDialog for user selection, then writes each selected contact to Contact Directories. Returns the count of contacts added.
+PARAMETERS:
+- context (BuildContext): For showing the selection dialog
+- selectedList (String): The target list
+MARKSCHEME: Group B | Writing and reading from files | Batch contact loading with memory-efficient processing and multi-select UI
+OBJECTIVE: 2.2 - Bulk contact import with selection dialog
+
+[firebase_services.showListDialogForIntroScreen]
+PURPOSE: Shows a dialog to create a new list during the onboarding flow, then navigates to intro page 1.
+PARAMETERS:
+- context (BuildContext): For showing the dialog and navigation
+MARKSCHEME: Group C | Appropriate choice of simple data types | Onboarding dialog wrapper
+OBJECTIVE: 2.1 - Guided list creation
+
+[firebase_services.showListDialogForIntroScreen1]
+PURPOSE: Same as showListDialogForIntroScreen but with a 3-second loading delay before navigation —gives the user visual feedback that their list was created.
+PARAMETERS:
+- context (BuildContext): For showing the dialog
+MARKSCHEME: Group C | Appropriate choice of simple data types | Onboarding dialog with loading animation
+OBJECTIVE: 2.1 - Guided list creation
+
+[firebase_services.showListDialog]
+PURPOSE: Shows a styled Material dialog for creating a new list. Includes a text field for the list name, validation, and calls addNewList followed by a data refresh.
+PARAMETERS:
+- context (BuildContext): For showing the dialog
+MARKSCHEME: Group C | Appropriate choice of simple data types | List creation dialog
+OBJECTIVE: 2.1 - List creation UI
+
+[firebase_services.fetchDocumentsInOrder]
+PURPOSE: Debug/logging function that prints all contacts for the currently selected list to the console.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Debug output
+OBJECTIVE: 2.1 - Development utility
+
+[firebase_services.fetchDocumentAtIndexAndShowDialog]
+PURPOSE: Fetches contacts for a list, retrieves the contact at the specified index, and shows the call dialog. Shows an error dialog if the index is out of bounds.
+PARAMETERS:
+- context (BuildContext): For showing dialogs
+- index (int): The contact index to show
+- selectedList (String): The list to fetch from
+MARKSCHEME: Group B | Simple user-defined algorithms | Index-based contact retrieval with bounds checking
+OBJECTIVE: 3.1 - Call cycle contact display
+
+[firebase_services.showContactDialog]
+PURPOSE: The main call-cycle dialog shown during dialling. Records a call timestamp to contact_notes, displays the contact's name and phone, auto-dials after 5 seconds via url_launcher, and offers Next/Close/View Notes action buttons.
+PARAMETERS:
+- context (BuildContext): For dialog display
+- contactName (String): The contact's display name
+- contactPhoneNumber (String): The phone number to dial
+- callDuration (String): Duration of the previous call
+MARKSCHEME: Group B | Simple OOP model | Call cycle dialog with auto-dial timer, call recording, and navigation actions
+OBJECTIVE: 3.1 - Auto-dialer contact dialog; 4.1 - Call recording
+
+[firebase_services.recordCallTimestamp]
+PURPOSE: Writes a document to the contact_notes Firestore collection each time a call is made. Records the timestamp, user_id, contact info, list name, and default note text. This creates the raw data used by NLP analysis and reports.
+PARAMETERS:
+- contactName (String): Contact's name
+- contactPhoneNumber (String): Phone number called
+- listName (String): List the contact belongs to
+MARKSCHEME: Group B | Writing and reading from files | Firestore call record creation for downstream analytics
+OBJECTIVE: 4.1 - Call event recording
+
+[firebase_services.fetchDocumentsInOrderAndSaveToArray]
+PURPOSE: Fetches all contacts for the selected list into the documentArray cache in ListStateManager, then increments the call cycle index. This pre-loads all contacts so the dialer can step through them without repeated Firestore queries.
+MARKSCHEME: Group B | Simple user-defined algorithms | Document pre-loading into array cache for efficient cycling
+OBJECTIVE: 3.1 - Contact pre-loading for dialer
+
+[firebase_services.getDocumentByIndex]
+PURPOSE: Returns the document map from documentArray at the given index, or an empty map if out of bounds.
+PARAMETERS:
+- index (int): Position in the cached document array
+MARKSCHEME: Group C | Appropriate choice of simple data types | Bounds-checked array access
+OBJECTIVE: 3.1 - Indexed document retrieval
+
+[firebase_services.cycleThroughContacts]
+PURPOSE: Iterates through all contacts in the selected list and prints them. Primarily a development/debug utility.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Debug contact cycling
+OBJECTIVE: 3.1 - Development utility
+
+[firebase_services.startCallTimer]
+PURPOSE: Starts a 1-second periodic timer that increments elapsedSeconds. Passed a setState callback so the UI rebuilds each second to show the timer.
+PARAMETERS:
+- setState (Function): Callback to trigger UI rebuild
+MARKSCHEME: Group C | Appropriate choice of simple data types | Periodic timer for call duration tracking
+OBJECTIVE: 3.1 - Call duration display
+
+[firebase_services.showCallFinishedDialog]
+PURPOSE: Shows a dialog displaying the elapsed call time when the user returns from a native phone call. Offers redial and dismiss buttons.
+PARAMETERS:
+- context (BuildContext): For dialog display
+- name (String): Contact name
+- documentDataAtIndex (Map?): Optional contact data
+MARKSCHEME: Group B | Simple OOP model | Post-call feedback dialog with duration display
+OBJECTIVE: 3.1 - Call completion feedback
+
+[firebase_services.textColor]
+PURPOSE: Returns Colors.black — a utility for theme-aware text colour. Currently hardcoded but designed for future theme integration.
+PARAMETERS:
+- context (BuildContext): BuildContext for potential theme lookup
+MARKSCHEME: Group C | Appropriate choice of simple data types | Colour utility function
+OBJECTIVE: 5.1 - Theme support
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== dialer.dart (Auto-Dialer — Additional Entries) ===
+
+[ImgSample]
+PURPOSE: Utility class with a static method that returns an image asset path from a given image name. Used for loading sample card images in the dialer.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Static image path helper
+OBJECTIVE: 3.6 - Visual assets
+
+[MyStringsSample]
+PURPOSE: Contains a static card_text constant with sample descriptive text for dialer cards. Used as placeholder content.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Static string constant
+OBJECTIVE: 3.6 - Card content
+
+[MyColorsSample]
+PURPOSE: Contains a static accent colour constant pointing to the app's primary colour from AppDesignTokens.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Static colour constant
+OBJECTIVE: 3.6 - Theme colour reference
+
+[_DialerContactsViewState]
+PURPOSE: The main state class for the auto-dialer. Manages the contact list, call cycle index, priority queue toggle, NLP summary state, call feedback dialog state, and Excel/phonebook import flows. Mixes in WidgetsBindingObserver to detect when the user returns from the native phone app after dialling.
+MARKSCHEME: Group A | Complex user-defined use of OOP (composition, interfaces) | Complex stateful widget composing URL launcher, WidgetsBindingObserver, Firestore, NLP, priority queue, call cycle service, and Excel import — the most integration-heavy widget in the application
+OBJECTIVE: 3.1 - Auto-dialer core implementation; 3.5 - App lifecycle detection; 3.6 - Visual progress indicators
+
+[_DirectoryContactSelectDialog]
+PURPOSE: StatefulWidget dialog for selecting contacts from the app's Contact Directory (not the device phonebook) to add to a specific list. Displays contacts with search/filter, select-all/deselect-all, and marks contacts already in the target list as disabled. Returns the selected set.
+MARKSCHEME: Group B | Simple OOP model | Directory contact selection dialog with real-time search filtering and existing-membership detection
+OBJECTIVE: 2.2 - Contact selection from directory
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== call_duration_chart.dart (Call Duration Distribution) ===
+
+FILE PURPOSE: Bar chart showing call duration distribution across 5 bins (0-1min, 1-3min, 3-5min, 5-10min, 10+min) with stacked successful/unsuccessful bars, median/percentile reference lines, and statistical summary. Supports time range and list filtering.
+
+[CallDurationChart]
+PURPOSE: StatefulWidget rendering a bar chart of call duration distribution. Groups calls into 5 duration bins and shows the count of successful (green) and unsuccessful (red) calls in each bin. Overlays median and 75th percentile lines. Includes a statistical summary card with mean, median, 75th percentile, and standard deviation.
+MARKSCHEME: Group B | Simple OOP model | Data visualisation widget with statistical analysis — demonstrates aggregation, binning, and percentile calculations
+OBJECTIVE: 5.1 - Call duration analytics
+
+[_CallDurationChartState]
+PURPOSE: State class managing call data fetching, duration binning, and chart rendering. Calculates median, mean, standard deviation, and 75th percentile from raw call data.
+MARKSCHEME: Group B | Simple user-defined algorithms | Statistical aggregation with sorted-data percentile interpolation
+OBJECTIVE: 5.1 - Duration statistical analysis
+
+[DurationBinData]
+PURPOSE: Data class holding a duration bin's label (e.g. "1-3 min"), min/max seconds range, and counts of successful and unsuccessful calls falling in that bin.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Bin data container for chart rendering
+OBJECTIVE: 5.1 - Duration bin representation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== call_outcome_donut_chart.dart (Call Outcomes Donut) ===
+
+FILE PURPOSE: Donut (pie) chart showing proportions of call outcomes: Connected, No Answer, Busy/Failed, and Voicemail. Uses fl_chart's PieChart. Supports time range filtering and target user for team reports.
+
+[CallOutcomeDonutChart]
+PURPOSE: StatefulWidget rendering a donut chart of call outcome proportions. Categorises each call record from call_history into one of four outcome buckets based on duration and answered flags. Shows percentage breakdowns and a colour-coded legend beneath the chart.
+MARKSCHEME: Group B | Simple OOP model | Donut chart visualisation with outcome categorisation — demonstrates data classification and proportional display
+OBJECTIVE: 5.1 - Call outcome analytics
+
+[_CallOutcomeDonutChartState]
+PURPOSE: State class managing call outcome aggregation and fl_chart PieChart section generation. Handles touch interaction to expand tapped sections.
+MARKSCHEME: Group B | Simple user-defined algorithms | Outcome counting and percentage calculation for pie chart rendering
+OBJECTIVE: 5.1 - Outcome proportion display
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== call_heatmap.dart (Call Activity Heatmap) ===
+
+FILE PURPOSE: GitHub-style call activity heatmap. Each cell represents one day (or one hour in day view), colour-coded from grey (0 calls) to dark green (many calls). Supports multiple time scales: week, month, last 7/30 days, custom range, and single day (24-hour view).
+
+[CallHeatmap]
+PURPOSE: StatefulWidget rendering a 2D grid of call activity. Cells are colour-coded by call count relative to a configurable max threshold. Supports time scale selection, contact filtering, list filtering, and target user for team reports.
+MARKSCHEME: Group B | Multi-dimensional arrays | 2D heatmap grid visualisation mapping call counts to colour intensities — demonstrates matrix-style data representation and colour interpolation
+OBJECTIVE: 5.1 - Call activity heatmap visualisation
+
+[_CallHeatmapState]
+PURPOSE: State class managing date range calculation, Firestore call data fetching (from list_cycles or call_history), call count aggregation by day/hour, and grid rendering with colour mapping.
+MARKSCHEME: Group B | Simple user-defined algorithms | Date-indexed aggregation with colour mapping for heatmap cells
+OBJECTIVE: 5.1 - Temporal call data aggregation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== weekly_calls_chart.dart (Weekly/Daily Call Trends) ===
+
+FILE PURPOSE: Line chart showing daily or weekly call trends. Groups calls into successful/failed/missed categories. Supports weekday aggregation (7-day view) or daily aggregation (30-day/custom). Includes a rolling average line and summary table.
+
+[WeeklyCallsChart]
+PURPOSE: StatefulWidget rendering a multi-series line chart of call trends over time. Four lines: successful (green), failed (orange), missed (red), and total (blue). Supports time range selection, list filtering, and target user. Includes a daily/weekday breakdown summary table beneath the chart.
+MARKSCHEME: Group B | Simple OOP model | Multi-series line chart with time-bucketed aggregation — demonstrates temporal data processing and multi-metric visualisation
+OBJECTIVE: 5.1 - Call trends analytics
+
+[_WeeklyCallsChartState]
+PURPOSE: State class managing call data fetching, temporal bucketing (by weekday or calendar date), call categorisation (successful/failed/missed), FlSpot generation for fl_chart, and rolling average computation.
+MARKSCHEME: Group B | Simple user-defined algorithms | Temporal aggregation with category-based call classification and rolling average
+OBJECTIVE: 5.1 - Trend data processing
+
+[CallDayData]
+PURPOSE: Data class holding weekday number, day name, and successful/failed/missed counts for a single weekday bin.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Weekday aggregation container
+OBJECTIVE: 5.1 - Weekday data representation
+
+[DailyCallData]
+PURPOSE: Data class holding a specific date, date key string, and successful/failed/missed counts for a single calendar day.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Daily aggregation container
+OBJECTIVE: 5.1 - Daily data representation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== list_performance_chart.dart (List/Cycle Performance) ===
+
+FILE PURPOSE: Displays per-cycle performance metrics for a selected list. Each call cycle shows contacts called, answer rate, completion percentage, duration, and individual call events. Joins data from list_cycles, cycle_events, and call_history.
+
+[ListPerformanceChart]
+PURPOSE: StatefulWidget rendering performance cards for each call cycle of a selected list. Shows aggregate stats (contacts called, answered/unanswered, completion %, duration) and individual call event rows within each cycle card.
+MARKSCHEME: Group B | Simple OOP model | Cycle performance dashboard with multi-collection Firestore joins — demonstrates data aggregation from three related collections
+OBJECTIVE: 5.1 - Per-cycle performance analytics; 3.2 - Cycle data display
+
+[_ListPerformanceChartState]
+PURPOSE: State class managing list selection, cycle data fetching with cross-collection joins (list_cycles → cycle_events → call_history), and per-cycle stat computation.
+MARKSCHEME: Group B | Calling Web service APIs and parsing JSON | Multi-collection Firestore query with cross-document data joining
+OBJECTIVE: 5.1 - Cycle data aggregation
+
+[CycleData]
+PURPOSE: Data class holding all metrics for a single call cycle: cycle number, ID, start/end dates, completion percentage, total duration, contacts called, outgoing calls count, and a list of CallEventData objects.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Cycle metrics container
+OBJECTIVE: 3.2 - Cycle data model
+
+[CallEventData]
+PURPOSE: Data class for a single call event within a cycle: contact name, phone number, timestamp, answered status, and duration.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Call event data container
+OBJECTIVE: 3.3 - Call event data model
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== linear_regression_stats_view.dart (ML Stats — Additional Entries) ===
+
+[_LinearRegressionStatsViewState]
+PURPOSE: State class for the ML analytics view. Initialises and trains the LinearRegressionModel, WilsonScoreCalculator, and KaplanMeierEstimator from Firestore data. Renders three expandable sections with algorithm explanations, model results, and data visualisations. Each section includes a gradient header card explaining the mathematical formula in layperson-accessible language.
+MARKSCHEME: Group A | Complex user-defined algorithms | Composite ML analytics dashboard training and displaying three statistical models — demonstrates integration of regression, confidence intervals, and survival analysis in a unified view
+OBJECTIVE: 6.2, 6.3, 6.4 - Linear regression, Wilson Score, Kaplan-Meier display
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== call_history_view.dart (Call History View) ===
+
+FILE PURPOSE: Screen showing the user's call history built using the CallHistoryLinkedList. Resolves phone numbers to contact names via Contact Directories and uses merge sort for chronological ordering.
+
+[CallHistoryView]
+PURPOSE: StatefulWidget displaying the user's call history from Firestore. Builds a CallHistoryLinkedList for efficient traversal, merge-sorts records by timestamp, and resolves phone numbers against the Contact Directories to show names instead of raw numbers.
+MARKSCHEME: Group A | Complex user-defined use of OOP (composition) | View integrating doubly-linked list construction, merge sort ordering, and directory name resolution — demonstrates composing multiple data structure algorithms into a cohesive UI
+OBJECTIVE: 5.1 - Call history display with linked list and merge sort
+
+[_CallHistoryViewState]
+PURPOSE: State class managing linked list construction from Firestore, merge sort invocation, directory name resolution, and ListView rendering of call records with avatars, timestamps, durations, and callback buttons.
+MARKSCHEME: Group A | Complex user-defined data structures | Linked list integration with merge sort and cross-collection joins for a complete call history view
+OBJECTIVE: 5.1 - Call history data processing and display
+
+[CallRecord]
+PURPOSE: Data class for a single call record: timestamp, duration, call type (incoming/outgoing/missed), answered flag, phone number (address), raw type code, and upload timestamp. The fromMap factory handles bool/int conversion for the answered field.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Call record data model with defensive type conversion
+OBJECTIVE: 5.1 - Call record representation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== call_outcome_donut_chart.dart (continued) ===
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== team_reports_view.dart (Team Reports) ===
+
+FILE PURPOSE: Team owner's reports page that mirrors the individual reports dashboard but allows viewing any team member's data via a member selector dropdown. Passes targetUserId to all chart widgets.
+
+[TeamReportsView]
+PURPOSE: StatefulWidget providing team-level reporting. Shows a member dropdown for the team owner to select which member's data to analyse. All 6 report tabs (Heatmap, Weekly Trends, Call Duration, List Performance, Outcomes, ML Stats) receive the selected member's targetUserId.
+MARKSCHEME: Group B | Simple OOP model | Multi-user report aggregation view with member selection — demonstrates parameterised data scoping across multiple chart widgets
+OBJECTIVE: 1.4 - Team owner can view member reports; 5.1 - Team-level analytics
+
+[_TeamReportsViewState]
+PURPOSE: State class managing team loading, member selection, per-member list loading, and 6-tab report rendering with target user scoping.
+MARKSCHEME: Group B | Calling Web service APIs and parsing JSON | Multi-query Firestore integration fetching team, members, and member-specific lists
+OBJECTIVE: 1.4 - Team member data access
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== contact_directory_view.dart (Contact Directory) ===
+
+[ContactDirectoryView]
+PURPOSE: Unified contact directory showing all contacts across all lists, de-duplicated by normalised phone number. Integrates the ContactGraph for relationship analytics. Supports searching, importing, editing, deleting, and navigating to CallPredictionView (Naive Bayes).
+MARKSCHEME: Group A | Complex user-defined use of OOP (composition) | Directory view integrating graph analytics, contact CRUD, Excel import, and ML prediction navigation — demonstrates composing multiple subsystems into a cohesive interface
+OBJECTIVE: 2.1 - Unified contact directory; 6.6 - Graph analytics integration
+
+[_ContactDirectoryViewState]
+PURPOSE: State class managing contact fetching, graph construction (ContactGraph.buildFromFirestore), search filtering, graph analytics display with BFS connected components, contact editing/deletion, and navigation to call prediction.
+MARKSCHEME: Group A | Graph/Tree Traversal | Integrates graph construction, BFS component detection, and analytics display alongside standard CRUD operations
+OBJECTIVE: 2.1 - Contact directory with graph-based analytics
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== call_prediction_view.dart (Additional Entries) ===
+
+[_CallPredictionViewState]
+PURPOSE: State class managing NaiveBayesCallPredictor initialisation, prediction loading, and rendering of three display sections: current-time recommendation badge, top-5 ranked time slots with probabilities, and a 7-day × 24-hour heatmap grid colour-coded by answer probability.
+MARKSCHEME: Group A | Complex user-defined algorithms | ML prediction visualisation rendering Bayesian probability output as heatmap and top-N display
+OBJECTIVE: 6.1 - Naive Bayes prediction display
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== contact_notes_view.dart (Additional Entries) ===
+
+[_ContactNotesViewState]
+PURPOSE: State class managing Trie construction from note texts, real-time autocomplete search, note CRUD operations (add/edit/delete), star rating input, and note display with timestamps. Builds the Trie on initialisation by inserting all words from all notes.
+MARKSCHEME: Group A | Graph/Tree Traversal | Trie-powered search integration with CRUD note management — demonstrates real-time autocomplete from a prefix tree
+OBJECTIVE: 4.2 - Contact notes with Trie search; 6.7 - Trie autocomplete
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== reports_view_clean.dart (Additional Entries) ===
+
+[_ReportsViewState]
+PURPOSE: State class managing the 6-tab reports dashboard. Holds TabController, time range selections, list filters, and custom date ranges for each tab. Fetches available lists on init for the filter dropdowns.
+MARKSCHEME: Group B | Simple OOP model | Multi-tab dashboard state management with per-tab filter configuration
+OBJECTIVE: 5.1 - Reports dashboard state management
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== list_view_visible.dart (Additional Entries) ===
+
+[_list_view_visibleState]
+PURPOSE: State class for the list management view. Manages ReorderableListView for drag-and-drop list reordering, inline description editing, expansion state for list tiles, stats loading (contact count, last dialed), and navigation to the dialer.
+MARKSCHEME: Group A | Complex user-defined use of OOP | Drag-and-drop list management with Firestore order persistence and inline editing
+OBJECTIVE: 2.1 - List management; 2.5 - Drag-and-drop reordering
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== team_management_view.dart (Additional Entries) ===
+
+[_TeamManagementViewState]
+PURPOSE: State class managing team creation form, join code display with copy-to-clipboard, code regeneration, and member list with remove buttons. Uses TeamService for all Firestore operations.
+MARKSCHEME: Group B | Simple OOP model | Team admin interface with CRUD operations and clipboard integration
+OBJECTIVE: 1.3, 1.4 - Team creation and member management
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== user_profile_editor.dart (Profile Editor — Additional Entries) ===
+
+[_UserProfileEditorState]
+PURPOSE: State class managing profile data loading from Firestore, field-specific navigation to edit sub-pages, profile photo upload flow, team join/leave integration, and theme toggle.
+MARKSCHEME: Group B | Simple OOP model | Profile editing orchestration with sub-page navigation
+OBJECTIVE: 2.6 - Profile editing
+
+[User]
+PURPOSE: Local data class caching the current user's profile fields (image, name, phone, about) for display in the profile editor. Not to be confused with Firebase's User class.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Local profile cache
+OBJECTIVE: 2.6 - Profile display
+
+[UserData]
+PURPOSE: Static utility class with methods to get and set individual profile fields from/to Firestore. Provides getProfilePicture, getName, getPhone, getAbout, and corresponding set methods.
+MARKSCHEME: Group B | Writing and reading from files | Firestore profile CRUD via static utility methods
+OBJECTIVE: 2.6 - Profile field persistence
+
+[DisplayImage]
+PURPOSE: Reusable widget that displays a profile image from either a network URL or a default asset. Wraps it in a circular container with specified dimensions.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Image display widget with fallback
+OBJECTIVE: 2.6 - Profile picture display
+
+[_EditNameFormPage]
+PURPOSE: StatefulWidget sub-page for editing the user's display name. Shows a text field pre-filled with the current name and save/cancel buttons.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Form page for name editing
+OBJECTIVE: 2.6 - Name editing
+
+[_EditNameFormPageState]
+PURPOSE: State class managing name text controller, validation, and Firestore update on save.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Form state management
+OBJECTIVE: 2.6 - Name update
+
+[_EditPhoneFormPage]
+PURPOSE: StatefulWidget sub-page for editing the user's phone number.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Form page for phone editing
+OBJECTIVE: 2.6 - Phone editing
+
+[_EditPhoneFormPageState]
+PURPOSE: State class managing phone text controller, validation, and Firestore update.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Form state management
+OBJECTIVE: 2.6 - Phone update
+
+[_EditImagePage]
+PURPOSE: StatefulWidget sub-page for changing the profile picture. Uses DKImagePickerController to pick from camera or gallery, uploads to Firebase Storage, and saves the URL to Firestore.
+MARKSCHEME: Group B | Writing and reading from files | Image upload flow: picker → Firebase Storage → URL persistence
+OBJECTIVE: 2.6 - Profile picture upload
+
+[_EditImagePageState]
+PURPOSE: State class managing image picker, Firebase Storage upload with progress tracking, and URL persistence.
+MARKSCHEME: Group B | Writing and reading from files | Image upload with progress tracking and error handling
+OBJECTIVE: 2.6 - Image upload state management
+
+[_EditDescriptionFormPage]
+PURPOSE: StatefulWidget sub-page for editing the user's about/description text.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Form page for description editing
+OBJECTIVE: 2.6 - Description editing
+
+[_EditDescriptionFormPageState]
+PURPOSE: State class managing description text controller and Firestore update.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Form state management
+OBJECTIVE: 2.6 - Description update
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== View & Widget Files (Remaining UI Entries) ===
+
+FILE PURPOSE: The remaining view and widget files are standard Flutter StatefulWidget/StatelessWidget implementations for login, registration, onboarding, notes, and utility dialogs.
+
+[LoginView]
+PURPOSE: Legacy login screen with email and password fields, login button, and navigation to register. Replaced by LoginScreen1 in the new-login-pages module.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Basic login form
+OBJECTIVE: 1.1 - Login interface
+
+[_LoginViewState]
+PURPOSE: State class managing login form controllers, AuthBloc event dispatch, and error display.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Login form state
+OBJECTIVE: 1.1 - Login state management
+
+[RegisterView]
+PURPOSE: Legacy registration screen with email and password fields.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Basic registration form
+OBJECTIVE: 1.1 - Registration interface
+
+[_RegisterViewState]
+PURPOSE: State class managing registration form controllers and AuthBloc event dispatch.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Registration form state
+OBJECTIVE: 1.1 - Registration state management
+
+[VerifyEmailView]
+PURPOSE: Screen prompting the user to verify their email. Shows a message and a resend-verification button.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Email verification prompt
+OBJECTIVE: 1.1 - Email verification
+
+[_VerifyEmailViewState]
+PURPOSE: State class managing email verification resend and navigation after verification.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Verification state
+OBJECTIVE: 1.1 - Verification flow
+
+[LoginScreen1]
+PURPOSE: Modern login screen with gradient background, custom text fields, and styled buttons. Uses the new-login-pages design system.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Styled login form
+OBJECTIVE: 1.1 - Modern login UI
+
+[_LoginPageState]
+PURPOSE: State class with email/password controllers, visibility toggle, and AuthBloc login dispatch.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Login form state
+OBJECTIVE: 1.1 - Login form management
+
+[RegisterScreen1]
+PURPOSE: Modern registration screen matching LoginScreen1 styling with email and password fields.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Styled registration form
+OBJECTIVE: 1.1 - Modern registration UI
+
+[VerifyEmailView2]
+PURPOSE: Modern email verification screen matching the new-login-pages design system.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Styled verification prompt
+OBJECTIVE: 1.1 - Modern verification UI
+
+[_VerifyEmailView2]
+PURPOSE: State class managing verification resend and navigation.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Verification state
+OBJECTIVE: 1.1 - Verification state
+
+[VerifyEmailDialog]
+PURPOSE: Material dialog prompting email verification with resend and dismiss actions.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Verification dialog
+OBJECTIVE: 1.1 - Verification prompt
+
+[MyButton]
+PURPOSE: Reusable styled button used in the login and registration screens. Takes onTap callback and child widget.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Custom button widget
+OBJECTIVE: 1.1 - UI component
+
+[MyTextField]
+PURPOSE: Reusable styled text field used in login and registration screens. Supports hint text, obscured text, and custom controllers.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Custom text field widget
+OBJECTIVE: 1.1 - UI component
+
+[SquareTile]
+PURPOSE: Reusable square image tile widget used for social login buttons on the login screen.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Image tile widget
+OBJECTIVE: 1.1 - UI component
+
+[NotesView]
+PURPOSE: Screen displaying the user's cloud notes from FirebaseCloudStorage using a StreamBuilder for real-time updates. Shows a list of notes with delete and tap-to-edit functionality.
+MARKSCHEME: Group B | Simple OOP model | Real-time note list with StreamBuilder and CRUD actions
+OBJECTIVE: 4.2 - Cloud notes display
+
+[_NotesViewState]
+PURPOSE: State class managing FirebaseCloudStorage stream subscription, note creation, deletion, and navigation to the editor.
+MARKSCHEME: Group B | Simple OOP model | Stream-based note list state management
+OBJECTIVE: 4.2 - Notes list state
+
+[NotesListView]
+PURPOSE: Reusable ListView widget that renders a list of CloudNote objects with delete icons and tap handlers. Used by NotesView.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Parameterised list builder widget
+OBJECTIVE: 4.2 - Note list rendering
+
+[CreateUpdateNoteView]
+PURPOSE: Full-screen note editor with text field, auto-save to Firestore, and sharing capability. Supports both creating new notes and editing existing ones.
+MARKSCHEME: Group B | Simple OOP model | Note editor with auto-save and share functionality
+OBJECTIVE: 4.2 - Note creation and editing
+
+[_CreateUpdateNoteViewState]
+PURPOSE: State class managing note text controller, Firestore auto-save on text change, note creation/update logic, and share action.
+MARKSCHEME: Group B | Simple OOP model | Auto-saving note editor state
+OBJECTIVE: 4.2 - Note editor state
+
+[OnBoardingScreen]
+PURPOSE: Onboarding flow using PageView with intro pages and a progress indicator. Guides new users through app features.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Onboarding page flow
+OBJECTIVE: 1.1 - First-time user experience
+
+[sliderScreen]
+PURPOSE: Alternative onboarding/intro slider using PageView with 3 intro pages and smooth page indicators.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Intro slider widget
+OBJECTIVE: 1.1 - Intro screens
+
+[_OnBoardingScreenState]
+PURPOSE: State class managing PageController, current page index, and navigation buttons (Next/Done).
+MARKSCHEME: Group C | Appropriate choice of simple data types | Page navigation state
+OBJECTIVE: 1.1 - Onboarding navigation
+
+[IntroPage1]
+PURPOSE: First intro screen with a create-list button and descriptive text.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Intro page content
+OBJECTIVE: 1.1 - Onboarding content
+
+[IntroPage2]
+PURPOSE: Second intro screen with upload contacts button.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Intro page content
+OBJECTIVE: 1.1 - Onboarding content
+
+[RoundedButton]
+PURPOSE: Custom rounded button widget used in intro pages.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Custom button
+OBJECTIVE: 1.1 - UI component
+
+[_RoundedButtonState]
+PURPOSE: State class for the animated rounded button with InkWell tap handling.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Button state
+OBJECTIVE: 1.1 - Button animation
+
+[IntroPage3]
+PURPOSE: Third intro screen with start-dialing button.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Intro page content
+OBJECTIVE: 1.1 - Onboarding content
+
+[_IntroPage3State]
+PURPOSE: State class managing the start action navigation.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Intro page state
+OBJECTIVE: 1.1 - Onboarding navigation
+
+[CallView]
+PURPOSE: Legacy call screen for individual calls. Displays contact info and call controls.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Call screen
+OBJECTIVE: 3.1 - Call interface
+
+[_CallViewState]
+PURPOSE: State class managing call UI and timer.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Call state
+OBJECTIVE: 3.1 - Call state
+
+[MyApp]
+PURPOSE: Legacy MaterialApp wrapper from an older version of the list view.
+MARKSCHEME: Group C | Appropriate choice of simple data types | App wrapper
+OBJECTIVE: 2.1 - Legacy app structure
+
+[ListScreen]
+PURPOSE: Legacy list screen using Scaffold with a list of items. Superseded by list_view_visible.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Legacy list view
+OBJECTIVE: 2.1 - Legacy list display
+
+[ListScreenState]
+PURPOSE: State class for the legacy list screen.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Legacy list state
+OBJECTIVE: 2.1 - Legacy list state
+
+[list_view.DeleteAllContactsFromListButtonFunction]
+PURPOSE: Top-level function that shows a confirmation dialog and deletes all contacts from a list if confirmed.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Delete confirmation wrapper
+OBJECTIVE: 2.1 - List deletion
+
+[list_view.createDemoList]
+PURPOSE: Creates a demo list with sample contacts for first-time users.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Demo data creation
+OBJECTIVE: 2.1 - Demo data
+
+[CurvedBar1.createState]
+PURPOSE: Creates the State object for the CurvedBar1 bottom navigation widget.
+MARKSCHEME: Group C | Appropriate choice of simple data types | StatefulWidget lifecycle method
+OBJECTIVE: 2.1 - Navigation bar
+
+[CurvedBarState.build]
+PURPOSE: Builds the curved bottom navigation bar with 4 tabs: Home, Lists, Reports, Profile.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Navigation bar rendering
+OBJECTIVE: 2.1 - Tab navigation
+
+[ListServiceException.toString]
+PURPOSE: Returns the exception message string for cloud list service exceptions.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Exception display
+OBJECTIVE: 2.1 - Error handling
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== Utility Dialog Functions ===
+
+[cannot_share_empty_note_dialog.showCannotShareEmptyNoteDialog]
+PURPOSE: Shows a dialog telling the user they cannot share an empty note. Returns a Future<void> for await chaining.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Error dialog
+OBJECTIVE: 4.2 - Note sharing validation
+
+[delete_dialog.showDeleteDialog]
+PURPOSE: Shows a confirmation dialog for deleting a note, returning a Future<bool> indicating whether the user confirmed.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Delete confirmation dialog
+OBJECTIVE: 4.2 - Note deletion confirmation
+
+[delete_options_dialog.showDeleteListViewDialog]
+PURPOSE: Shows a dialog with options for deleting a list or its contacts, returning a Future<String?> with the selected action.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Multi-option delete dialog
+OBJECTIVE: 2.1 - List deletion options
+
+[logout_dialog.showLogOutDialog]
+PURPOSE: Shows a confirmation dialog for logging out, returning a Future<bool>.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Logout confirmation
+OBJECTIVE: 1.1 - Logout confirmation
+
+[welcome_dialog.showWelcomeDialog]
+PURPOSE: Shows a welcome dialog when a new user first opens the app, with an introduction message and dismiss button.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Welcome dialog
+OBJECTIVE: 1.1 - First-time welcome
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+=== bar_graph.dart (Bar Graph Widgets) ===
+
+[IndividualBar]
+PURPOSE: Data class holding the x-position and y-value for a single bar in a bar chart. Used by the bar graph widget to define each bar's position and height.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Bar data point container
+OBJECTIVE: 5.1 - Chart data representation
+
+[BarData]
+PURPOSE: Utility class that initialises and holds a list of IndividualBar objects from raw daily values. Converts 7 daily totals into chart-ready data points.
+MARKSCHEME: Group C | Appropriate choice of simple data types | Weekly bar data preparation
+OBJECTIVE: 5.1 - Chart data initialisation
+
+[MyBarGraph]
+PURPOSE: StatelessWidget rendering a bar chart using fl_chart's BarChart. Takes a list of daily call totals and displays them as vertical bars with day-of-week labels on the X axis.
+MARKSCHEME: Group B | Simple OOP model | Bar chart visualisation using the fl_chart library
+OBJECTIVE: 5.1 - Weekly calls bar chart

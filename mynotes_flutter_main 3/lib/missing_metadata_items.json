@@ -1,0 +1,9 @@
+[
+  {
+    "identifier": "ListStateManager.factory ListStateManager",
+    "type": "factory_constructor",
+    "class_name": "ListStateManager",
+    "item_name": "factory ListStateManager",
+    "file": "list_state_manager.dart"
+  }
+]

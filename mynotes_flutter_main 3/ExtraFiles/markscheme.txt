@@ -1,3 +1,379 @@
+Most chosen general qualifications exam board in England.
+
+About AQA
+Centre Services
+Join Us
+Contact Us
+
+Log in
+AQA
+Subjects
+Qualifications
+Professional Development
+Exams Admin
+Services
+Search
+Subjects
+Accounting
+
+Art and Design
+
+Biology
+
+Business
+
+Chemistry
+
+Computer Science
+
+Dance
+
+Design and Technology
+
+Drama
+
+Economics
+
+English
+
+Food preparation and Nutrition
+
+French
+
+Geography
+
+German
+
+History
+
+Mathematics
+
+Media Studies
+
+Languages
+
+Law
+
+Music
+
+Physical Education
+
+Physics
+
+Politics
+
+Psychology
+
+Religious Studies
+
+Science
+
+Sociology
+
+Spanish
+
+All subjects
+
+GCSEs
+Biology (8461)
+
+Chemistry (8462)
+
+Combined Science: Trilogy (8464)
+
+English Language (8700)
+
+English Literature (8702)
+
+Geography (8035)
+
+History (8145)
+
+Mathematics (8300)
+
+See all GCSEs
+
+AS and A-levels
+Biology (7402)
+
+Business (7138)
+
+Chemistry (7405)
+
+Geography (7037)
+
+History (7042)
+
+Physics (7408)
+
+Psychology (7182)
+
+Sociology (7192)
+
+See all AS and A-Levels
+
+Other qualifications
+Applied Generals
+
+AQA Certificate Mathematics
+
+Entry Level Certificates
+
+Project Qualifications
+
+Unit Award Scheme
+
+All qualifications
+
+Our training
+Course finder
+
+About our training
+
+Online training
+
+Face-to-face training
+
+In-school training
+
+Inside assessment
+
+Courses by theme
+Preparing for exams
+
+Unit Award Scheme
+
+Courses by subject
+English
+
+Mathematics
+
+Science
+
+Languages
+
+Design and Technology
+
+Physical Education
+
+Geography
+
+History
+
+All professional development
+
+Dates
+Dates and timetables
+
+Key dates
+
+Non-exam assessment (NEA)
+NEA, coursework and controlled assessment
+
+Deadlines for non-exam assessment
+
+Record forms
+
+Submit marks
+
+Exams
+Entries
+
+Entry fees
+
+Exams guidance
+
+Question papers and stationery
+
+Access arrangements
+
+Special consideration
+
+Results
+Results days
+
+Results slips
+
+Grade boundaries
+
+Results statistics
+
+Post-results services
+
+Exam certificates
+
+All Exams Admin
+
+Assessment Services
+Centre Services
+
+Associate Extranet
+
+Become an associate
+
+Products
+All About Maths
+
+AlphaPlus
+
+Data Insights
+
+Exampro
+
+Project Q
+
+Stride Maths
+
+Testbase
+
+Unit Award Scheme
+
+News and Insights
+AQI research and insight
+
+News
+
+Inside Exams Podcast
+
+Exams officers podcast
+
+Home
+Subjects
+Computer Science
+A-level Computer Science
+A-level Computer Science7517
+Specification
+Planning resources
+Teaching resources
+Assessment resources
+Key dates
+News
+1.0 Introduction
+2.0 Specification at a glance
+4.0 Subject content – A-level
+4.1 Fundamentals of programming
+4.2 Fundamentals of data structures
+4.3 Fundamentals of algorithms
+4.4 Theory of computation
+4.5 Fundamentals of data representation
+4.6 Fundamentals of computer systems
+4.7 Fundamentals of computer organisation and architecture
+4.8 Consequences of uses of computing
+4.9 Fundamentals of communication and networking
+4.10 Fundamentals of databases
+4.11 Big Data
+4.12 Fundamentals of functional programming
+4.13 Systematic approach to problem solving
+4.14 Non-exam assessment - the computing practical project
+5.0 Scheme of assessment
+6.0 Non-exam assessment administration
+7.0 General administration
+AS and A-level Computer Science Specification for first teaching in 2015
+AS and A-level Computer Science Specification for first teaching in 2015
+
+21 Jan 2019
+PDF | 1.31 MB
+
+4.14 Non-exam assessment - the computing practical project
+4.14.1 Overview
+4.14.1.1 Purpose of the project
+The project allows students to develop their practical skills in the context of solving a realistic problem or carrying out an investigation. The project is intended to be as much a learning experience as a method of assessment; students have the opportunity to work independently on a problem of interest over an extended period, during which they can extend their programming skills and deepen their understanding of computer science.
+
+The most important skill that should be assessed through the project is a student's ability to create a programmed solution to a problem or investigation. This is recognised by allocating 42 of the 75 available marks to the technical solution and a lower proportion of marks for supporting documentation to reflect the expectation that reporting of the problem, its analysis, the design of a solution or plan of an investigation and testing and evaluation will be concise.
+
+4.14.1.2 Types of problem/investigation
+Students are encouraged to choose a problem to solve or investigate that will interest them and that relates to a field that they have some knowledge of. There are no restrictions on the types of problem/investigation that can be submitted or the development tools (for example programming language) that can be used. The two key questions to ask when selecting a problem/investigation are:
+Does the student have existing knowledge of the field, or are they in a position to find out about it?
+Is a solution to the problem/investigation likely to give the student the opportunity to demonstrate the necessary degree of technical skill to achieve a mark that reflects their potential?
+Some examples of the types of problem to solve or investigate are:
+
+a simulation for example, of a business or scientific nature, or an investigation of a well-known problem such as the game of life
+a solution to a data processing problem for an organisation, such as membership systems
+the solution of an optimisation problem, such as production of a rota, shortest-path problems or route finding
+a computer game
+an application of artificial intelligence
+a control system, operated using a device such as an Arduino board
+a website with dynamic content, driven by a database back-end
+an app for a mobile phone or tablet
+an investigation into an area of computing, such as rendering a three-dimensional world on screen
+investigating an area of data science using, for example, Twitter feed data or online public data sets
+investigating machine learning algorithms.
+There is an expectation that within a centre, the problems chosen by students to solve or investigate will be sufficiently different to avoid the work of one student informing the work of another because they are working on the same problem or investigation. Teachers will be required to record on the Candidate Record Form for each student that they have followed this guideline. If in any doubt on whether problems chosen by students have the potential to raise this issue, please contact your AQA adviser.
+
+Table 1 and Table 2 show the technical skills and coding styles required for an A-level standard project. If a problem/investigation is selected that is not of A-level standard then the marks available in each section will be restricted.
+
+4.14.1.3 Project documentation structure
+The project is assessed in five sections. The table below lists the maximum available mark for each section of the project:
+
+Section	Max mark
+1	Analysis	9
+2	Documented design	12
+3	Technical solution	42
+4	Testing	8
+5	Evaluation	4
+Total	75
+For marking purposes, the project documentation should be presented in the order indicated in the table above. The table does not imply that students are expected to follow a traditional systems life cycle approach when working on their projects, whereby a preceding stage must be completed before the next can be tackled. It is recognised that this approach is unsuited to the vast majority of project work, and that project development is likely to be an iterative process, with earlier parts of the project being revisited as a result of discoveries made in later parts. Students should be encouraged to start prototyping and writing code early on in the project process. A recommended strategy is to tackle the critical path early in the project development process. The critical path is the part of the project that everything else depends on for a working system or a complete investigation result to be achieved.
+
+4.14.2 Using a level of response mark scheme
+Level of response mark schemes are broken down into a number of levels, each of which has a descriptor. The descriptor for the level shows the average performance for the level. There are a range of marks in each level. The descriptor for the level represents a typical mid-mark performance in that level.
+
+Before applying the mark scheme to a student’s project, read it through and annotate it to show the qualities that are being looked for. You can then apply the mark scheme.
+
+4.14.2.1 Step 1 Determine a level
+Start at the lowest level of the mark scheme and use it as a ladder to see whether the performance in that section of the project meets the descriptor for that level. The descriptor for the level indicates the different qualities that might be seen in the student’s work for that level. If it meets the lowest level then go to the next one and decide if it meets this level, and so on, until you have a match between the level descriptor and the work. With practice and familiarity you will find you will be able to quickly skip through the lower levels of the mark scheme.
+
+When assigning a level you should look at the overall quality of the work rather than any small or specific parts where the student has not performed quite as the level descriptor. If the work covers different aspects of different levels of the mark scheme you should use a best fit approach for defining the level and then use the variability of the response to help decide the mark within the level. ie if the response is predominantly level 3 with a small amount of level 4 material it would be placed in level 3 but be awarded a mark near the top of the level because of the level 4 content.
+
+4.14.2.2 Step 2 Determine a mark
+Once you have assigned a level you need to decide on the mark. The exemplar materials used for standardisation will help. This work will have been awarded a mark by AQA. You can compare your student’s work with the exemplar to determine if it is the same standard, better or worse. You can then use this to allocate a mark for the work based on AQA's mark on the exemplar.
+
+You may well need to read back through the work as you apply the mark scheme to clarify points and assure yourself that the level and the mark are appropriate.
+
+Work which contains nothing of relevance to the project area being assessed must be awarded no marks for that area.
+
+4.14.3 Marking criteria
+4.14.3.1 Analysis (9 marks)
+Level	Mark range	Description
+3	7-9	
+Fully or nearly fully scoped analysis of a real problem, presented in a way that a third party can understand.
+
+Requirements fully documented in a set of measurable and appropriate specific objectives, covering all required functionality of the solution or areas of investigation.
+
+Requirements arrived at by considering, through dialogue, the needs of the intended users of the system, or recipients of the outcomes for investigative projects.
+
+Problem sufficiently well modelled to be of use in subsequent stages.
+
+2	4-6	
+Well scoped analysis (but with some omissions that are not serious enough to undermine later design) of a real problem.
+
+Most, but not all, requirements documented in a set of, in the main, measurable and appropriate specific objectives that cover most of the required functionality of a solution or areas of investigation.
+
+Requirements arrived at, in the main, by considering, through dialogue, the needs of the intended users of the system, or recipients of the outcomes for investigative projects.
+
+Problem sufficiently well modelled to be of use in subsequent stages.
+
+1	1-3	
+Partly scoped analysis of a problem.
+
+Requirements partly documented in a set of specific objectives, not all of which are measurable or appropriate for developing a solution. The required functionality or areas of investigation are only partly addressed.
+
+Some attempt to consider, through dialogue, the needs of the intended users of the system, or recipients of the outcomes for investigative projects.
+
+Problem partly modelled and of some use in subsequent stages.
+
+4.14.3.2 Documented design (12 marks)
+Level	Mark range	Description
+4	10-12	Fully or nearly fully articulated design for a real problem, that describes how all or almost all of the key aspects of the solution/investigation are to be structured/are structured.
+3	7-9	Adequately articulated design for a real problem that describes how most of the key aspects of the solution/investigation are to be structured/are structured.
+2	4-6	Partially articulated design for a real problem that describes how some aspects of the solution/investigation are to be structured/are structured.
+1	1-3	Inadequate articulation of the design of the solution so that it is difficult to obtain a picture of how the solution/investigation is to be structured/is structured without resorting to looking directly at the programmed solution.
+4.14.3.3 Technical solution (42 marks)
+4.14.3.3.1 Completeness of solution (15 marks)
+Level	Mark range	Description
+3	11-15	A system that meets almost all of the requirements of a solution/an investigation (ignoring any requirements that go beyond the demands of A-level).
+2	6-10	A system that achieves many of the requirements but not all. The marks at the top end of the band are for systems that include some of the most important requirements.
+1	1-5	A system that tackles some aspects of the problem or investigation.
+4.14.3.3.2 Techniques used (27 marks)
 Level	Mark Range	Description	Additional information
 3	19-27	
 The techniques used are appropriate and demonstrate a level of technical skill equivalent to those listed in Group A in Table 1.
@@ -132,3 +508,164 @@ Linear search
 Simple mathematical calculations (eg average)
 
 Non-SQL table access
+
+Note that the contents of Table 1 are examples, selected to illustrate the level of demand of the technical skills that would be expected to be demonstrated in each group. The use of alternative algorithms and data models is encouraged. If a project cannot easily be marked against Table 1 (for example, a project with a considerable hardware component) then please consult your AQA non-exam assessment Adviser or provide a full explanation of how you have arrived at the mark for this section when submitting work for moderation.
+
+4.14.3.4.2 Table 2: Coding styles
+Style	Characteristic
+Excellent	
+Modules (subroutines) with appropriate interfaces.
+
+Loosely coupled modules (subroutines) – module code interacts with other parts of the program through its interface only.
+
+Cohesive modules (subroutines) – module code does just one thing.
+
+Modules(collections of subroutines) – subroutines with common purpose grouped.
+
+Defensive programming.
+
+Good exception handling.
+
+Good	
+Well-designed user interface
+
+Modularisation of code
+
+Good use of local variables
+
+Minimal use of global variables
+
+Managed casting of types
+
+Use of constants
+
+Appropriate indentation
+
+Self-documenting code
+
+Consistent style throughout
+
+File paths parameterised
+
+Basic	
+Meaningful identifier names
+
+Annotation used effectively where required
+
+The descriptions in Table 2 are cumulative, ie for a program to be classified as excellent it would be expected to exhibit the characteristics listed as excellent, good and basic not just those listed as excellent.
+
+4.14.3.5 Testing (8 marks)
+Level	Mark range	Description
+4	7-8	Clear evidence, in the form of carefully selected representative samples, that thorough testing has been carried out. This demonstrates the robustness of the complete or nearly complete solution/thoroughness of investigation and that the requirements of the solution/investigation have been achieved.
+3	5-6	Extensive testing has been carried out, but the evidence presented in the form of representative samples does not make clear that all of the core requirements of the solution/investigation have been achieved. This may be due to some key aspects not being tested or because the evidence is not always presented clearly.
+2	3-4	
+Evidence in the form of representative samples of moderately extensive testing, but falling short of demonstrating that the requirements of the solution/investigation have been achieved and the solution is robust/investigation thorough.
+
+The evidence presented is explained.
+
+1	1-2	
+A small number of tests have been carried out, which demonstrate that some parts of the solution work/some outcomes of the investigation are achieved.
+
+The evidence presented may not be entirely clear.
+
+Evidence for the testing section may be produced after the system has been fully coded or during the coding process. It is expected that tests will either be planned in a test plan or that the tests will be fully explained alongside the evidence for them. Only carefully selected representative samples are required.
+
+4.14.3.6 Evaluation (4 marks)
+Level	Mark	Description
+4	4	
+Full consideration given to how well the outcome meets all of its requirements.
+
+How the outcome could be improved if the problem was revisited is discussed and given detailed consideration.
+
+Independent feedback obtained of a useful and realistic nature, evaluated and discussed in a meaningful way.
+
+3	3	
+Full or nearly full consideration given to how well the outcome meets all of its requirements.
+
+How the outcome could be improved if the problem was revisited is discussed but consideration given is limited.
+
+Independent feedback obtained of a useful and realistic nature but is not evaluated and discussed in a meaningful way, if at all.
+
+2	2	
+The outcome is discussed but not all aspects are fully addressed either by omission or because some of the requirements have not been met and those requirements not met have been ignored in the evaluation.
+
+No independent feedback obtained or if obtained is not sufficiently useful or realistic to be evaluated in a meaningfully way even if attempted.
+
+1	1	
+Some of the outcomes are assessed but only in a superficial way.
+
+No independent feedback obtained or if obtained is so basic as to be not worthy of evaluation.
+
+4.14.4 Project tasks that are not of A-level standard
+If the task (problem or investigation) selected for a project is not of A-level standard, mark the project against the criteria given, but adjust, the mark awarded downwards by two marking levels (two marks in the case of evaluation) in each section for all but the technical solution. You should have already taken the standard into account for this, by directly applying the criteria. For example, if a student had produced a 'fully or nearly fully articulated design of a real problem describing how solution is to be structured/is structured'. This would, for an A-level standard project, achieve a mark in Level Four for Documented Design (10-12 marks). If the problem selected was too simple to be of A-level standard but the same criteria had been fulfilled, shift the mark awarded down by two levels, into Level Two, an award of 4-6 marks. If a downward shift by two levels is not possible, then a mark in the lowest level should be awarded.
+
+4.14.5 Guide to non-exam assessment documentation
+4.14.5.1 Analysis
+Students are expected to:
+
+produce a clear statement that describes the problem area and specific problem that is being solved/investigated
+outline how they researched the problem
+state for whom the problem is being solved/investigated
+provide background in sufficient detail for a third party to understand the problem being solved/investigated
+produce a numbered list of measurable, "appropriate" specific objectives, covering all required functionality of the solution or areas of investigation (Appropriate means that the specific objectives are single purpose and at a level of detail that is without ambiguity.)
+report any modelling of the problem that will inform the Design stage, for example a graph/network model of Facebook connections or an E-R model.
+A fully scoped analysis is one that has:
+
+researched the problem thoroughly
+has clearly defined the problem being solved/investigated
+omitted nothing that is relevant to subsequent stages
+statements of objectives which clearly and unambiguously identify the scope of the project
+modelled the problem for the Design stage where this is possible and necessary.
+4.14.5.2 Design
+Students are expected to articulate their design in a manner appropriate to the task and with sufficient clarity for a third party to understand how the key aspects of the solution/investigation are structured and on what the design will rely, eg use of numerical and scientific package libraries, data visualisation package library, particular relational database and/or web design framework. The emphasis is on communicating the design; therefore it is acceptable to provide a description of the design in a combination of diagrams and prose as appropriate, as well as a description of algorithms, SQL, data structures, database relations as appropriate, and using relevant technical description languages, such as pseudo-code. Where design of a user interface is relevant, screen shots of actual screens are acceptable.
+
+4.14.5.3 Technical solution
+Students should provide program listing(s) that demostrate their technical skill. The program listing(s) should be appropriately annotated and self-documenting (an approach that uses meaningful identifiers, with well structured code that minimises instances where program comments are necessary).
+
+Students should present their work in a way that will enable a third party to discern the quality and purpose of the coding. This could take the form of:
+
+an overview guide which amongst other things includes the names of entities such as executables, data filenames/urls, database names, pathnames so that a third party can, if they so desire, run the solution/investigation
+explanations of particularly difficult-to-understand code sections; a careful division of the presentation of the code listing into appropriately labelled sections to make navigation as easy as possible for a third party reading the code listing.
+Achievement of the latter, to an extent, is linked to the skill in applying a structured approach during the course of developing the solution or carrying out the investigation.
+4.14.5.4 Testing
+Students must provide and present in a structured way for example in tabular form, clear evidence of testing. This should take the form of carefully selected and representative samples, which demonstrate the robustness of the complete, or nearly complete, solution/thoroughness of investigation and which demonstrate that the requirements of the solution/investigation have been achieved. The emphasis should be on producing a representative sample in a balanced way and not on recording every possible test and test outcome. Students should explain the tests carried out alongside the evidence for them. This could take the form of:
+
+an introduction and overview
+the test performed
+its purpose if not self-evident
+the test data
+the expected test outcome
+the actual outcome with a sample of the evidence, for example screen shots of before and after the test, etc, sampled in order to limit volume.
+4.14.5.5 Evaluation
+Students should consider and assess how well the outcome meets its requirements. Students should obtain independent feedback on how well the outcome meets its requirements and discuss this feedback. Some of this feedback could be generated during prototyping. If so, this feedback, and how/why it was taken account must be presented and referenced so it can be found easily.
+
+Students should also consider and discuss how the outcome could be improved more realistically if the problem/investigation were to be revisited.
+
+4.14.6 Assessment objective breakdown for non-exam assessment
+Section	Total	AO2	AO3	Elements
+Analysis	9	9	 	AO2b
+Design	12	 	12	AO3a
+Technical Solution	42	 	42	AO3b
+Testing	8	 	8	AO3c
+Evaluation	4	 	4	AO3c
+Totals	75	9	66	 
+4.13 Systematic approach to problem solving
+5.0 Scheme of assessment
+AQA
+Become an examiner
+Switch to AQA
+Contact Us
+Join us
+Terms and conditions
+Accessibility
+Modern slavery statement
+Privacy notice
+Cookie notice
+X
+LinkedIn
+Youtube
+©AQA 2026 | Company number: 03644723 | Registered office: Devas Street, Manchester, M15 6EX | AQA is not responsible for the content of external sites
+
+AQA Education has obtained an injunction preventing interference with public examinations. This notice is to alert you to the injunction, so that you are aware of it and can make submissions about it if you wish to do so.
+
+A-level Computer Science 7517 | Specification | Subject Content | Non Exam Assessment The Computing Practical Project | AQA

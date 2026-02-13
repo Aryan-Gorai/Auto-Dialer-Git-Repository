@@ -1,10 +1,13 @@
 // Per-contact notes view. Shows all notes/call feedback for a single contact,
 // with a Trie-powered search bar for fast autocomplete across note text.
+// Includes an undo/redo stack for note editing (AQA Group A: Stack).
 // Users can add new notes, search existing ones, and tap to call the contact.
 
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
+import 'package:flutter_application_1/services/stack/undo_redo_stack.dart';
 import 'package:flutter_application_1/services/trie/trie.dart';
 import 'package:flutter_application_1/theme/components/app_components.dart';
 import 'package:intl/intl.dart';
@@ -37,6 +40,11 @@ class _ContactNotesViewState extends State<ContactNotesView> {
   /// Stores all words from all notes for O(k) prefix search where k = word length
   final Trie _noteTrie = Trie();
   
+  /// Undo/redo stack for note editing — stores text snapshots so the
+  /// user can reverse changes.  Uses the custom array-backed stack
+  /// with push/pop/peek operations (AQA Group A: Stack data structure).
+  final UndoRedoStack<NoteEditSnapshot> _editHistory = UndoRedoStack<NoteEditSnapshot>(maxDepth: 50);
+  
   /// Current search query
   String _searchQuery = '';
   
@@ -45,6 +53,9 @@ class _ContactNotesViewState extends State<ContactNotesView> {
   
   /// Whether to show autocomplete suggestions
   bool _showSuggestions = false;
+  
+  /// Debounce timer for undo/redo snapshot capture
+  Timer? _snapshotDebounce;
   
   String get userId => AuthService.firebase().currentUser!.id;
 
@@ -55,13 +66,67 @@ class _ContactNotesViewState extends State<ContactNotesView> {
     
     // Listen to search query changes for real-time autocomplete
     _searchController.addListener(_onSearchChanged);
+    
+    // Listen to note input for undo/redo stack snapshots.
+    // Debounced at 500ms so we don't push a snapshot on every keystroke.
+    _noteController.addListener(_captureEditSnapshot);
   }
 
   @override
   void dispose() {
+    _snapshotDebounce?.cancel();
     _noteController.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+  
+  /// Captures a debounced snapshot of the note text onto the undo stack.
+  /// The 500ms delay means only the last state after a burst of typing is
+  /// recorded, keeping the stack size manageable.
+  void _captureEditSnapshot() {
+    _snapshotDebounce?.cancel();
+    _snapshotDebounce = Timer(const Duration(milliseconds: 500), () {
+      final currentText = _noteController.text;
+      // Only push if the text actually changed from the last snapshot.
+      final last = _editHistory.peek();
+      if (last == null || last.text != currentText) {
+        _editHistory.push(NoteEditSnapshot(
+          text: currentText,
+          timestamp: DateTime.now(),
+          cursorPosition: _noteController.selection.baseOffset,
+        ));
+        if (mounted) setState(() {}); // refresh undo/redo button states
+      }
+    });
+  }
+
+  /// Undo the last note edit — pops the stack and restores the text.
+  void _undoEdit() {
+    final snapshot = _editHistory.undo();
+    if (snapshot != null) {
+      // Temporarily remove listener to avoid re-capturing the undo itself.
+      _noteController.removeListener(_captureEditSnapshot);
+      _noteController.text = snapshot.text;
+      _noteController.selection = TextSelection.collapsed(
+        offset: snapshot.cursorPosition.clamp(0, snapshot.text.length),
+      );
+      _noteController.addListener(_captureEditSnapshot);
+      setState(() {});
+    }
+  }
+
+  /// Redo a previously undone edit — pops the redo stack.
+  void _redoEdit() {
+    final snapshot = _editHistory.redo();
+    if (snapshot != null) {
+      _noteController.removeListener(_captureEditSnapshot);
+      _noteController.text = snapshot.text;
+      _noteController.selection = TextSelection.collapsed(
+        offset: snapshot.cursorPosition.clamp(0, snapshot.text.length),
+      );
+      _noteController.addListener(_captureEditSnapshot);
+      setState(() {});
+    }
   }
   
   /// Handle search query changes
@@ -476,25 +541,54 @@ class _ContactNotesViewState extends State<ContactNotesView> {
           
           const SizedBox(height: 8),
           
-          // Add new note section
+          // Add new note section with undo/redo controls
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Row(
+            child: Column(
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _noteController,
-                    decoration: const InputDecoration(
-                      hintText: 'Add a note about this call...',
-                      border: OutlineInputBorder(),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _noteController,
+                        decoration: const InputDecoration(
+                          hintText: 'Add a note about this call...',
+                          border: OutlineInputBorder(),
+                        ),
+                        maxLines: 2,
+                      ),
                     ),
-                    maxLines: 2,
-                  ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: addNewCallNote,
+                      child: const Text('Add Note'),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: addNewCallNote,
-                  child: const Text('Add Note'),
+                // Undo/Redo toolbar — uses the UndoRedoStack<NoteEditSnapshot>
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.undo, size: 20),
+                      tooltip: 'Undo',
+                      onPressed: _editHistory.canUndo ? _undoEdit : null,
+                      color: AppDesignTokens.primary,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.redo, size: 20),
+                      tooltip: 'Redo',
+                      onPressed: _editHistory.canRedo ? _redoEdit : null,
+                      color: AppDesignTokens.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'History: ${_editHistory.undoDepth}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppDesignTokens.neutral500,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

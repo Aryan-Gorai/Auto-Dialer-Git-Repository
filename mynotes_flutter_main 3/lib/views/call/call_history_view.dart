@@ -1,13 +1,16 @@
 // Call history screen that pulls logged calls from the 'call_history'
-// Firestore collection. Displays each call with contact name, time,
-// duration, whether it was answered, and lets you tap to call back.
-// Also maps phone numbers to names from the Contact Directories collection.
+// Firestore collection.  Uses a doubly-linked list internally for
+// efficient chronological traversal and merge sort for ordering.
+// Displays each call with contact name, time, duration, whether it
+// was answered, and lets you tap to call back.
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_application_1/services/auth/auth_service.dart';
+import 'package:flutter_application_1/services/linked_list/call_history_linked_list.dart';
+import 'package:flutter_application_1/services/sorting/merge_sort.dart';
 import 'package:flutter_application_1/theme/components/app_components.dart';
 
 class CallHistoryView extends StatefulWidget {
@@ -24,6 +27,11 @@ class _CallHistoryViewState extends State<CallHistoryView> {
   // Map of normalized phone => contact name from Contact Directories
   Map<String, String> _directoryNameByPhone = {};
 
+  // Doubly-linked list for efficient chronological traversal — O(1)
+  // insertion at head/tail, O(1) node deletion, O(n) traversal.
+  // (AQA Group A: Linked list maintenance)
+  CallHistoryLinkedList _callLinkedList = CallHistoryLinkedList();
+
   // Collection name for Contact Directories
   static const String _contactDirectoriesCollection = 'Contact Directories';
 
@@ -36,12 +44,20 @@ class _CallHistoryViewState extends State<CallHistoryView> {
   }
 
   // Loads all call records from 'call_history' for this user,
-  // sorted newest-first, then resolves phone numbers to contact names.
+  // builds a doubly-linked list for efficient traversal, then
+  // merge-sorts the records newest-first and resolves phone→name.
   Future<void> _fetchCallHistory() async {
     try {
       setState(() {
         _isLoading = true;
       });
+
+      // Build the doubly-linked list from Firestore in one pass.
+      // This gives us O(1) insertion and bidirectional traversal.
+      _callLinkedList = await CallHistoryLinkedList.buildFromFirestore(
+        userId: _userId,
+      );
+      print('📋 Built call-history linked list: ${_callLinkedList.length} nodes');
 
       QuerySnapshot querySnapshot = await _firestore
           .collection('call_history')
@@ -58,6 +74,14 @@ class _CallHistoryViewState extends State<CallHistoryView> {
           print('Error parsing document ${doc.id}: $e');
         }
       }
+
+      // Use our hand-coded merge sort (O(n log n), recursive
+      // divide-and-conquer) instead of the built-in .sort().
+      // Sorts by timestamp descending (newest first).
+      records = mergeSort<CallRecord>(
+        records,
+        (a, b) => b.timestamp.compareTo(a.timestamp),
+      );
 
       // Resolve display names from Contact Directories for the user's numbers
       await _resolveDirectoryNamesForCalls(records);

@@ -724,12 +724,15 @@ class NEACodeDocumentationGenerator:
                     if not line_stripped or line_stripped.startswith('=') or line_stripped.startswith('━'):
                         continue
                     
-                    # Skip section headers
+                    # Skip section headers and file-level metadata lines
                     if line_stripped.startswith('Author:') or line_stripped.startswith('Date:') or line_stripped.startswith('This document'):
                         continue
+                    if line_stripped.startswith('FILE PURPOSE:') or line_stripped.startswith('WHY THIS FILE EXISTS:') or line_stripped.startswith('ROLE IN PROJECT:') or line_stripped.startswith('IMPORTS EXPLAINED:'):
+                        current_field = None  # Stop appending to previous entry
+                        continue
                     
-                    # Match [ClassName.methodName] or [functionName]
-                    match = re.match(r'^\[([A-Za-z0-9_]+(?:\.[A-Za-z0-9_]*)?)\]\s*(?:\(([^)]+)\))?$', line_stripped)
+                    # Match [ClassName.methodName] or [functionName] or [ClassName.factory ClassName]
+                    match = re.match(r'^\[([A-Za-z0-9_ ]+(?:\.[A-Za-z0-9_ ]*)?)\]\s*(?:\(([^)]+)\))?$', line_stripped)
                     if match:
                         # Save previous entry
                         if current_id:
@@ -857,7 +860,7 @@ class NEACodeDocumentationGenerator:
                     
                     # Extract WHY THIS FILE EXISTS
                     why_match = re.search(
-                        r'WHY THIS FILE EXISTS:\s*(.+?)(?=\n\n\n|\nROLE|\nIMPORTS|\n===|\Z)',
+                        r'WHY THIS FILE EXISTS:\s*(.+?)(?=\n\n|\nROLE|\nIMPORTS|\n\[|\n===|\Z)',
                         section_content, re.DOTALL
                     )
                     if why_match:
@@ -865,7 +868,7 @@ class NEACodeDocumentationGenerator:
                     
                     # Extract ROLE IN PROJECT
                     role_match = re.search(
-                        r'ROLE IN PROJECT:\s*(.+?)(?=\n\n\n|\nIMPORTS|\n===|\Z)',
+                        r'ROLE IN PROJECT:\s*(.+?)(?=\n\n|\n\[|\nIMPORTS|\n===|\Z)',
                         section_content, re.DOTALL
                     )
                     if role_match:
@@ -1001,14 +1004,71 @@ class NEACodeDocumentationGenerator:
                 self._set_cell_background(value_cell, highlight_rows[label])
             
             self._set_cell_width(value_cell, value_width_cm)
-            value_para = value_cell.paragraphs[0]
-            value_run = value_para.add_run(str(value))
-            value_run.font.size = Pt(10)
             
-            if label in ["Markscheme Group", "Markscheme Skill", "How Applied"]:
-                value_run.bold = True
+            # For long text values, split into paragraphs at sentence boundaries
+            value_str = str(value)
+            segments = self._split_into_paragraphs(value_str, label)
+            
+            for seg_idx, segment in enumerate(segments):
+                if seg_idx == 0:
+                    value_para = value_cell.paragraphs[0]
+                else:
+                    value_para = value_cell.add_paragraph()
+                    value_para.paragraph_format.space_before = Pt(4)
+                value_run = value_para.add_run(segment)
+                value_run.font.size = Pt(10)
+                
+                if label in ["Markscheme Group", "Markscheme Skill", "How Applied"]:
+                    value_run.bold = True
         
         return table
+
+    def _split_into_paragraphs(self, text: str, label: str = "") -> List[str]:
+        """Split a long text value into logical paragraphs for cleaner table cells.
+        
+        For short text (<200 chars), returns as-is.
+        For longer text, splits at sentence boundaries ('. ') so each idea
+        gets its own paragraph in the Word cell.
+        Explicit newlines are always honoured.
+        """
+        # Always honour explicit newlines first
+        if '\n' in text:
+            return [seg.strip() for seg in text.split('\n') if seg.strip()]
+        
+        # Short text — no splitting needed
+        if len(text) < 200:
+            return [text]
+        
+        # Don't split certain fields that should stay compact
+        compact_labels = {"Identifier", "File Path", "Source File", "File Type",
+                          "Lines of Code", "Documentation Style", "Class Name",
+                          "Widget Name", "Abstract", "Methods Count", "Returns",
+                          "Markscheme Group", "Markscheme Skill", "Type"}
+        if label in compact_labels:
+            return [text]
+        
+        # Split at sentence boundaries (period followed by space and uppercase)
+        # Also split at em-dashes used as section separators
+        segments = []
+        current = []
+        sentences = re.split(r'(?<=\.)\s+(?=[A-Z])', text)
+        
+        for sentence in sentences:
+            current.append(sentence)
+            joined = ' '.join(current)
+            # Start a new paragraph roughly every 1-3 sentences
+            if len(joined) >= 150:
+                segments.append(joined)
+                current = []
+        
+        if current:
+            segments.append(' '.join(current))
+        
+        # If splitting produced only 1 segment, return as-is
+        if len(segments) <= 1:
+            return [text]
+        
+        return segments
 
     def _add_code_to_cell(self, cell, code: str):
         """Add code-formatted text to a table cell."""
@@ -1945,7 +2005,11 @@ class NEACodeDocumentationGenerator:
 
     def _collect_all_dart_files(self) -> List[Path]:
         """Collect all Dart files from the lib/ directory."""
-        lib_dir = self.project_root / 'lib'
+        # If project_root is already 'lib', scan it directly; otherwise look for lib/ inside it
+        if self.project_root.name == 'lib':
+            lib_dir = self.project_root
+        else:
+            lib_dir = self.project_root / 'lib'
         files = []
         
         if lib_dir.exists():

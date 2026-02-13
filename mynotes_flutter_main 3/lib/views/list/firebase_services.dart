@@ -4,7 +4,7 @@
 //   - Adding/removing contacts to/from the normalised Contact Directories
 //   - Creating/deleting lists in lists_collection
 //   - Building the bottom navigation bar (Gbar widget)
-//   - Global state variables (selectedList, kPickedName, etc.)
+//   - Shared state via ListStateManager singleton
 // Basically the "service layer" that sits between the UI and Firestore.
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,6 +13,8 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_application_1/services/auth/auth_service.dart';
+import 'package:flutter_application_1/services/list_state_manager.dart';
+import 'package:flutter_application_1/services/cloud_list/cloud_list_exceptions.dart';
 import 'package:flutter_application_1/utilities/dialogs/error_dialog.dart';
 
 //import 'package:flutter_application_1/views/dialer/dialer.dart';
@@ -30,23 +32,42 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
 
+// ============================================================================
+// GLOBAL STATE — delegated to ListStateManager singleton
+// These top-level variables are kept for backward compatibility but
+// now read/write through a single encapsulated object instead of
+// being free-floating mutable globals.
+// ============================================================================
+final _state = ListStateManager();
 
+bool get hasCallSupport => _state.hasCallSupport;
+set hasCallSupport(bool v) => _state.hasCallSupport = v;
 
- bool hasCallSupport = false;
- Future<void>? launched;
- String phone = '';
- String selectedList = '';
- 
-  List<String> listNames = []; // To store the list names from Firestore
+Future<void>? get launched => _state.launched;
+set launched(Future<void>? v) => _state.launched = v;
+
+String get phone => _state.phone;
+set phone(String v) => _state.phone = v;
+
+String get selectedList => _state.selectedList;
+set selectedList(String v) => _state.selectedList = v;
+
+List<String> get listNames => _state.listNames;
+set listNames(List<String> v) => _state.listNames = v;
 
 String get userId => AuthService.firebase().currentUser!.id;
 
 // Firestore collection for contact directory (per user, de-duplicated)
 const String contactDirectoriesCollection = 'Contact Directories';
 
-String kPickedNumber = '';
-String kPickedName = '';
-PhoneContact? phoneContact;
+String get kPickedNumber => _state.pickedNumber;
+set kPickedNumber(String v) => _state.pickedNumber = v;
+
+String get kPickedName => _state.pickedName;
+set kPickedName(String v) => _state.pickedName = v;
+
+PhoneContact? get phoneContact => _state.phoneContact;
+set phoneContact(PhoneContact? v) => _state.phoneContact = v;
 
 // ============================================================================
 // NORMALIZED DATABASE HELPER FUNCTIONS
@@ -69,13 +90,31 @@ String getContactDocId(String phoneNumber) {
   return '${userId}_${normalizePhone(phoneNumber)}';
 }
 
-/// Add or update a contact in Contact Directories with list membership and index
+/// Add or update a contact in Contact Directories with list membership and index.
+///
+/// Validates inputs and throws typed [ListServiceException] subclasses
+/// for specific error conditions so that callers can handle them
+/// individually.
 Future<void> addContactToList({
   required String contactName,
   required String contactPhoneNumber,
   required String listName,
   int? contactIndex,
 }) async {
+  // ── Input validation using typed exceptions ──
+  if (contactName.trim().isEmpty) {
+    throw InvalidContactNameException(
+        'Contact name must not be empty.');
+  }
+  if (contactPhoneNumber.trim().isEmpty) {
+    throw InvalidPhoneNumberException(
+        'Phone number must not be empty.');
+  }
+  if (listName.trim().isEmpty) {
+    throw InvalidListNameException(
+        'List name must not be empty.');
+  }
+
   try {
     final firestore = FirebaseFirestore.instance;
     final normalizedPhoneNum = normalizePhone(contactPhoneNumber);
@@ -119,6 +158,9 @@ Future<void> addContactToList({
       });
     }
     print('✅ Contact added/updated in directory: $contactName for list: $listName at index: $indexToUse');
+  } on FirebaseException catch (e) {
+    throw FirestoreOperationException(
+        'Firestore error adding contact "$contactName": ${e.message}');
   } catch (e) {
     print('❌ Error adding contact to directory: $e');
     rethrow;
@@ -152,6 +194,9 @@ Future<int> getNextContactIndexForList(String listName) async {
 }
 
 /// Remove a contact from a specific list (keeps the contact in directory if in other lists)
+/// Remove a contact from a specific list (keeps the contact in directory if in other lists).
+///
+/// Throws [ContactNotFoundException] when the contact does not exist.
 Future<void> removeContactFromList({
   required String contactPhoneNumber,
   required String listName,
@@ -163,7 +208,10 @@ Future<void> removeContactFromList({
     final docRef = firestore.collection(contactDirectoriesCollection).doc(docId);
 
     final existing = await docRef.get();
-    if (!existing.exists) return;
+    if (!existing.exists) {
+      throw ContactNotFoundException(
+          'Contact with phone $contactPhoneNumber not found in directory.');
+    }
 
     final data = existing.data()!;
     Map<String, dynamic> listMemberships = 
@@ -173,8 +221,7 @@ Future<void> removeContactFromList({
     listMemberships.remove(listName);
 
     if (listMemberships.isEmpty) {
-      // No more list memberships - optionally delete the contact entirely
-      // For now, keep it in directory but with empty memberships
+      // No more list memberships — keep in directory but clear memberships
       await docRef.update({
         'list_memberships': {},
         'updated_at': FieldValue.serverTimestamp(),
@@ -186,13 +233,24 @@ Future<void> removeContactFromList({
       });
     }
     print('✅ Removed contact from list: $listName');
+  } on ContactNotFoundException {
+    rethrow;
+  } on FirebaseException catch (e) {
+    throw FirestoreOperationException(
+        'Firestore error removing contact: ${e.message}');
   } catch (e) {
     print('❌ Error removing contact from list: $e');
   }
 }
 
-/// Fetch all contacts for a specific list, sorted by contact_index
+/// Fetch all contacts for a specific list, sorted by contact_index.
+///
+/// Throws [ListNotFoundException] when the list name is empty.
 Future<List<Map<String, dynamic>>> fetchContactsForList(String listName) async {
+  if (listName.trim().isEmpty) {
+    throw ListNotFoundException('Cannot fetch contacts: list name is empty.');
+  }
+
   try {
     final firestore = FirebaseFirestore.instance;
     final snapshot = await firestore
@@ -224,6 +282,9 @@ Future<List<Map<String, dynamic>>> fetchContactsForList(String listName) async {
         (a['contact_index'] as int).compareTo(b['contact_index'] as int));
 
     return contacts;
+  } on FirebaseException catch (e) {
+    throw FirestoreOperationException(
+        'Firestore error fetching contacts for "$listName": ${e.message}');
   } catch (e) {
     print('❌ Error fetching contacts for list: $e');
     return [];
@@ -600,6 +661,25 @@ Future<void> addNewContactData() async {
 // Creates a brand-new list document in lists_collection.
 // Stores the list name, owner user_id, initial index/doc count,
 // and a server timestamp so we can sort lists by creation order.
+
+/// Refresh list names from Firestore into the shared [ListStateManager].
+/// Called after adds/deletes/renames to keep the UI in sync.
+Future<void> fetchDataFromFirestore() async {
+  try {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('lists_collection')
+        .where('user_id', isEqualTo: userId)
+        .get();
+    listNames = snapshot.docs
+        .map((doc) => doc['list_name'] as String)
+        .toList()
+      ..sort();
+  } on FirebaseException catch (e) {
+    throw FirestoreOperationException(
+        'Error refreshing list data: ${e.message}');
+  }
+}
+
 Future<void> addNewList(String listName) async {
   try {
     // Get the Firestore instance
@@ -1186,57 +1266,6 @@ void showListDialogForIntroScreen1(BuildContext context) {
 }
 
 
-// void showListDialog(BuildContext context) {
-//     TextEditingController listNameController = TextEditingController();
-
-//     showDialog(
-//       context: context,
-//       builder: (BuildContext context) {
-//         return AlertDialog(
-//           title: Text('Create New List'),
-//           content: TextField(
-//             controller: listNameController,
-//             decoration: InputDecoration(hintText: 'Enter list name'),
-//           ),
-//           actions: <Widget>[
-//             TextButton(
-//               child: Text('Cancel'),
-//               onPressed: () {
-//                 Navigator.of(context).pop();
-
-//               },
-//             ),
-//             TextButton(
-//               child: Text('OK'),
-//               onPressed: () {
-//                 String listName = listNameController.text;
-//                 addNewList(listName);
-//                 Navigator.of(context).pop();
-//                 fetchDataFromFirestore();
-//                 getListNames();
-                
-//               },
-//             ),
-//           ],
-//         );
-//       },
-//     );
-
-
-
-
-
-
-
-
-
-
-
-    
-//   }
-
-
-
 Future<void> showListDialog(BuildContext context) async {
   TextEditingController listNameController = TextEditingController();
 
@@ -1752,244 +1781,6 @@ Future<void> showCallFinishedDialog(BuildContext context , String name, [documen
 
 
 
-Future<void> fetchDataFromFirestore() async {
-    try {
-  await FirebaseFirestore.instance.collection('lists_collection').get();
-      
-
-      // setState(() {
-      //   list = querySnapshot.docs.map((doc) => doc['list_name'] as String).toList();
-
-       // If the list is not empty, set the dropdown value to the first item
-      //   if (list.isNotEmpty) {
-      //     dropdownValue = list.first;
-      //   }
-      // });
-    } catch (error) {
-      print("Error fetching data: $error");
-    }
-  }
-
-
-
-
-
-
-
-
-
-class functions extends StatefulWidget {
-  const functions({super.key});
-
-  @override
-  State<functions> createState() => _functionsState();
-}
-
-class _functionsState extends State<functions> {
-
-
-
-
-
-
-
-
-
-  // Dropdown
-// Future<void> fetchDataFromFirestore() async {
-//     try {
-//       QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('lists_collection').get();
-//       print("This is function on the lisT_view dart page");
-
-//       setState(() {
-//         list = querySnapshot.docs.map((doc) => doc['list_name'] as String).toList();
-
-//         // If the list is not empty, set the dropdown value to the first item
-//         if (list.isNotEmpty) {
-//           dropdownValue = list.first;
-//         }
-        
-//       });
-//     } catch (error) {
-//       showErrorDialog(context, "Could not load...");
-//     }
-//   }
-
-
-
-Future<void> fetchDataFromFirestore() async {
-    try {
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('lists_collection').where('userId', isEqualTo: userId).get();
-
-      print("This is function on the lisT_view dart page");
-
-      setState(() {
-        list = querySnapshot.docs.map((doc) => doc['list_name'] as String).toList();
-
-        // If the list is not empty, set the dropdown value to the first item
-        if (list.isNotEmpty) {
-          dropdownValue = list.first;
-        }
-        
-      });
-    } catch (error) {
-      showErrorDialog(context, "Could not load...");
-    }
-  }
-
-
-
-
-
-
-
-
-
-// Dropdown
-
-
-  @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
-  }
-}
-
-
-
-    String getCurrentScreen(BuildContext context) {
-    final route = ModalRoute.of(context);
-    if (route != null) {
-      return route.settings.name ?? '';
-    }
-    return '';
-  }
-
-
-
-//  Widget buildBottomNavigationBar(context) {
-//     return Container(
-//         color: Colors.black,
-//         child: Padding(
-//           padding: const  EdgeInsets.symmetric(
-//             horizontal: 15.0,
-//             vertical: 20,
-//             ),
-//           child: GNav(
-//                   backgroundColor: Colors.black,
-//                   color: Colors.white,
-//                   activeColor: Colors.white,
-//                   tabBackgroundColor: Colors.grey.shade800,
-//                   padding: EdgeInsets.all(16),
-                  
-//                   onTabChange: (pageindex) {
-//                     print(pageindex);
-
-//                       if (pageindex == 0) {
-//                       Navigator.of(context).push(
-//                         MaterialPageRoute(
-//                           builder: (context) =>  NotesView(),
-//                         ),
-//                       );
-                      
-//                     }
-
-
-
-//                       if (pageindex == 1) {
-//                       Navigator.of(context).push(
-//                         MaterialPageRoute(
-//                           builder: (context) =>  ListScreen(),
-//                         ),
-//                       );
-                      
-//                     }
-
-
-//                     if (pageindex  == 2) {
-//                       Navigator.of(context).push(
-//                         MaterialPageRoute(
-//                           builder: (context) =>  DialerView(),
-//                         ),
-//                       );
-                      
-//                     }
-
-//                   if (pageindex  == 3) {
-//                       Navigator.of(context).push(
-//                         MaterialPageRoute(
-//                           builder: (context) => ReportsView(),
-//                         ),
-//                       );
-
-                      
-//                     }
-
-
-//                     final currentScreen = getCurrentScreen(context);
-//                     print(currentScreen);
-//                   },
-
-                  
-//                   // rippleColor: Colors.grey[300]!,
-//                   // hoverColor: Colors.grey[100]!,
-//                   // gap: 8,
-//                   // activeColor: Colors.black,
-//                   // iconSize: 24,
-//                   // //padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-//                   // duration: Duration(milliseconds: 400),
-//                   // tabBackgroundColor: Colors.grey[100]!,
-//                   // color: Colors.black,
-//                   haptic: true,
-//             tabs: const[
-//               GButton(
-//                 icon: Icons.home,
-//                 text: 'Home',
-//                 ),
-//               GButton(
-//                 icon: Icons.list,
-//                 text: 'List',
-//                 ),
-//               GButton(
-//                 icon: Icons.call,
-//                 text: 'Dialer',
-//                 ),
-//                 GButton(
-//                 icon: Icons.bar_chart,
-//                 text: 'Reports',
-//                 ),
-//               GButton(
-//                 icon: Icons.settings,
-//                 text: 'Settigns',
-//               ),
-//             ],
-
-            
-            
-//           ),
-//         ),
-//     );
-//   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Legacy bottom navigation bar using GNav — replaced by the liquid-glass
 // tab bar in sliderScreen.dart, but kept here for backwards compatibility.
 class Gbar extends StatefulWidget {
@@ -2020,62 +1811,24 @@ class _GbarState extends State<Gbar> {
                   padding: EdgeInsets.all(16),
                   
                   onTabChange: (pageindex) {
-                    print(pageindex);
-
-
-
-
-
-
-
-                    //   if (pageindex == 0) {
-                    //   Navigator.of(context).push(
-                    //     MaterialPageRoute(
-                    //       builder: (context) =>  ListScreen(),
-                    //     ),
-                    //   );
-                      
-                    // }
-          
-                if (pageindex == 0) {
+                    if (pageindex == 0) {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) =>  list_view_visible(),
+                          builder: (context) => list_view_visible(),
                         ),
                       );
-                      
                     }
 
-                  if (pageindex  == 1) {
+                    if (pageindex == 1) {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => ReportsView(),
                         ),
                       );
                     }
-
-
-
-                    final currentScreen = getCurrentScreen(context);
-                    print(currentScreen);
                   },
-
-                  
-                  // rippleColor: Colors.grey[300]!,
-                  // hoverColor: Colors.grey[100]!,
-                  // gap: 8,
-                  // activeColor: Colors.black,
-                  // iconSize: 24,
-                  // //padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  // duration: Duration(milliseconds: 400),
-                  // tabBackgroundColor: Colors.grey[100]!,
-                  // color: Colors.black,
                   haptic: true,
             tabs: const[
-              // GButton(
-              //   icon: Icons.home,
-              //   text: 'Home',
-              //   ),
               GButton(
                 icon: Icons.list,
                 text: 'List',
@@ -2084,28 +1837,14 @@ class _GbarState extends State<Gbar> {
               icon: Icons.bar_chart,
               text: 'Reports',
               ),
-              // GButton(
-              //   icon: Icons.settings,
-              //   text: 'Settigns',
-              // ),
             ],
-
-            
-            
           ),
         ),
     );
   }
-
 }
 
-
-
-
-
-
-  Color textColor(BuildContext context) {
-   
-      return Colors.black;
-    
-  }
+/// Utility to pick the correct text color for the current theme.
+Color textColor(BuildContext context) {
+  return Colors.black;
+}
