@@ -1304,7 +1304,13 @@ Future<void> showListDialog(BuildContext context) async {
             ),
             child: const Text('Create'),
             onPressed: () {
-              String listName = listNameController.text;
+              String listName = listNameController.text.trim();
+              if (listName.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please enter a list name')),
+                );
+                return;
+              }
               addNewList(listName);
               Navigator.of(context).pop();
               fetchDataFromFirestore();

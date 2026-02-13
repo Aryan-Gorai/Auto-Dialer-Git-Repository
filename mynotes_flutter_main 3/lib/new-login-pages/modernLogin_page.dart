@@ -27,8 +27,22 @@ class _LoginPageState extends State<LoginScreen1> {
   // Attempts Firebase sign-in and navigates to the list page on success.
   // Catches specific Firebase error codes to show helpful messages.
   Future<void> signUserIn() async {               
-    final email = emailController.text;
+    final email = emailController.text.trim();
     final password = passwordController.text;
+
+    // Client-side validation for empty fields and basic email format
+    if (email.isEmpty) {
+      await showErrorDialog(context, 'Please enter your email');
+      return;
+    }
+    if (password.isEmpty) {
+      await showErrorDialog(context, 'Please enter your password');
+      return;
+    }
+    if (!email.contains('@') || !email.contains('.')) {
+      await showErrorDialog(context, 'Invalid email format');
+      return;
+    }
 
     setState(() => _isLoading = true);
 
@@ -54,8 +68,14 @@ class _LoginPageState extends State<LoginScreen1> {
       
       if (e.code == 'user-not-found') {
         await showErrorDialog(context, 'User not found');
-      } else if (e.code == 'wrong-password'){
+      } else if (e.code == 'wrong-password') {
         await showErrorDialog(context, 'Wrong Username or Password');
+      } else if (e.code == 'invalid-email') {
+        await showErrorDialog(context, 'Invalid email format');
+      } else if (e.code == 'invalid-credential') {
+        await showErrorDialog(context, 'Incorrect email or password');
+      } else {
+        await showErrorDialog(context, 'Authentication error. Please try again.');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

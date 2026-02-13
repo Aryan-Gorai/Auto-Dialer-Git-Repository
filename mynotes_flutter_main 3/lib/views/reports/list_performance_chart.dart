@@ -39,7 +39,13 @@ class _ListPerformanceChartState extends State<ListPerformanceChart> {
   void didUpdateWidget(ListPerformanceChart oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.selectedList != widget.selectedList) {
-      _selectedList = widget.selectedList;
+      // Only accept the new value if it's in the available lists (or null)
+      final incoming = widget.selectedList;
+      if (incoming == null || _availableLists.contains(incoming)) {
+        _selectedList = incoming;
+      } else {
+        _selectedList = _availableLists.isNotEmpty ? _availableLists.first : null;
+      }
       if (_selectedList != null && _selectedList!.isNotEmpty) {
         _fetchCycleData();
       }
@@ -64,11 +70,13 @@ class _ListPerformanceChartState extends State<ListPerformanceChart> {
         }
       }
 
-      lists.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+      // Deduplicate list names to prevent DropdownButton assertion errors
+      final deduped = lists.toSet().toList();
+      deduped.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
 
       if (mounted) {
         setState(() {
-          _availableLists = lists;
+          _availableLists = deduped;
           if (_selectedList == null && lists.isNotEmpty) {
             _selectedList = lists.first;
             _fetchCycleData();

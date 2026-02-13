@@ -183,6 +183,12 @@ class _CallFeedbackDialogState extends State<CallFeedbackDialog> {
         ),
         TextButton(
           onPressed: () {
+            if (starRating == 0) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Please select a star rating before submitting')),
+              );
+              return;
+            }
             widget.onFeedbackSubmitted(starRating, notesController.text);
             Navigator.of(context).pop();
           },

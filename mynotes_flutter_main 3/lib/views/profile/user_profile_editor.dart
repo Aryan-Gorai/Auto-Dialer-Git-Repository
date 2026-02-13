@@ -1001,9 +1001,13 @@ class _EditPhoneFormPageState extends State<_EditPhoneFormPage> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your phone number';
-                    } else if (isAlpha(value)) {
+                    }
+                    // Strip spaces and optional leading + for validation
+                    final stripped = value.replaceAll(' ', '');
+                    final digits = stripped.startsWith('+') ? stripped.substring(1) : stripped;
+                    if (!isNumeric(digits)) {
                       return 'Only Numbers Please';
-                    } else if (value.length < 10) {
+                    } else if (digits.length < 10) {
                       return 'Please enter a VALID phone number';
                     }
                     return null;
@@ -1024,8 +1028,10 @@ class _EditPhoneFormPageState extends State<_EditPhoneFormPage> {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () {
-                      if (_formKey.currentState!.validate() && isNumeric(phoneController.text)) {
-                        widget.onSaved(phoneController.text);
+                      if (_formKey.currentState!.validate()) {
+                        // Strip spaces for storage, keep + prefix if present
+                        final cleaned = phoneController.text.replaceAll(' ', '');
+                        widget.onSaved(cleaned);
                         Navigator.pop(context);
                       }
                     },

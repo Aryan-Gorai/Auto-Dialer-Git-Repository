@@ -34,8 +34,18 @@ class _LoginPageState extends State<RegisterScreen1> {
   // Creates a Firebase account, writes a Firestore profile doc with the
   // selected role, creates a demo list for team members, then redirects to login.
   Future<void> registerUser() async {
-    final email = emailController.text;
+    final email = emailController.text.trim();
     final password = passwordController.text;
+
+    // Client-side validation for empty fields
+    if (email.isEmpty) {
+      await showErrorDialog(context, 'Please enter your email');
+      return;
+    }
+    if (password.isEmpty) {
+      await showErrorDialog(context, 'Please enter a password');
+      return;
+    }
 
     setState(() => _isLoading = true);
 
@@ -58,6 +68,9 @@ class _LoginPageState extends State<RegisterScreen1> {
       } else {
         await showErrorDialog(context, 'Authentication/Internet error');
       }
+      // Stop execution — don't create profile or navigate on failure
+      if (mounted) setState(() => _isLoading = false);
+      return;
     }
 
     // Create user profile in Firestore with role

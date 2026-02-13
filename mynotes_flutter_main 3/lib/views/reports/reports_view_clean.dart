@@ -153,12 +153,17 @@ class _ReportsViewState extends State<ReportsView> with SingleTickerProviderStat
         }
       }
 
-      // Sort lists alphabetically
-      lists.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+      // Deduplicate and sort lists alphabetically
+      final deduped = lists.toSet().toList();
+      deduped.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
 
       if (mounted) {
         setState(() {
-          _availableLists = lists;
+          _availableLists = deduped;
+          // Clear stale filter if it no longer exists in the available lists
+          if (_selectedListFilter != null && !deduped.contains(_selectedListFilter)) {
+            _selectedListFilter = null;
+          }
           _isLoadingLists = false;
         });
         print('Lists loaded successfully: ${lists.length} lists');
