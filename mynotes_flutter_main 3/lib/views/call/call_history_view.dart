@@ -54,15 +54,25 @@ class _CallHistoryViewState extends State<CallHistoryView> {
 
       // Build the doubly-linked list from Firestore in one pass.
       // This gives us O(1) insertion and bidirectional traversal.
-      _callLinkedList = await CallHistoryLinkedList.buildFromFirestore(
-        userId: _userId,
-      );
-      print('📋 Built call-history linked list: ${_callLinkedList.length} nodes');
+      // Wrapped in its own try-catch so a failure here does not
+      // prevent the main call-history query from running.
+      try {
+        _callLinkedList = await CallHistoryLinkedList.buildFromFirestore(
+          userId: _userId,
+        );
+        print('📋 Built call-history linked list: ${_callLinkedList.length} nodes');
+      } catch (e) {
+        print('⚠️ Non-fatal: could not build linked list: $e');
+        _callLinkedList = CallHistoryLinkedList();
+      }
 
+      // Fetch all call records for this user.
+      // We intentionally omit .orderBy('timestamp') here because
+      // we merge-sort in memory below — this avoids requiring a
+      // Firestore composite index on (user_id + timestamp).
       QuerySnapshot querySnapshot = await _firestore
           .collection('call_history')
           .where('user_id', isEqualTo: _userId)
-          .orderBy('timestamp', descending: true)
           .get();
 
       List<CallRecord> records = [];
@@ -374,14 +384,32 @@ class CallRecord {
       answered = false; // Default value
     }
 
+    // Parse timestamp — required field
+    final rawTimestamp = map['timestamp'];
+    final DateTime timestamp;
+    if (rawTimestamp is Timestamp) {
+      timestamp = rawTimestamp.toDate();
+    } else {
+      timestamp = DateTime.now();
+    }
+
+    // Parse uploaded_at — optional, may be absent in externally-written docs
+    final rawUploadedAt = map['uploaded_at'];
+    final DateTime uploadedAt;
+    if (rawUploadedAt is Timestamp) {
+      uploadedAt = rawUploadedAt.toDate();
+    } else {
+      uploadedAt = timestamp; // fall back to call timestamp
+    }
+
     return CallRecord(
-      timestamp: (map['timestamp'] as Timestamp).toDate(),
-      duration: (map['duration'] as num).toDouble(),
-      callType: map['call_type'] as String,
+      timestamp: timestamp,
+      duration: (map['duration'] as num?)?.toDouble() ?? 0.0,
+      callType: (map['call_type'] as String?) ?? 'Unknown',
       answered: answered,
-      address: map['address'] as String,
-      rawCallType: map['raw_call_type'] as int,
-      uploadedAt: (map['uploaded_at'] as Timestamp).toDate(),
+      address: (map['address'] as String?) ?? '',
+      rawCallType: (map['raw_call_type'] as int?) ?? 0,
+      uploadedAt: uploadedAt,
     );
   }
 }

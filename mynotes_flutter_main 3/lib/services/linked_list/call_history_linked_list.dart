@@ -296,10 +296,12 @@ class CallHistoryLinkedList {
   }) async {
     final linkedList = CallHistoryLinkedList();
 
+    // Omit .orderBy to avoid requiring a Firestore composite index.
+    // Records are inserted at tail in doc order; the caller can
+    // sort or traverse as needed.
     Query<Map<String, dynamic>> query = FirebaseFirestore.instance
         .collection('call_history')
-        .where('user_id', isEqualTo: userId)
-        .orderBy('timestamp', descending: false);
+        .where('user_id', isEqualTo: userId);
 
     final snapshot = await query.get();
 
